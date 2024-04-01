@@ -38,7 +38,7 @@ def inpainting(image, mask, prompt):
     response = json.loads(r.content)
     return response
 
-prompt = "the classroom chair, classroom desk, realistic"
+prompt = "cute fish, pool-tube"
 
 # Base64 인코딩
 def imageToString(img, mode='RGB'):
@@ -55,29 +55,13 @@ def stringToImage(base64_string, mode='RGB'):
         img = img.convert('L')  # Convert to Grayscale if mode is 'Grayscale'
     return img
 
-# mask 생성 및 저장
-def generateMask(image_shape, center_size=(700, 700)):
-    mask = np.ones(image_shape[:2], dtype=np.uint8) * 255  # 모두 흰색으로 채웁니다.
-
-    # 마스크의 중앙에 검은색 사각형을 그립니다.
-    center_x = image_shape[1] // 2
-    center_y = image_shape[0] // 2
-    center_width, center_height = center_size
-    mask[center_y - center_height//2: center_y + center_height//2, 
-         center_x - center_width//2: center_x + center_width//2] = 0
-
-    mask = Image.fromarray(mask)
-    mask.save('mask.png')
-    return mask
-
 # 이미지 파일 불러오기
-img = Image.open('make-base-picture/template/classroom3.png')
+img = Image.open('make-base-picture/template/beach1.png')
+mask = Image.open('make-base-picture/mask/beach1_mask1.png')
 
 # 이미지를 Base64 인코딩하기
 img_base64 = imageToString(img)
 
-# mask 생성 및 이미지로 변환 후 Base64 인코딩
-mask = generateMask(img.size)
 mask_base64 = imageToString(mask, mode='Grayscale')
 
 # 이미지 변환하기 REST API 호출
