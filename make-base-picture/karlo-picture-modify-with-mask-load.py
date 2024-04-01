@@ -37,7 +37,7 @@ def inpainting(image, mask, prompt):
     response = json.loads(r.content)
     return response
 
-prompt = "the classroom chair, classroom desk, realistic"
+prompt = "cute fish, pool-tube"
 
 # Base64 인코딩
 def imageToString(img, mode='RGB'):
@@ -55,12 +55,11 @@ def stringToImage(base64_string, mode='RGB'):
     return img
 
 # 이미지 파일 불러오기
-img = Image.open('make-base-picture/template/classroom3.png')
-mask = Image.open('make-base-picture/mask/mask1.png')
+img = Image.open('make-base-picture/template/beach1.png')
+mask = Image.open('make-base-picture/mask/beach1_mask1.png')
 
 # 이미지를 Base64 인코딩하기
 img_base64 = imageToString(img)
-
 
 mask_base64 = imageToString(mask, mode='Grayscale')
 
