@@ -26,7 +26,8 @@ def inpainting(image, mask, prompt):
         json = {
             'image': image,
             'mask': mask,
-            'prompt': prompt
+            'prompt': prompt,
+            ''
         },
         headers = {
             'Authorization': f'KakaoAK {REST_API_KEY}',
