@@ -24,6 +24,7 @@ def t2i(prompt, negative_prompt):
         json = {
             "prompt": prompt,
             "negative_prompt": negative_prompt, 
+            'seed': [10],
         },
         headers = {
             'Authorization': f'KakaoAK {REST_API_KEY}',
@@ -36,7 +37,7 @@ def t2i(prompt, negative_prompt):
 
 
 # 프롬프트에 사용할 제시어
-prompt = "park, dog, red flower, bird"
+prompt = "newspaper, glasses, tea, cookie"
 negative_prompt = "scary, darkness"
 
 # 이미지 생성하기 REST API 호출
@@ -46,4 +47,4 @@ response = t2i(prompt, negative_prompt)
 result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
 result.show()
 
-result.save('image_create.png','PNG')
+result.save('make-base-picture/base-picture/room1-base-picture.png','PNG')

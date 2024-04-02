@@ -1,0 +1,9 @@
+base negative-prompt : scary, darkness
+
+keyword (seed)
+
+classroom1 : desk, chair, book, pencil (1000)
+park1 : park, dog, red flower, bird (640)
+mountain1 : green mountain, purple grape, tree (1500)
+beach1 : beach, fish, parasol (660)
+room1 : newspaper, glasses, tea, cookie (10)
