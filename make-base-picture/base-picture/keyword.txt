@@ -7,3 +7,13 @@ park1 : park, dog, red flower, bird (640)
 mountain1 : green mountain, purple grape, tree (1500)
 beach1 : beach, fish, parasol (660)
 room1 : newspaper, glasses, tea, cookie (10)
+
+============================================
+
+base negative-prompt: scary, darkness, person, human-like
+
+classroom2: A wooden desk and chair set in a softly lit room, with an open book and a sharp pencil resting on the desk's surface. (1000)
+park2: A lively scene in a park featuring a playful dog running across the grass, vibrant red flowers blooming in the foreground, and a bird soaring in the clear blue sky above. (700)
+mountain2: A lush green mountain with trees, under which a purple grapes hangs prominently in the foreground. (1500)
+beach2: There is a bright parasol on the beach and a beach view of colorful fish swimming near the coast. (660)
+room2: A wooden table, upon which lies a newspaper, glasses perched atop. Next to it, a steaming cup of tea and a plate with a half-eaten cookie rest, capturing a moment of relaxation and indulgence. (10)
