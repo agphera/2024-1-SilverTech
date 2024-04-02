@@ -22,9 +22,15 @@ def t2i(prompt, negative_prompt):
     r = requests.post(
         'https://api.kakaobrain.com/v2/inference/karlo/t2i',
         json = {
+            "version": "v2.1",
             "prompt": prompt,
             "negative_prompt": negative_prompt, 
             'seed': [10],
+            'upscale': False,
+            'prior_num_inference_steps': 10,
+            'prior_guidance_scale': 10.0,
+            'num_inference_steps': 70,
+            'guidance_scale': 20.0,
         },
         headers = {
             'Authorization': f'KakaoAK {REST_API_KEY}',
@@ -37,7 +43,7 @@ def t2i(prompt, negative_prompt):
 
 
 # 프롬프트에 사용할 제시어
-prompt = "newspaper, glasses, tea, cookie"
+prompt = "A wooden desk and chair set in a softly lit room, with an open book and a sharp pencil resting on the desk's surface."
 negative_prompt = "scary, darkness"
 
 # 이미지 생성하기 REST API 호출
@@ -47,4 +53,4 @@ response = t2i(prompt, negative_prompt)
 result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
 result.show()
 
-result.save('make-base-picture/base-picture/room1-base-picture.png','PNG')
+result.save('make-base-picture/base-picture/classroom2-base-picture.png','PNG')
