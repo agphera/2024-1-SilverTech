@@ -26,7 +26,13 @@ def inpainting(image, mask, prompt):
         json = {
             'image': image,
             'mask': mask,
-            'prompt': prompt
+            'prompt': prompt,
+            'samples': 1,
+            'seed': [1],
+            'prior_num_inference_steps': 10,
+            'prior_guidance_scale': 10.0,
+            'num_inference_steps': 70,
+            'guidance_scale': 8.0
         },
         headers = {
             'Authorization': f'KakaoAK {REST_API_KEY}',
@@ -37,7 +43,7 @@ def inpainting(image, mask, prompt):
     response = json.loads(r.content)
     return response
 
-prompt = "cute fish, pool-tube"
+prompt = "white fish and pink pool-tube and sharp seashell and beach-ball like simple illustrated"
 
 # Base64 인코딩
 def imageToString(img, mode='RGB'):
