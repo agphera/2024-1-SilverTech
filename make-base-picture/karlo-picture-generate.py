@@ -36,8 +36,8 @@ def t2i(prompt, negative_prompt):
 
 
 # 프롬프트에 사용할 제시어
-prompt = "A cat with white fur"
-negative_prompt = "sleeping cat, dog, human, ugly face, cropped"
+prompt = "park, dog, red flower, bird"
+negative_prompt = "scary, darkness"
 
 # 이미지 생성하기 REST API 호출
 response = t2i(prompt, negative_prompt)

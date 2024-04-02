@@ -40,7 +40,7 @@ def generateMask(image_shape, black_regions):
 img = Image.open('make-base-picture/template/sky1.png')
 
 # 마스크 생성
-black_regions = [(200, 400, 300, 300), (700, 200, 200, 200)]  # 왼쪽 상단과 오른쪽 하단에 검은색 영역 추가
+black_regions = [(200, 400, 350, 350), (700, 200, 300, 300)]  # 왼쪽 상단과 오른쪽 하단에 검은색 영역 추가
 mask = generateMask(img.size, black_regions)
 
 # 마스크를 이미지로 변환 후 Base64 인코딩

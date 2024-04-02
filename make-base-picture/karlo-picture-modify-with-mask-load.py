@@ -43,7 +43,7 @@ def inpainting(image, mask, prompt):
     response = json.loads(r.content)
     return response
 
-prompt = "white fish and pink pool-tube and sharp seashell and beach-ball like simple illustrated"
+prompt = "a yellow balloon and red sun"
 
 # Base64 인코딩
 def imageToString(img, mode='RGB'):
@@ -61,8 +61,8 @@ def stringToImage(base64_string, mode='RGB'):
     return img
 
 # 이미지 파일 불러오기
-img = Image.open('make-base-picture/template/beach1.png')
-mask = Image.open('make-base-picture/mask/beach1_mask1.png')
+img = Image.open('make-base-picture/template/sky1.png')
+mask = Image.open('make-base-picture/mask/sky1_mask1.png')
 
 # 이미지를 Base64 인코딩하기
 img_base64 = imageToString(img)
@@ -76,3 +76,4 @@ print(response)
 # 응답의 첫 번째 이미지 생성 결과 출력하기
 result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
 result.show()
+result.save('make-base-picture/base-picture/sky1-base-picture.png')
