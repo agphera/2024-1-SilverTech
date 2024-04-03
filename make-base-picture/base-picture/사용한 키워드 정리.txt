@@ -20,6 +20,9 @@ room2: A wooden table, upon which lies a newspaper, glasses perched atop. Next t
 
 ===========================================
 
-base negative-prompt: scary, darkness, person, human-like, complicated, stack
+base seed: 777
+base negative-prompt: scary, darkness, person, human-like, complicated, stack, small creature
 
-mountain3: clear style, appropriate distance between objects, purest form of minimalistic perfectoin, a green mountain landscape with ripe grapes and various types of trees illustration, high-end graphic illustration, high contrast, realistic colors. (1500)
+template: clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {word1} and {word2} and {word3}, high-end graphic illustration, high contrast, realistic colors.
+
+{subject}: {word1}, {word2}, {word3} => keywords.json을 보시오
