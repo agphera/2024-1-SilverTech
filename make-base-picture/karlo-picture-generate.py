@@ -25,7 +25,7 @@ def t2i(prompt, negative_prompt):
             "version": "v2.1",
             "prompt": prompt,
             "negative_prompt": negative_prompt, 
-            'seed': [660],
+            'seed': [1500],
             'upscale': False,
             'prior_num_inference_steps': 20,
             'prior_guidance_scale': 10.0,
@@ -41,10 +41,21 @@ def t2i(prompt, negative_prompt):
     response = json.loads(r.content)
     return response
 
+def make_prompt(subject):
+    mountain_keywords=["few green mountains", "grapes hanging on the tree", "various types of trees illustration"]
+    if subject == "mountain": 
+        keywords = mountain_keywords
+
+    prompt_template = "clear style, appropriate distance between objects, purest form of minimalistic perfection, {word1} and {word2} and {word3}, high-end graphic illustration, high contrast, realistic colors."
+    prompt = prompt_template.format(word1=keywords[0], word2=keywords[1], word3=keywords[2])
+    return prompt
+
+# 만들어낼 그림 주제
+subject = "mountain"
 
 # 프롬프트에 사용할 제시어
-prompt = "There is a bright parasol on the beach and a beach view of colorful fish swimming near the coast by realitic."
-negative_prompt = "scary, darkness, person, human-like"
+prompt = make_prompt(subject)
+negative_prompt = "scary, darkness, person, human-like, complicated, stack, small creature"
 
 # 이미지 생성하기 REST API 호출
 response = t2i(prompt, negative_prompt)
@@ -53,4 +64,4 @@ response = t2i(prompt, negative_prompt)
 result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
 result.show()
 
-result.save('make-base-picture/base-picture/beach2-base-picture.png','PNG')
+result.save(f'make-base-picture/base-picture/{subject}3-base-picture.png','PNG')

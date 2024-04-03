@@ -17,3 +17,9 @@ park2: A lively scene in a park featuring a playful dog running across the grass
 mountain2: A lush green mountain with trees, under which a purple grapes hangs prominently in the foreground. (1500)
 beach2: There is a bright parasol on the beach and a beach view of colorful fish swimming near the coast. (660)
 room2: A wooden table, upon which lies a newspaper, glasses perched atop. Next to it, a steaming cup of tea and a plate with a half-eaten cookie rest, capturing a moment of relaxation and indulgence. (10)
+
+===========================================
+
+base negative-prompt: scary, darkness, person, human-like, complicated, stack
+
+mountain3: clear style, appropriate distance between objects, purest form of minimalistic perfectoin, a green mountain landscape with ripe grapes and various types of trees illustration, high-end graphic illustration, high contrast, realistic colors. (1500)
