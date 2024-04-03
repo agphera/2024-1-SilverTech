@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  </head>
+  <body>
+    <p><video id="cameraview" width="720" height="480"></video></p>
+    <div style="text-align: center;">
+      <button id="openBtn">카메라 켜기</button>
+      <button id="closeBtn">카메라 끄기</button>
+    </div>
+  </body>
+  <script>
+    var streamVideo
+    if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia )
+    {
+        alert("Media Device not supported")
+    } else {
+      document.getElementById("openBtn").addEventListener('click',open)
+      document.getElementById("closeBtn").addEventListener('click',close)
+      open()
+    }
+    function open() {
+      close()
+      navigator.mediaDevices.getUserMedia({video:true}).then(stream => {
+        streamVideo = stream
+        var cameraView = document.getElementById("cameraview");
+        cameraView.srcObject = stream;
+        cameraView.play()
+      })
+    }
+    function close() {
+      if (streamVideo) {
+        var track = streamVideo.getTracks()
+        track[0].stop()
+        streamVideo = null
+      }
+    }
+  </script>
+</html>
