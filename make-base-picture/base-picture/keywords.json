@@ -1,36 +1,33 @@
 {
-    "classroom": [
-        "numerous desks",
-        "pencils are scattered on the surfaces",
-        "a blackboard located in the center of one wall"
-    ],
-    "park": [
-        "free-flying birds",
-        "flowers blossoming on a hill",
-        "a fountain of water located in the center"
-    ],
-    "mountain": [
-        "a dog playing alone",
-        "grapes hanging on the tree",
-        "various types of trees illustration"
-    ],
-    "beach": [
-        "perfectly shaped sandcastle",
-        "a parasol plunged into the sand offering shade",
-        "a lonely round float bobbing gently on the azure waves"
-    ],
-    "sky": [
-        "a thick cloud",
-        "a rainbow below the sun",
-        "the sun is rising"
-    ],
-    "stream": [
-        "children playing tag in fun",
-        "few children are seen splashing water on each other's backs",
-        "a fish-fishing child"
-    ],
-    "farming": [
-        "a farmer who goes to the field with a bull",
-        "stream flows next to the field"
-    ]
+  "classroom": [
+    "numerous desks",
+    "pencils are scattered on the surfaces",
+    "a blackboard located in the center of one wall"
+  ],
+  "park": [
+    "free-flying birds",
+    "flowers blossoming on a hill",
+    "a fountain of water located in the center"
+  ],
+  "mountain": [
+    "a dog playing alone",
+    "grapes hanging on the tree",
+    "various types of trees illustration"
+  ],
+  "beach": [
+    "perfectly shaped sandcastle",
+    "a parasol plunged into the sand offering shade",
+    "a lonely round float bobbing gently on the azure waves"
+  ],
+  "sky": ["a thick cloud", "a rainbow below the sun", "the sun is rising"],
+  "stream": [
+    "children playing tag in fun",
+    "few children are seen splashing water on each other's backs",
+    "a fish-fishing child"
+  ],
+  "farming": [
+    "a farmer who goes to the field with a bull",
+    "stream flows next to the field"
+  ],
+  "game": ["Samullori Instrumental Music", "happiness", "lightness"]
 }

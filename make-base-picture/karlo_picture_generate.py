@@ -9,7 +9,7 @@ from PIL import Image
 classic_template_subjects = ["classroom", "park", "mountain", "beach", "sky"] # 여기에 넣은 subject는 기존 프롬프트 사용
 CLASSIC_NEGATIVE_PROMPT = 'scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon'
 
-memory_template_subjects = ["stream", "farming"] # 새로운 프롬프트 사용
+memory_template_subjects = ["stream", "farming", "game"] # 새로운 프롬프트 사용
 MEMORY_NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, normal quality, signature, watermark, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language, Southeast Asia'
 
 #%% API 키 불러오기
@@ -58,6 +58,9 @@ def t2i(prompt):
 
 def make_prompt(subject):
     # 각 주제에 맞게 작성한 키워드를 불러와 템플릿에 맞춰 프롬프트 완성
+    prompt_template = ''
+    negative_prompt = ''
+
     with open('make-base-picture/base-picture/keywords.json') as f:
         keyword_data = json.load(f)
         keywords = keyword_data[subject]
@@ -82,10 +85,10 @@ def make_prompt(subject):
 if __name__ == "__main__":
     # 만들어낼 그림 주제
     """ 
-    subject: park, mountain, sky 
-    final-subject: stream, farming
+    subject: park, mountain, sky
+    final-subject: stream, farming, game
     """
-    subject = "sky"
+    subject = "game"
     version = '5'
 
     # 프롬프트에 사용할 제시어
