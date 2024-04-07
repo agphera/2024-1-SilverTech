@@ -6,6 +6,8 @@ import os
 import json
 from PIL import Image
 
+NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, normal quality, signature, watermark, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language'
+
 #%% API 키 불러오기
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('API', 'api_keys.txt')
@@ -33,7 +35,7 @@ def t2i(prompt):
             'prior_num_inference_steps': 20,
             'prior_guidance_scale': 10.0,
             'num_inference_steps': 70,
-            'guidance_scale': 5.0,
+            'guidance_scale': 20.0,
         },
         headers = {
             'Authorization': f'KakaoAK {REST_API_KEY}',
@@ -50,18 +52,22 @@ def make_prompt(subject):
         keyword_data = json.load(f)
         keywords = keyword_data[subject]
 
-    prompt_template = "clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {word1} and {word2} and {word3}, high-end graphic illustration, high contrast, realistic colors."
+    # prompt_template = "clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {word1} and {word2} and {word3}, high-end graphic illustration, high contrast, realistic colors."
+    # prompt_template = "clear style, the {subject}-themed {word1} and {word2} and {word3} by Kim Hong-do, Korean traditional artist."
+    # prompt_template = "The {subject}-themed {word1} and {word2} and {word3} by Kim Hong-do, Korean traditional artist."
+    prompt_template = "In modern and contemporary history, Korea, and East Asia, The {subject}-themed {word1} and {word2} and {word3}, Simple illustration, Clear style."
+    
     prompt = prompt_template.format(subject=subject, word1=keywords[0], word2=keywords[1], word3=keywords[2])
-    negative_prompt = "scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon"
 
-    return (prompt, negative_prompt)
+    return (prompt, NEGATIVE_PROMPT)
 
 if __name__ == "__main__":
     # 만들어낼 그림 주제
     """ 
-    subject: classroom, park, mountain, beach, room 
+    subject: classroom, park, mountain, beach, sky 
+    + subject: stream
     """
-    subject = "sky"
+    subject = "stream"
     version = '4'
 
     # 프롬프트에 사용할 제시어
