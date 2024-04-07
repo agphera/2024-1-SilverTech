@@ -5,10 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" , charset="utf-8">
 
     <title>4조 프로젝트</title>
-    <link rel="icon" href="Main_source/mainIcon.png">
+    <link rel="icon" href="mainIcon.png">
     <link rel="stylesheet" href="index.css" type="text/css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
-    <script src="index.js"></script>
+    <script src="index.js" type="module"></script>
+
+
+
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 
 </head>
 
@@ -20,7 +24,7 @@
     <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
             <a class="navbar-item" href="index.html">
-                <img src="Main_source/mainIcon.png" width="30" height="50">
+                <img src="mainIcon.png" width="30" height="50">
             </a>
 
             <a role="button" id="burger" onclick="burgerOn()" class="navbar-burger" aria-label="menu"
@@ -91,7 +95,7 @@
         <div class="column">
             Base Image
 
-            <img src="Main_source/mainIcon.png" height="100%" width="100%">
+            <img src="mainIcon.png" height="100%" width="100%">
 
 
         </div>
@@ -127,34 +131,63 @@
 
 
 </body>
+
+<input type="file" id="fileInput">
 <script>
-    //Record
-let mediaRecorder;
-let audioChunks = [];
+    let mediaRecorder;
+    let audioChunks = []; // audioChunks를 전역 변수로 초기화
 
-document.getElementById("startBtn").addEventListener("click", function() {
-navigator.mediaDevices.getUserMedia({ audio: true })
-.then(stream => {
-  mediaRecorder = new MediaRecorder(stream);
-  mediaRecorder.start();
+    document.getElementById("startBtn").addEventListener("click", function () {
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
 
-  mediaRecorder.addEventListener("dataavailable", event => {
-    audioChunks.push(event.data);
-  });
+                mediaRecorder.addEventListener("dataavailable", event => {
+                    audioChunks.push(event.data);
+                });
 
-  mediaRecorder.addEventListener("stop", () => {
-    const audioBlob = new Blob(audioChunks);
-    const audioUrl = URL.createObjectURL(audioBlob);
-    const audio = document.getElementById("audioPlayback");
-    audio.src = audioUrl;
-    audioChunks = [];
-  });
-});
-});
+                mediaRecorder.addEventListener("stop", () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    audioChunks = []; // 녹음이 끝난 후 audioChunks를 초기화하여 다음 녹음을 준비
+                    sendAudioToNaverSTT(audioBlob);
+                });
+            })
+            .catch(error => {
+                console.error("Cannot access audio stream from microphone.", error);
+            });
+    });
 
-document.getElementById("stopBtn").addEventListener("click", function() {
-mediaRecorder.stop();
-});
+    document.getElementById("stopBtn").addEventListener("click", function () {
+        mediaRecorder.stop();
+    });
 
+    // Blob 형식의 오디오 파일을 네이버 STT API로 전송하는 함수
+    function sendAudioToNaverSTT(blob) {
+        const clientId = ''; // 네이버 클라우드 플랫폼에서 발급받은 Client ID
+        const clientSecret = ''; // 네이버 클라우드 플랫폼에서 발급받은 Client Secret
+        const url = "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor";
+
+        const headers = new Headers({
+            "Content-Type": "application/octet-stream",
+            "X-NCP-APIGW-API-KEY-ID": clientId,
+            "X-NCP-APIGW-API-KEY": clientSecret
+        });
+
+        fetch(url, {
+            method: "POST",
+            headers: headers,
+            body: blob
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log(data);
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    }
+    
 </script>
+
 </html>
