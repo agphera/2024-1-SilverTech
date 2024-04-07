@@ -6,7 +6,11 @@ import os
 import json
 from PIL import Image
 
-NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, normal quality, signature, watermark, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language'
+classic_template_subjects = ["classroom", "park", "mountain", "beach", "sky"] # 여기에 넣은 subject는 기존 프롬프트 사용
+CLASSIC_NEGATIVE_PROMPT = 'scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon'
+
+memory_template_subjects = ["stream", "farming"] # 새로운 프롬프트 사용
+MEMORY_NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, normal quality, signature, watermark, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language, Southeast Asia'
 
 #%% API 키 불러오기
 # API 키 작성된 메모장 주소
@@ -35,11 +39,11 @@ def t2i(prompt):
             'prior_num_inference_steps': 20,
             'prior_guidance_scale': 10.0,
             'num_inference_steps': 70,
-            'guidance_scale': 5.0,
-            'face_refiner': {
+            'guidance_scale': 10.0,
+            'face_refiner': { # 얼굴 보정
                 'bbox_size_threshold': 1.0,
                 'bbox_filter_threshold': 1.0,
-                'restoration_repeats': 3.0,
+                'restoration_repeats': 5.0,
                 'weight_sft': 0.5
             }
         },
@@ -58,23 +62,31 @@ def make_prompt(subject):
         keyword_data = json.load(f)
         keywords = keyword_data[subject]
 
-    # prompt_template = "clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {word1} and {word2} and {word3}, high-end graphic illustration, high contrast, realistic colors."
-    # prompt_template = "clear style, the {subject}-themed {word1} and {word2} and {word3} by Kim Hong-do, Korean traditional artist."
-    # prompt_template = "The {subject}-themed {word1} and {word2} and {word3} by Kim Hong-do, Korean traditional artist."
-    prompt_template = "In modern and contemporary history, Korea, and East Asia, The {subject}-themed {word1} and {word2} and {word3}, Simple, Clear style."
-    
-    prompt = prompt_template.format(subject=subject, word1=keywords[0], word2=keywords[1], word3=keywords[2])
+    # 키워드 수에 맞게 자동으로 and 조절
+    words_placeholder = ' and '.join(['{' + f'word{i+1}' + '}' for i in range(len(keywords))])
 
-    return (prompt, NEGATIVE_PROMPT)
+    # classic과 memory를 구분하여 프롬프트 생성
+    if subject in classic_template_subjects:
+        prompt_template = f"clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {words_placeholder}, high-end graphic illustration, high contrast, realistic colors."
+        negative_prompt = CLASSIC_NEGATIVE_PROMPT
+    elif subject in memory_template_subjects:
+        prompt_template = f"The {subject}-themed {words_placeholder}, Korea, East Asia, Korea, clear style, In modern and contemporary history, simple graphic illustration, realistic colors, Korea."
+        negative_prompt = MEMORY_NEGATIVE_PROMPT
+
+    # 프롬프트에 키워드 삽입
+    word_mapping = {f'word{i+1}': keywords[i] for i in range(len(keywords))}
+    prompt = prompt_template.format(subject=subject, **word_mapping)
+
+    return (prompt, negative_prompt)
 
 if __name__ == "__main__":
     # 만들어낼 그림 주제
     """ 
-    subject: classroom, park, mountain, beach, sky 
-    + subject: stream
+    subject: park, mountain, sky 
+    final-subject: stream, farming
     """
-    subject = "stream"
-    version = '4'
+    subject = "sky"
+    version = '5'
 
     # 프롬프트에 사용할 제시어
     prompt = make_prompt(subject)
@@ -87,4 +99,4 @@ if __name__ == "__main__":
     result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
     result.show()
 
-    result.save(f'make-base-picture/base-picture/{subject+version}-base-picture.png','PNG') 
+    result.save(f'make-base-picture/final-base-picture/{subject+version}-base-picture.png','PNG') 
