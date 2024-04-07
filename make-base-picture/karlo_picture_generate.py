@@ -35,7 +35,13 @@ def t2i(prompt):
             'prior_num_inference_steps': 20,
             'prior_guidance_scale': 10.0,
             'num_inference_steps': 70,
-            'guidance_scale': 20.0,
+            'guidance_scale': 5.0,
+            'face_refiner': {
+                'bbox_size_threshold': 1.0,
+                'bbox_filter_threshold': 1.0,
+                'restoration_repeats': 3.0,
+                'weight_sft': 0.5
+            }
         },
         headers = {
             'Authorization': f'KakaoAK {REST_API_KEY}',
@@ -55,7 +61,7 @@ def make_prompt(subject):
     # prompt_template = "clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {word1} and {word2} and {word3}, high-end graphic illustration, high contrast, realistic colors."
     # prompt_template = "clear style, the {subject}-themed {word1} and {word2} and {word3} by Kim Hong-do, Korean traditional artist."
     # prompt_template = "The {subject}-themed {word1} and {word2} and {word3} by Kim Hong-do, Korean traditional artist."
-    prompt_template = "In modern and contemporary history, Korea, and East Asia, The {subject}-themed {word1} and {word2} and {word3}, Simple illustration, Clear style."
+    prompt_template = "In modern and contemporary history, Korea, and East Asia, The {subject}-themed {word1} and {word2} and {word3}, Simple, Clear style."
     
     prompt = prompt_template.format(subject=subject, word1=keywords[0], word2=keywords[1], word3=keywords[2])
 
