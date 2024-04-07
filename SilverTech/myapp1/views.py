@@ -4,7 +4,7 @@ import requests
 
 # 웹 페이지를 여는 뷰
 def index(request):
-    return render(request, 'index.html')
+    return render(request, '/Users/leesoyeon/Documents/GitHub/2024-1-OSS-team-4-SilverTech/Index/index.html')
 
 # 오디오 파일을 네이버 STT로 전송하는 뷰
 def send_audio_to_naver_stt(request):
