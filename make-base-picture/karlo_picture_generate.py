@@ -6,11 +6,11 @@ import os
 import json
 from PIL import Image
 
-classic_template_subjects = ["classroom", "park", "mountain", "beach", "sky"] # 여기에 넣은 subject는 기존 프롬프트 사용
-CLASSIC_NEGATIVE_PROMPT = 'scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon'
+classic_template_subjects = ["classroom", "park", "mountain", "beach", "sky", "mountain2"] # 여기에 넣은 subject는 기존 프롬프트 사용
+CLASSIC_NEGATIVE_PROMPT = 'scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon, dirty, crowded, faint, ambiguous'
 
-memory_template_subjects = ["stream", "farming", "game"] # 새로운 프롬프트 사용
-MEMORY_NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, normal quality, signature, watermark, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language, Southeast Asia'
+memory_template_subjects = ["stream", "farming", "farming2","stream2", "park2"] # 새로운 프롬프트 사용
+MEMORY_NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, signature, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language, Southeast Asia'
 
 #%% API 키 불러오기
 # API 키 작성된 메모장 주소
@@ -36,7 +36,7 @@ def t2i(prompt):
             "negative_prompt": negative_prompt, 
             'seed': [777],
             'upscale': False,
-            'prior_num_inference_steps': 20,
+            'prior_num_inference_steps': 15,
             'prior_guidance_scale': 10.0,
             'num_inference_steps': 70,
             'guidance_scale': 10.0,
@@ -73,7 +73,7 @@ def make_prompt(subject):
         prompt_template = f"clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {words_placeholder}, high-end graphic illustration, high contrast, realistic colors."
         negative_prompt = CLASSIC_NEGATIVE_PROMPT
     elif subject in memory_template_subjects:
-        prompt_template = f"The {subject}-themed {words_placeholder}, Korea, East Asia, Korea, clear style, In modern and contemporary history, simple graphic illustration, realistic colors, Korea."
+        prompt_template = f"The {subject}-themed {words_placeholder}, Korea, East Asia, Korea, clear style, In modern and contemporary history, pastel colors, Korea."
         negative_prompt = MEMORY_NEGATIVE_PROMPT
 
     # 프롬프트에 키워드 삽입
@@ -85,11 +85,10 @@ def make_prompt(subject):
 if __name__ == "__main__":
     # 만들어낼 그림 주제
     """ 
-    subject: park, mountain, sky
-    final-subject: stream, farming, game
+    subject: park, mountain, sky, mountain2, park2
+    final-subject: stream, farming, stream2, farming2
     """
-    subject = "game"
-    version = '5'
+    subject = "park2"
 
     # 프롬프트에 사용할 제시어
     prompt = make_prompt(subject)
@@ -102,4 +101,4 @@ if __name__ == "__main__":
     result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
     result.show()
 
-    result.save(f'make-base-picture/final-base-picture/{subject+version}-base-picture.png','PNG') 
+    result.save(f'make-base-picture/final-base-picture/{subject}-base-picture.png','PNG') 
