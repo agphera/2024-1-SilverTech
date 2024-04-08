@@ -1,71 +1,61 @@
 {
-  "classroom": [
-    "numerous desks",
-    "pencils are scattered on the surfaces",
-    "a blackboard located in the center of one wall"
-  ],
-  "park": [
-    "free-flying birds",
-    "flowers blossoming on a hill",
-    "a fountain of water located in the center"
-  ],
-  "mountain": [
+  "mountain1": [
     "a dog playing alone",
     "grapes hanging on the tree",
     "various types of trees illustration"
   ],
-  "beach": [
-    "perfectly shaped sandcastle",
-    "a parasol plunged into the sand offering shade",
-    "a lonely round float bobbing gently on the azure waves"
-  ],
-  "sky": ["a thick cloud", "a rainbow below the sun", "the sun is rising"],
-  "stream": [
-    "children playing tag in fun",
-    "few children are seen splashing water on each other's backs",
-    "a fish-fishing child"
-  ],
-  "farming": [
-    "a farmer who goes to the field with a bull",
-    "stream flows next to the field"
-  ],
-  "game": [
-    "People are engaging in object play with traditional Korean percussion instruments such as the kkwaenggwari, jing, janggu, and buk.",
-    "happiness",
-    "lightness"
-  ],
-  "farming2": [
-    "a tractor",
-    "a two chickens pecking at the ground",
-    "a farmer harvesting ripe tomatoes from the vine",
-    "a field of rice"
-  ],
-  "stream2": [
-    "a river flowing through the valley",
-    "the sun setting behind the distant mountains",
-    "a waterfall cascading down the rocky cliffs",
-    "a young boy or girl chasing butterflies with a net"
-  ],
   "mountain2": [
     "Golden autumn foliage adorns the lush mountainside.",
     "Red, orange, and yellow leaves carpet the slopes.",
-    "A narrow trail winds through towering trees along the mountainside.",
+    "A narrow trail",
     "A rabbit hops among the yellow leaves.",
     "A cozy cabin nestled among the trees, smoke curling from the chimney.",
     "A cluster of mushrooms sprouts from the forest floor"
   ],
+  "park1": [
+    "free-flying birds",
+    "flowers blossoming on a hill",
+    "a fountain of water located in the center"
+  ],
   "park2": [
-    "a bench",
     "a field of nothing",
+    "a bench",
     "The back of an old couple leaning on each other",
     "a sunflower garden",
     "watering can",
     "flying sparrows"
+  ],
+  "sky1": [
+    "the sun is rising",
+    "a rainbow below the sun",
+    "a thick cloud",
+    "clear"
   ],
   "sky2": [
     "A beautiful hot air balloon floating in the sky",
     "a sky with nothing in it",
     "Small airplane flying in the sky",
     "some soap bubbles"
+  ],
+  "stream1": [
+    "children playing tag in fun",
+    "few children are seen splashing water on each other's backs",
+    "a fish-fishing child"
+  ],
+  "stream2": [
+    "a river flowing through the valley",
+    "a young boy or girl chasing butterflies with a net",
+    "the sun setting behind the distant mountains",
+    "a waterfall cascading down the rocky cliffs"
+  ],
+  "farming1": [
+    "a farmer who goes to the field with a bull",
+    "stream flows next to the field"
+  ],
+  "farming2": [
+    "the back of farmer harvesting pumpkins",
+    "a two chickens pecking at the ground",
+    "a field of rice",
+    "a tractor"
   ]
 }
