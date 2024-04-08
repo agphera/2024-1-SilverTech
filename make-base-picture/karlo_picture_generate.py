@@ -6,10 +6,10 @@ import os
 import json
 from PIL import Image
 
-classic_template_subjects = ["classroom", "park", "mountain", "beach", "sky", "mountain2"] # 여기에 넣은 subject는 기존 프롬프트 사용
-CLASSIC_NEGATIVE_PROMPT = 'scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon, dirty, crowded, faint, ambiguous'
+classic_template_subjects = ["classroom", "park", "mountain", "beach", "sky", "mountain2", "park2", "sky2"] # 여기에 넣은 subject는 기존 프롬프트 사용
+CLASSIC_NEGATIVE_PROMPT = 'scary, darkness, person, human-like, complicated, stack, small creature, an alcoholic beverage, a moon, dirty, crowded, faint, ambiguous, box'
 
-memory_template_subjects = ["stream", "farming", "farming2","stream2", "park2"] # 새로운 프롬프트 사용
+memory_template_subjects = ["stream", "farming", "farming2","stream2"] # 새로운 프롬프트 사용
 MEMORY_NEGATIVE_PROMPT = 'out of frame, low resolution, blurry, worst quality, fuzzy, lowres, text, low quality, signature, grainy, poorly drawn hands, poorly drawn feet, poorly drawn face, out of frame, body out of frame, watermark, distorted face, bad anatomy, missing anatomy, missing body, missing face, missing legs, missing fingers, missing feet, missing toe, fewer digits, extra limbs, extra anatomy, extra face, extra arms, extra fingers, extra hands, extra legs, extra feet, extra toe, mutated hands, ugly, mutilated, disfigured, mutation, bad proportions, cropped head, cross-eye, mutilated, distorted eyes, strabismus, skin blemishes, Japan, China, Japanese, Chinese, Japanese language, Chinese language, Southeast Asia'
 
 #%% API 키 불러오기
@@ -88,7 +88,7 @@ if __name__ == "__main__":
     subject: park, mountain, sky, mountain2, park2
     final-subject: stream, farming, stream2, farming2
     """
-    subject = "park2"
+    subject = "sky2"
 
     # 프롬프트에 사용할 제시어
     prompt = make_prompt(subject)
