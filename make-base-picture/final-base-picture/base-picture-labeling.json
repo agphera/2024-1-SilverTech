@@ -1,0 +1,105 @@
+[
+  {
+    "picture": "mountain1",
+    "keywords": ["dog", "grape", "tree", "leaf", "mountain", "snow", "berry"]
+  },
+  {
+    "picture": "mountain2",
+    "keywords": [
+      "autumn",
+      "mountain",
+      "leaves",
+      "slope",
+      "trail",
+      "rabbit",
+      "tree",
+      "cabin",
+      "smoke",
+      "chimney",
+      "mushroom",
+      "forest"
+    ]
+  },
+  {
+    "picture": "park1",
+    "keywords": [
+      "bird",
+      "flower",
+      "hill",
+      "water",
+      "fountain",
+      "chair",
+      "grand"
+    ]
+  },
+  {
+    "picture": "park2",
+    "keywords": [
+      "field",
+      "bench",
+      "couple",
+      "garden",
+      "sunflower",
+      "watering can",
+      "sparrow",
+      "fence",
+      "tree",
+      "streetlight"
+    ]
+  },
+  {
+    "picture": "sky1",
+    "keywords": ["sun", "rainbow", "cloud", "sky"]
+  },
+  {
+    "picture": "sky2",
+    "keywords": ["hot air balloon", "sky", "airplane", "soap bubbles"]
+  },
+  {
+    "picture": "farming1",
+    "keywords": [
+      "trail",
+      "farmer",
+      "bull",
+      "field",
+      "stream",
+      "flower",
+      "tree",
+      "cloud"
+    ]
+  },
+  {
+    "picture": "farming2",
+    "keywords": [
+      "farmer",
+      "pumpkin",
+      "chickens",
+      "field",
+      "rice",
+      "tractor",
+      "house",
+      "cloud",
+      "tree"
+    ]
+  },
+  {
+    "picture": "stream1",
+    "keywords": ["childeren", "tag", "water", "fish-fishing"]
+  },
+  {
+    "picture": "stream2",
+    "keywords": [
+      "river",
+      "valley",
+      "boy",
+      "butterfly",
+      "net",
+      "sun",
+      "mountain",
+      "waterfall",
+      "rock",
+      "cliff",
+      "flower"
+    ]
+  }
+]
