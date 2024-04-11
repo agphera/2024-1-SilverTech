@@ -1,7 +1,14 @@
 [
   {
     "picture": "mountain1",
-    "keywords": ["dog", "grape", "tree", "leaf", "mountain", "snow", "berry"]
+    "keywords": [
+      "dog",
+      "grape",
+      "tree",
+      "leaf",
+      "mountain",
+      "flower"
+    ]
   },
   {
     "picture": "mountain2",
@@ -9,8 +16,6 @@
       "autumn",
       "mountain",
       "leaves",
-      "slope",
-      "trail",
       "rabbit",
       "tree",
       "cabin",
@@ -25,35 +30,41 @@
     "keywords": [
       "bird",
       "flower",
-      "hill",
-      "water",
-      "fountain",
-      "chair",
-      "grand"
+      "lake",
+      "tree",
+      "mountain"
     ]
   },
   {
     "picture": "park2",
     "keywords": [
-      "field",
       "bench",
       "couple",
       "garden",
       "sunflower",
       "watering can",
-      "sparrow",
+      "bird",
       "fence",
-      "tree",
-      "streetlight"
+      "tree"
     ]
   },
   {
     "picture": "sky1",
-    "keywords": ["sun", "rainbow", "cloud", "sky"]
+    "keywords": [
+      "sun",
+      "rainbow",
+      "cloud",
+      "sky"
+    ]
   },
   {
     "picture": "sky2",
-    "keywords": ["hot air balloon", "sky", "airplane", "soap bubbles"]
+    "keywords": [
+      "sky",
+      "airplane",
+      "cloud",
+      "soap bubbles"
+    ]
   },
   {
     "picture": "farming1",
@@ -62,10 +73,10 @@
       "farmer",
       "bull",
       "field",
-      "stream",
-      "flower",
       "tree",
-      "cloud"
+      "cloud",
+      "mountain",
+      "flower"
     ]
   },
   {
@@ -79,27 +90,31 @@
       "tractor",
       "house",
       "cloud",
-      "tree"
+      "tree",
+      "mountain"
     ]
   },
   {
     "picture": "stream1",
-    "keywords": ["childeren", "tag", "water", "fish-fishing"]
+    "keywords": [
+      "childeren",
+      "water",
+      "fish",
+      "tree",
+      "stream"
+    ]
   },
   {
     "picture": "stream2",
     "keywords": [
       "river",
-      "valley",
+      "field",
       "boy",
+      "girl",
       "butterfly",
-      "net",
+      "flower",
       "sun",
-      "mountain",
-      "waterfall",
-      "rock",
-      "cliff",
-      "flower"
+      "mountain"
     ]
   }
 ]
