@@ -3,7 +3,6 @@ import requests
 import json
 import urllib
 import os
-import json
 import threading
 from tqdm import tqdm
 from PIL import Image
@@ -58,7 +57,7 @@ def t2i(prompt):
     response = json.loads(r.content)
     return response
 
-def make_prompt(subject):
+def make_prompt(subject, words):
     # 각 주제에 맞게 작성한 키워드를 불러와 템플릿에 맞춰 프롬프트 완성
     prompt_template = ''
     negative_prompt = ''
@@ -67,6 +66,9 @@ def make_prompt(subject):
         keyword_data = json.load(f)
         keywords = keyword_data[subject]
 
+    if words != None: # 키워드가 입력으로 들어왔다면, 기본 키워드를 사용하지 않음
+        keywords = words
+    
     # 키워드 수에 맞게 자동으로 and 조절
     words_placeholder = ' and '.join(['{' + f'word{i+1}' + '}' for i in range(len(keywords))])
 
@@ -87,6 +89,10 @@ def make_prompt(subject):
     prompt = prompt_template.format(subject=subject, **word_mapping)
 
     return (prompt, negative_prompt)
+
+def show_pic(response):
+    result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
+    result.show()
 
 def process_subject(subject, progress):   
     # 프롬프트에 사용할 제시어

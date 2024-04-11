@@ -1,5 +1,5 @@
 import urllib
-from karlo_picture_generate import make_prompt, t2i
+from karlo import make_prompt, t2i
 from PIL import Image
 
 """ 
