@@ -1,5 +1,7 @@
-# pip install google-cloud-translate==2.0.1
-# [Cloud CLI 설치] https://cloud.google.com/sdk/docs/install?hl=ko <= 일단 인증키 받기 위해서 다운 받았음. 나만 필요한건지 모르겠네
+# 1. pip install google-cloud-translate==2.0.1
+# 2. 수채 프로젝트에 추가 (call me)
+# 3. [Cloud CLI 설치] https://cloud.google.com/sdk/docs/install?hl=ko <= 인증키 사용하기 위해 사용
+# 4. 설치 후 터미널에서 gcloud auth application-default login 실행 https://cloud.google.com/docs/authentication/api-keys?hl=ko#using-with-client-libs
 
 
 def translate_text_list(text: list) -> dict:
