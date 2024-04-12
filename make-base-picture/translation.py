@@ -15,13 +15,13 @@ def translate_text_list(text: list) -> dict:
     if isinstance(text, bytes):
         text = text.decode("utf-8")
     
-    text = ' '.join(text)
-    results = translate_client.translate(text, target_language="en")["translatedText"]
-    results = results.split(' ')
-    results = [word[0].lower() + word[1:] for word in results]    
-    # results = []
-    # for te in text: 
-    #     results.append(translate_client.translate(te, target_language="en")["translatedText"])
+    # text = ' '.join(text)
+    # results = translate_client.translate(text, target_language="en")["translatedText"]
+    # results = results.split(' ')
+    # results = [word[0].lower() + word[1:] for word in results]    
+    results = []
+    for te in text: 
+        results.append(translate_client.translate(te, target_language="en")["translatedText"])
 
     return results
 
