@@ -14,18 +14,17 @@ def translate_text_list(text: list) -> dict:
 
     if isinstance(text, bytes):
         text = text.decode("utf-8")
-
-    results = []
-    # Text can also be a sequence of strings, in which case this method
-    # will return a sequence of results for each text.
-    for te in text: 
-        results.append(translate_client.translate(te, target_language="en")["translatedText"])
-
-    # print("Text: {}".format(result["input"]))
-    # print("Translation: {}".format(result["translatedText"]))
-    # print("Detected source language: {}".format(result["detectedSourceLanguage"]))
+    
+    text = ' '.join(text)
+    results = translate_client.translate(text, target_language="en")["translatedText"]
+    results = results.split(' ')
+    results = [word[0].lower() + word[1:] for word in results]    
+    # results = []
+    # for te in text: 
+    #     results.append(translate_client.translate(te, target_language="en")["translatedText"])
 
     return results
 
 if __name__ == "__main__":
-    translate_text_list(["마 니 뭐하는 놈이고"])
+    print(translate_text_list(['배', '바다', '돛', '선장']))
+    print(translate_text_list(['배', '사과', '나무', '산']))
