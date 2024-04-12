@@ -1,14 +1,7 @@
 [
   {
     "picture": "mountain1",
-    "keywords": [
-      "dog",
-      "grape",
-      "tree",
-      "leaf",
-      "mountain",
-      "flower"
-    ]
+    "keywords": ["dog", "grape", "tree", "leaf", "mountain", "flower"]
   },
   {
     "picture": "mountain2",
@@ -27,13 +20,15 @@
   },
   {
     "picture": "park1",
-    "keywords": [
-      "bird",
-      "flower",
-      "lake",
-      "tree",
-      "mountain"
-    ]
+    "keywords": {
+      "새": "bird",
+      "꽃": "flower",
+      "강": "lake",
+      "나무": "tree",
+      "산": "mountain",
+      "구름": "cloud",
+      "길": "trail"
+    }
   },
   {
     "picture": "park2",
@@ -50,21 +45,11 @@
   },
   {
     "picture": "sky1",
-    "keywords": [
-      "sun",
-      "rainbow",
-      "cloud",
-      "sky"
-    ]
+    "keywords": ["sun", "rainbow", "cloud", "sky"]
   },
   {
     "picture": "sky2",
-    "keywords": [
-      "sky",
-      "airplane",
-      "cloud",
-      "soap bubbles"
-    ]
+    "keywords": ["sky", "airplane", "cloud", "soap bubbles"]
   },
   {
     "picture": "farming1",
@@ -96,13 +81,7 @@
   },
   {
     "picture": "stream1",
-    "keywords": [
-      "childeren",
-      "water",
-      "fish",
-      "tree",
-      "stream"
-    ]
+    "keywords": ["childeren", "water", "fish", "tree", "stream"]
   },
   {
     "picture": "stream2",

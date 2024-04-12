@@ -1,7 +1,9 @@
-from karlo import make_prompt, t2i, show_pic
-from translation import translate_text_list
 from kiwi import sbg_noun_extractor
+from lexical_relationship_analysis import lex_rel_anal
+from translation import translate_text_list
+from karlo import make_prompt, t2i, show_pic
 import time
+import json
 
 def time_check(start):
     current = time.time()
@@ -21,14 +23,27 @@ print(f"키워드: {results}")
 time_check(start)
 
 #3 유사도 측정으로 점수 결정
-## step 1.
-### a. (정의) 키워드 최종 검수. 변경사항은 공유해서 마무리
-### b. (정의) 키워드: 영어 -> 한글
+with open('make-base-picture/base-picture/base-picture-labeling.json') as f:
+    label_data = json.load(f)
+true_words = set()
+false_words = set()
 
-## step 2.
-### a. 사용자 키워드와, base 그림 키워드 비교하면서 맞는 키워드 체크(API)
-### b. 맞는 키워드는 기존 영어 사용, 틀린 키워드는 영어로 번역 => 그림 생성
-### c. 정답률 표현
+for label in label_data:
+    base_keyword = label[thema]["keywords"].keys()
+    for user_keyword in results:
+        if lex_rel_anal(base_keyword, user_keyword):
+            true_words.add(base_keyword)
+        else: 
+            false_words.add(user_keyword)
+            break
+
+print("정답 단어:", true_words) #정답일 경우 프롬프트 그대로 출력 -> 키워드와 프롬프트 문장 간 연결 필요
+print("오답 단어:", false_words) #4번 영어로 번역 함수에 넣기
+# true_words 개수 / "keywords" 전체 개수 => 점수측정
+# 두 세트 합쳐서 5번 그림 생성에 넣기
+
+
+
 
 #4 영어로 번역
 results = translate_text_list(results)
