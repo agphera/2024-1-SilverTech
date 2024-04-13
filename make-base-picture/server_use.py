@@ -23,35 +23,41 @@ print(f"키워드: {results}")
 time_check(start)
 
 #3 유사도 측정으로 점수 결정
-with open('make-base-picture/base-picture/base-picture-labeling.json') as f:
+with open('make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
     label_data = json.load(f)
 true_words = set()
 false_words = set()
 
-for label in label_data:
-    base_keyword = label[thema]["keywords"].keys()
-    for user_keyword in results:
-        if lex_rel_anal(base_keyword, user_keyword):
+for data in label_data:
+    if data["picture"] == thema:
+        label = set(data["keywords"])
+        break
+
+for user_keyword in results:
+    found_word = False
+    for base_keyword in label:
+        print(user_keyword,"와 ",base_keyword,"를 비교하겠습니다.") #새, 꽃, 강, 나무, 산, 구름, 길
+        similarity_result, similarity_score = lex_rel_anal(user_keyword, base_keyword)
+        if similarity_result:
             true_words.add(base_keyword)
-        else: 
-            false_words.add(user_keyword)
-            break
+            found_word = True
+    if not found_word:
+        false_words.add(user_keyword)
 
 print("정답 단어:", true_words) #정답일 경우 프롬프트 그대로 출력 -> 키워드와 프롬프트 문장 간 연결 필요
-print("오답 단어:", false_words) #4번 영어로 번역 함수에 넣기
-# true_words 개수 / "keywords" 전체 개수 => 점수측정
+print("오답 단어:", false_words)
+print("전체 키워드 개수:", len(label))
+print("정답 키워드 개수:", len(true_words))
 # 두 세트 합쳐서 5번 그림 생성에 넣기
 
 
-
-
 #4 영어로 번역
-results = translate_text_list(results)
-print(f"번역한 문장: {results}")
+true_words = translate_text_list(false_words)
+print(f"번역한 문장: {false_words}")
 time_check(start)
 
 #5 그림 생성
-prompt = make_prompt(thema, results)
+prompt = make_prompt(thema, true_words)
 print(f"생성한 프롬프트: {prompt}")
 
 response = t2i(prompt)

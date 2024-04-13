@@ -47,4 +47,4 @@ def lex_rel_anal(firstWord, secondWord):
 
 if __name__ == "__main__":
     
-    print(lex_rel_anal('연필', '볼펜'))
+    print(lex_rel_anal('입', '새'))
