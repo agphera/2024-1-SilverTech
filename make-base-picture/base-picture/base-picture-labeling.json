@@ -37,16 +37,25 @@
   },
   {
     "picture": "park2",
-    "keywords": [
-      "bench",
-      "couple",
-      "garden",
-      "sunflower",
-      "watering can",
-      "bird",
-      "fence",
-      "tree"
-    ]
+    "keywords": {
+      "공원": "park",
+      "벤치": "bench",
+      "부부": "couple",
+      "정원": "garden",
+      "해바라기": "sunflower",
+      "물뿌리개": "watering can",
+      "새": "bird",
+      "울타리": "fence",
+      "나무": "tree"
+    },
+    "prompt": {
+      "공원": "a field of nothing",
+      "벤치": "a bench",
+      "부부": "The back of an old couple leaning on each other",
+      "해바라기": "a sunflower garden",
+      "물뿌리개": "watering can",
+      "새": "flying sparrows"
+    }
   },
   {
     "picture": "sky1",

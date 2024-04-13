@@ -32,6 +32,10 @@ def lex_rel_anal(firstWord, secondWord):
         body=json.dumps(requestJson)
     )
 
+    print("[responseCode] " + str(response.status))
+    print("[responBody]")
+    print(response.data.decode('utf-8'))
+
     # JSON 데이터를 파이썬 딕셔너리로 변환
     data = json.loads(response.data)
 

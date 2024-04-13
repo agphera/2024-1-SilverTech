@@ -41,7 +41,7 @@ for data in label_data:
 for user_keyword in results:
     found_word = False
     for base_keyword in label_keyword:
-        print(user_keyword,"와 ",base_keyword,"를 비교하겠습니다.") #새, 꽃, 강, 나무, 산, 구름, 길
+        #print(user_keyword,"와 ",base_keyword,"를 비교하겠습니다.") #비교 확인용 코드
         similarity_result, similarity_score = lex_rel_anal(user_keyword, base_keyword)
         if similarity_result:
             found_word = True
