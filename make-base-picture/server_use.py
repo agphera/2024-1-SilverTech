@@ -25,42 +25,48 @@ time_check(start)
 #3 유사도 측정으로 점수 결정
 with open('make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
     label_data = json.load(f)
-true_words = set()
-false_words = set()
+true_word = set()
+false_word = set()
 
 for data in label_data:
     if data["picture"] == thema:
-        label = set(data["keywords"])
+        label_keyword = set(data["keywords"])
+        label_prompt = data["prompt"]
         break
 
 for user_keyword in results:
     found_word = False
-    for base_keyword in label:
-        print(user_keyword,"와 ",base_keyword,"를 비교하겠습니다.") #새, 꽃, 강, 나무, 산, 구름, 길
+    for base_keyword in label_keyword:
+        #print(user_keyword,"와 ",base_keyword,"를 비교하겠습니다.") #새, 꽃, 강, 나무, 산, 구름, 길
         similarity_result, similarity_score = lex_rel_anal(user_keyword, base_keyword)
         if similarity_result:
-            true_words.add(base_keyword)
             found_word = True
+            if base_keyword in label_prompt:
+                true_word.add(label_prompt[base_keyword])
+            else :
+                true_word.add(base_keyword)
+            break
     if not found_word:
-        false_words.add(user_keyword)
+        false_word.add(user_keyword)
 
-print("정답 단어:", true_words) #정답일 경우 프롬프트 그대로 출력 -> 키워드와 프롬프트 문장 간 연결 필요
-print("오답 단어:", false_words)
-print("전체 키워드 개수:", len(label))
-print("정답 키워드 개수:", len(true_words))
-# 두 세트 합쳐서 5번 그림 생성에 넣기
+print("정답 단어:", true_word)
+print("오답 단어:", false_word)
+print("전체 키워드 개수:", len(label_keyword))
+print("정답 키워드 개수:", len(true_word))
 
 
 #4 영어로 번역
-true_words = translate_text_list(false_words)
-print(f"번역한 문장: {false_words}")
+false_word_trans = translate_text_list(false_word) #틀린 단어만 번역
+print(f"번역한 문장: {false_word_trans}")
 time_check(start)
 
 #5 그림 생성
-prompt = make_prompt(thema, true_words)
-print(f"생성한 프롬프트: {prompt}")
+true_word = true_word.union(false_word_trans)
+print(true_word)
+# prompt = make_prompt(thema, list(true_word))
+# print(f"생성한 프롬프트: {prompt}")
 
-response = t2i(prompt)
-time_check(start)
+# response = t2i(prompt)
+# time_check(start)
 
-show_pic(response)
+# show_pic(response)

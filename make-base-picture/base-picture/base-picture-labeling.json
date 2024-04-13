@@ -28,6 +28,11 @@
       "산": "mountain",
       "구름": "cloud",
       "길": "trail"
+    },
+    "prompt": {
+      "새": "flying a few birds",
+      "꽃": "flowers blossoming on a hill",
+      "강": "lake located in the center"
     }
   },
   {
