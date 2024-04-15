@@ -22,16 +22,16 @@ function stt(language, filePath) {
         headers: headers,
         body: fileBuffer // Buffer를 body로 설정
     })
-    .then(response => {
-        console.log(response.status); // 응답 상태 코드 출력
-        return response.text(); // 응답 본문을 텍스트로 변환
-    })
-    .then(body => {
-        console.log(body); // 응답 본문 출력
-    })
-    .catch(err => {
-        console.error(err); // 오류 출력
-    });
+        .then(response => {
+            console.log(response.status); // 응답 상태 코드 출력
+            return response.text(); // 응답 본문을 텍스트로 변환
+        })
+        .then(body => {
+            console.log(body); // 응답 본문 출력
+        })
+        .catch(err => {
+            console.error(err); // 오류 출력
+        });
 }
 
 stt('Kor', '../Hello.wav');

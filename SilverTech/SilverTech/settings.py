@@ -59,7 +59,7 @@ ROOT_URLCONF = 'SilverTech.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / '../Index'],
+        'DIRS': [BASE_DIR / '../Frontend_UI'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
