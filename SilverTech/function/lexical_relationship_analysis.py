@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # API 키 작성된 메모장 주소
-keys_file_path = os.path.join('API', 'api_keys.txt')
+keys_file_path = os.path.join('../API', 'api_keys.txt')
 
 # 파일에서 API 키를 로드하는 함수
 with open(keys_file_path, 'r', encoding='utf-8') as file:
