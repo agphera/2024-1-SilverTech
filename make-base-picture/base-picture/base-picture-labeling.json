@@ -1,0 +1,193 @@
+[
+  {
+    "picture": "mountain1",
+    "keywords": [
+      "개",
+      "포도",
+      "나무",
+      "잎",
+      "산",
+      "꽃",
+      "울타리"
+    ],
+    "prompt": {
+      "개": "a dog playing alone",
+      "포도": "grapes hanging on the tree",
+      "나무": "various types of trees illustration"
+    }
+  },
+  {
+    "picture": "mountain2",
+    "keywords": [
+      "가을",
+      "산",
+      "잎",
+      "토끼",
+      "나무",
+      "오두막",
+      "연기",
+      "굴뚝",
+      "버섯",
+      "숲",
+      "울타리",
+      "길"
+    ],
+    "prompt": {
+      "가을": "Golden autumn foliage adorns the lush mountainside.",
+      "숲": "Golden autumn foliage adorns the lush mountainside.",
+      "잎": "Red, orange, and yellow leaves carpet the slopes.",
+      "길": "A narrow trail",
+      "토끼": "A rabbit hops among the yellow leaves.",
+      "굴뚝": "A cozy cabin nestled among the trees, smoke curling from the chimney.",
+      "오두막": "A cozy cabin nestled among the trees, smoke curling from the chimney.",
+      "버섯": "A cluster of mushrooms sprouts from the forest floor"
+    }
+  },
+  {
+    "picture": "park1",
+    "keywords": [
+      "새",
+      "꽃",
+      "호수",
+      "나무",
+      "산",
+      "구름",
+      "길"
+    ],
+    "prompt": {
+      "새": "flying a few birds",
+      "꽃": "flowers blossoming on a hill",
+      "호수": "lake located in the center"
+    }
+  },
+  {
+    "picture": "park2",
+    "keywords": [
+      "공원",
+      "벤치",
+      "부부",
+      "정원",
+      "해바라기",
+      "물뿌리개",
+      "새",
+      "울타리",
+      "나무"
+    ],
+    "prompt": {
+      "공원": "a field of nothing",
+      "벤치": "a bench",
+      "부부": "The back of an old couple leaning on each other",
+      "해바라기": "a sunflower garden",
+      "물뿌리개": "watering can",
+      "새": "flying sparrows"
+    }
+  },
+  {
+    "picture": "sky1",
+    "keywords": [
+      "해",
+      "무지개",
+      "구름",
+      "하늘"
+    ],
+    "prompt": {
+      "해": "the sun is rising",
+      "무지개": "a rainbow below the sun",
+      "구름": "a thick cloud"
+    }
+  },
+  {
+    "picture": "sky2",
+    "keywords": [
+      "하늘",
+      "비행기",
+      "구름",
+      "비눗방울"
+    ],
+    "prompt": {
+      "하늘": "a sky with nothing in it",
+      "비행기": "big airplane flying in the sky",
+      "비눗방울": "some small soap bubbles"
+    }
+  },
+  {
+    "picture": "farming1",
+    "keywords": [
+      "길",
+      "농부",
+      "소",
+      "들판",
+      "나무",
+      "구름",
+      "산",
+      "꽃"
+    ],
+    "prompt": {
+      "농부": "a farmer",
+      "소": "a bull",
+      "길": "small trail",
+      "들판": "empty field"
+    }
+  },
+  {
+    "picture": "farming2",
+    "keywords": [
+      "농부",
+      "호박",
+      "닭",
+      "밭",
+      "벼",
+      "트랙터",
+      "집",
+      "구름",
+      "나무",
+      "산"
+    ],
+    "prompt": {
+      "농부": "the back of farmer harvesting pumpkins",
+      "호박": "the back of farmer harvesting pumpkins",
+      "닭": "a two chickens pecking at the ground",
+      "벼": "a field of rice",
+      "밭": "a field of rice",
+      "트랙터": "a tractor"
+    }
+  },
+  {
+    "picture": "stream1",
+    "keywords": [
+      "아이들",
+      "물",
+      "물고기",
+      "나무",
+      "계곡",
+      "산",
+      "돌"
+    ],
+    "prompt": {
+      "아이들": "children playing tag in fun",
+      "물": "few children are seen splashing water on each other's backs",
+      "물고기": "a fish-fishing child"
+    }
+  },
+  {
+    "picture": "stream2",
+    "keywords": [
+      "계곡",
+      "들판",
+      "소년",
+      "소녀",
+      "나비",
+      "꽃",
+      "새",
+      "산",
+      "돌"
+    ],
+    "prompt": {
+      "계곡": "a river flowing through the valley and a waterfall cascading down the bank",
+      "소년": "a young boy and girl chasing butterflies",
+      "소녀": "a young boy and girl chasing butterflies",
+      "나비": "a young boy and girl chasing butterflies",
+      "산": "the sun setting behind the distant round mountains"
+    }
+  }
+]

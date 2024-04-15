@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+    <title>4조 프로젝트</title>
+    {% load static %}
+    <link rel="icon" href="{% static 'mainIcon.png' %}">
+    <link rel="stylesheet" href="{% static 'index.css' %}" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <script src="{% static 'index.js' %}" type="module"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+</head>
+
+
+
+
+<body>
+
+    <!-- 네이게이션 바 시작 -->
+    <nav class="navbar" role="navigation" aria-label="main navigation">
+        <div class="navbar-brand">
+            <a class="navbar-item" href="index.html">
+                <img src="{% static 'mainIcon.png' %}" width="30" height="50">
+            </a>
+
+            <a role="button" id="burger" onclick="burgerOn()" class="navbar-burger" aria-label="menu"
+                aria-expanded="false" data-target="navbarBasicExample">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
+        </div>
+
+
+
+        <div id="nav-links" class="navbar-menu is-centered"> <!--여기에 is-active를 class에 넣으면 burger 작동-->
+            <div class="navbar-start">
+                <div class="navbar-item has-dropdown is-hoverable">
+
+                    <a class="navbar-link">
+                        <strong class="nav_hover text_color" id="nav_title1">난이도 조정</strong>
+                    </a>
+
+                    <div class="navbar-dropdown">
+                        <a class="navbar-item text_colorBlack">
+                            1단계
+                        </a>
+                        <a class="navbar-item text_colorBlack">
+                            2단계
+                        </a>
+                        <a class="navbar-item text_colorBlack">
+                            3단계
+                        </a>
+                        <!--<hr class="navbar-divider">     얇은 회색 선을 그림-->
+                        <a class="navbar-item text_colorBlack">
+                            4단계
+                        </a>
+                    </div>
+                </div>
+
+
+            </div><!--왼쪽 정렬된 메뉴들 닫기-->
+
+
+            <!--오른쪽 정렬된 메뉴 열기-->
+            <div class="navbar-end">
+                <div class="navbar-item">
+
+                    <div class="buttons">
+                        <a class="Instar button">
+                            <strong>로그아웃</strong>
+                        </a>
+                        <a class="Github button">
+                            <strong>개발자모드</strong>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <!-- 네이게이션 바 끝 -->
+
+
+    <!-- 프로그레스 바 시작 -->
+    <progress class="progress is-success" value="50" max="100">15%</progress>
+    <!-- 프로그래스 바 끝 -->
+
+
+    <!-- 메인 화면 시작 -->
+    <div class="columns">
+        <div class="column">
+            Base Image
+
+            <img src="{% static 'mainIcon.png' %}" height="100%" width="100%">
+
+
+        </div>
+
+        <div class="column">
+            <div class="columns is-mobile TextBoard">
+                <div class="column">
+
+                    Text Something
+
+                </div>
+
+            </div>
+
+            <div class="columns is-mobile TextBoard">
+                <div class="column">
+                    ICON
+
+                    <button id="startBtn">녹음 시작</button>
+                    <button id="stopBtn">녹음 중지</button>
+                    <audio id="audioPlayback" controls></audio>
+
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    </div>
+    <!-- 메인 화면 끝 -->
+
+
+
+
+</body>
+
+<input type="file" id="fileInput">
+<script>
+    let mediaRecorder;
+    let audioChunks = []; // audioChunks를 전역 변수로 초기화
+
+    //document.getElementById("startBtn").addEventListener("click", function () {
+    //    navigator.mediaDevices.getUserMedia({ audio: true })
+    //        .then(stream => {
+    //            mediaRecorder = new MediaRecorder(stream);
+    //            mediaRecorder.start();
+    //
+    //              mediaRecorder.addEventListener("dataavailable", event => {
+    //                audioChunks.push(event.data);
+    //          });
+    //
+    //              mediaRecorder.addEventListener("stop", () => {
+    //                const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+    //              audioChunks = []; // 녹음이 끝난 후 audioChunks를 초기화하여 다음 녹음을 준비
+    ///            sendAudioToNaverSTT(audioBlob);
+    //     });
+    //            })
+    //          .catch(error => {
+    //            console.error("Cannot access audio stream from microphone.", error);
+    //      });
+    //    });
+
+    document.getElementById("startBtn").addEventListener("click", function () {
+        console.log("녹음하기");
+        navigator.mediaDevices.getUserMedia({ audio: true })
+            .then(stream => {
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.start();
+
+                let audioChunks = [];
+
+                mediaRecorder.addEventListener("dataavailable", event => {
+                    audioChunks.push(event.data);
+                });
+
+                // 녹음이 시작된 후 10초 후에 자동으로 녹음을 중지합니다.
+                setTimeout(() => {
+                    mediaRecorder.stop();
+                    // 녹음이 중지되면 마이크 사용도 중지합니다.
+                    stream.getTracks().forEach(track => track.stop());
+                }, 10000); // 10000ms = 10s
+
+
+                mediaRecorder.addEventListener("stop", () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' }); // 원본은 WAV 타입
+                    audioChunks = []; // 다음 녹음을 위해 초기화
+
+                    // 녹음 파일을 다운로드하기 위한 URL 생성
+                    const audioUrl = URL.createObjectURL(audioBlob);
+
+                    // 다운로드 링크 생성 및 자동 클릭 이벤트 발생
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = audioUrl;
+                    downloadLink.setAttribute('download', 'audio_recording.wav'); // 다운로드 될 파일의 이름
+                    document.body.appendChild(downloadLink); // DOM에 링크 추가 (시각적으로 보이지 않음)
+                    downloadLink.click(); // 링크 클릭 이벤트 강제 발생
+
+                    document.body.removeChild(downloadLink); // 다운로드 후 링크 요소 제거
+                    URL.revokeObjectURL(audioUrl); // URL 해제
+
+                    // 이전 예제의 sendAudioToNaverSTT 함수 호출 부분
+                    sendAudioToNaverSTT(audioBlob);
+                });
+
+            })
+            .catch(error => {
+                console.error("Cannot access audio stream from microphone.", error);
+            });
+    });
+
+
+    document.getElementById("stopBtn").addEventListener("click", function () {
+        mediaRecorder.stop();
+    });
+
+    function sendAudioToNaverSTT(blob) {
+        console.log("보내기");
+        const clientId = ''; // 네이버 클라우드 플랫폼에서 발급받은 Client ID
+        const clientSecret = ''; // 네이버 클라우드 플랫폼에서 발급받은 Client Secret
+        const url = "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor";
+        console.log("세팅");
+        const headers = new Headers({
+            "Content-Type": "application/octet-stream",
+            "X-NCP-APIGW-API-KEY-ID": clientId,
+            "X-NCP-APIGW-API-KEY": clientSecret
+        });
+
+        let formData = new FormData();
+        formData.append('audioFile', blob);
+
+        fetch('http://127.0.0.1:8000/api/naver-stt/', {
+            method: 'POST',
+            body: formData,
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("STT 결과:", data);
+                // 여기에서 data를 처리합니다. 예: 텍스트를 화면에 표시
+            })
+            //.then(response => {
+            //    console.log("HTTP 상태: "); // HTTP 상태 코드 출력
+            //    console.log(response.status); 
+            //    if (!response.ok) {
+            //      throw new Error('Network response was not ok');
+            //    }
+            //    return response.json(); // 응답 본문을 JSON으로 파싱
+            //})
+            .then(data => {
+                console.log("응답 본문 내용: ");
+                console.log(data); // 응답 본문 내용 출력
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+
+</script>
+
+</html>
