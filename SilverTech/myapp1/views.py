@@ -6,19 +6,20 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import json
 
+# API 키 작성된 메모장 주소
+keys_file_path = os.path.join('../API', 'api_keys.txt')
+
+# 파일에서 API 키를 로드하는 함수
+with open(keys_file_path, 'r', encoding='utf-8') as file:
+    keys = json.load(file)
+
+# API 키 사용
+NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
+NAVER_API_KEY = f"{keys['naver_api_keys']}"
+
 @csrf_exempt
 def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
-        # API 키 작성된 메모장 주소
-        keys_file_path = os.path.join('../API', 'api_keys.txt')
-
-        # 파일에서 API 키를 로드하는 함수
-        with open(keys_file_path, 'r', encoding='utf-8') as file:
-            keys = json.load(file)
-
-        # API 키 사용
-        NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
-        NAVER_API_KEY = f"{keys['naver_api_keys']}"
 
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
@@ -42,6 +43,7 @@ def proxy_to_naver_stt(request):
 # urls.py
 from django.urls import path
 from .views import proxy_to_naver_stt
+from function.server_use import scoring_points_create_picture
 
 urlpatterns = [
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
@@ -54,14 +56,12 @@ def index(request):
 def send_audio_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         audio_file = request.FILES['audioFile'].read()  # 파일을 메모리에 로드합니다.
-        client_id = ""  # settings에서 ID를 불러옵니다.
-        client_secret = ""  # settings에서 Secret을 불러옵니다.
         url = "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor"
 
         headers = {
             "Content-Type": "application/octet-stream",  # 오디오 파일의 유형에 따라 수정할 수 있습니다.
-            "X-NCP-APIGW-API-KEY-ID": client_id,
-            "X-NCP-APIGW-API-KEY": client_secret,
+            "X-NCP-APIGW-API-KEY-ID": NAVER_API_KEY_ID,
+            "X-NCP-APIGW-API-KEY": NAVER_API_KEY,
         }
 
         response = requests.post(url, data=audio_file, headers=headers)
@@ -71,6 +71,8 @@ def send_audio_to_naver_stt(request):
             # 응답 본문 내용을 콘솔에 출력합니다.
             print("네이버 음성 인식 API 응답:")
             print(response_data)
+            accuracy = scoring_points_create_picture(response_data.json()['text'])
+            print("정답률:", accuracy)
             return JsonResponse(response.json(), safe=False)
         else:
             # 네이버 API 응답 본문을 포함하여 오류 메시지를 개선합니다.
