@@ -32,6 +32,11 @@ def proxy_to_naver_stt(request):
         response = requests.post(naver_api_url, headers=headers, data=audio_file)
         data = response.json()
         
+        if "text" in data:            
+            accuracy, image_response = scoring_points_create_picture(data['text']) #주석
+            data['accuracy'] = accuracy
+            data['image_url'] = image_response['images'][0]['image']
+
         response_to_client = JsonResponse(data, safe=False)
         response_to_client["Access-Control-Allow-Origin"] = "*"
         response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
@@ -71,9 +76,7 @@ def send_audio_to_naver_stt(request):
             # 응답 본문 내용을 콘솔에 출력합니다.
             print("네이버 음성 인식 API 응답:")
             print(response_data)
-            accuracy = scoring_points_create_picture(response_data.json()['text']) #주석
-            print("정답률:", accuracy) #주석
-            return JsonResponse(response.json(), safe=False)
+            return JsonResponse(response_data, safe=False)
         else:
             # 네이버 API 응답 본문을 포함하여 오류 메시지를 개선합니다.
             return JsonResponse({'error': 'Failed to process audio file', 'message': response.text}, status=rescode)
