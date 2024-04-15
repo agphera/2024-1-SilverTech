@@ -63,7 +63,7 @@ def check_similarity_multithreading(user_keyword, base_keyword):
     return similarity_result, average_score, base_keyword
 
 def user_base_similarity(THEMA, results):
-    with open('make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
+    with open('../make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
         label_data = json.load(f)
 
     true_word = set() # 정답률 체크

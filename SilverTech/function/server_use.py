@@ -37,6 +37,5 @@ def scoring_points_create_picture(data):
 
     response = t2i(prompt)
     print(response)
-    show_pic(response)
 
-    return accuracy
+    return accuracy, response

@@ -62,7 +62,7 @@ def make_prompt(subject, words = None):
     prompt_template = ''
     negative_prompt = ''
 
-    with open('make-base-picture/base-picture/keywords.json') as f:
+    with open('../make-base-picture/base-picture/keywords.json') as f:
         keyword_data = json.load(f)
         keywords = keyword_data[subject]
 
