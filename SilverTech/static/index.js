@@ -42,8 +42,6 @@ function visible(current, total){
 
 
 
-console.log("보내기");console.log("보내기");console.log("보내기");console.log("보내기");
-
 
 
 

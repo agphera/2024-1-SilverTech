@@ -73,7 +73,15 @@ def send_audio_to_naver_stt(request):
             print(response_data)
             accuracy = scoring_points_create_picture(response_data.json()['text']) #주석
             print("정답률:", accuracy) #주석
-            return JsonResponse(response.json(), safe=False)
+            
+            
+            
+            return JsonResponse({'text': response_data['text'], 'accuracy': accuracy})
+            
+            
+            
+            #return JsonResponse(response.json(), safe=False)
+        
         else:
             # 네이버 API 응답 본문을 포함하여 오류 메시지를 개선합니다.
             return JsonResponse({'error': 'Failed to process audio file', 'message': response.text}, status=rescode)

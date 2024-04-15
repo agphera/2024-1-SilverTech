@@ -229,21 +229,11 @@
         })
             .then(response => response.json())
             .then(data => {
-                console.log("STT 결과:", data);
+                    console.log("음성 인식 결과:", data.text);
+                    console.log("정답률:", data.accuracy);
                 // 여기에서 data를 처리합니다. 예: 텍스트를 화면에 표시
             })
-            //.then(response => {
-            //    console.log("HTTP 상태: "); // HTTP 상태 코드 출력
-            //    console.log(response.status); 
-            //    if (!response.ok) {
-            //      throw new Error('Network response was not ok');
-            //    }
-            //    return response.json(); // 응답 본문을 JSON으로 파싱
-            //})
-            .then(data => {
-                console.log("응답 본문 내용: ");
-                console.log(data); // 응답 본문 내용 출력
-            })
+
             .catch(error => console.error('Error:', error));
     }
 
