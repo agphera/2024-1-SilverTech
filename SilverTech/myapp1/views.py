@@ -3,15 +3,28 @@ from django.shortcuts import render, HttpResponse
 from django.http import JsonResponse
 import requests
 from django.views.decorators.csrf import csrf_exempt
+import os
+import json
 
 @csrf_exempt
 def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
+        # API 키 작성된 메모장 주소
+        keys_file_path = os.path.join('../API', 'api_keys.txt')
+
+        # 파일에서 API 키를 로드하는 함수
+        with open(keys_file_path, 'r', encoding='utf-8') as file:
+            keys = json.load(file)
+
+        # API 키 사용
+        NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
+        NAVER_API_KEY = f"{keys['naver_api_keys']}"
+
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
             "Content-Type": "application/octet-stream",  # 오디오 파일의 유형에 따라 수정할 수 있습니다.
-            "X-NCP-APIGW-API-KEY-ID": "",
-            "X-NCP-APIGW-API-KEY": "" ,
+            "X-NCP-APIGW-API-KEY-ID": NAVER_API_KEY_ID,
+            "X-NCP-APIGW-API-KEY": NAVER_API_KEY,
         }
         
         audio_file = request.FILES['audioFile'].read()
@@ -36,7 +49,7 @@ urlpatterns = [
 
 @csrf_exempt
 def index(request):
-    return render(request, '/Users/leesoyeon/Documents/GitHub/2024-1-OSS-team-4-SilverTech/Index/index.html')
+    return render(request, '../Frontend_UI/index.html')
 
 def send_audio_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
