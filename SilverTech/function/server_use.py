@@ -1,7 +1,7 @@
-from kiwi import sbg_noun_extractor
-from lexical_relationship_analysis import user_base_similarity
-from translation import translate_text_list
-from karlo import make_prompt, t2i, show_pic
+from function.kiwi import sbg_noun_extractor
+from function.lexical_relationship_analysis import user_base_similarity
+from function.translation import translate_text_list
+from function.karlo import make_prompt, t2i, show_pic
 import time
 
 def scoring_points_create_picture(data):
@@ -37,6 +37,5 @@ def scoring_points_create_picture(data):
 
     response = t2i(prompt)
     print(response)
-    show_pic(response)
 
-    return accuracy
+    return accuracy, response

@@ -229,7 +229,12 @@
         })
             .then(response => response.json())
             .then(data => {
-                console.log("STT 결과:", data);
+                console.log("전체 데이터:", data);
+                console.log("STT 결과:", data['text']);
+                console.log("정확도:", data['accuracy'])
+                if (data['image_url']) {
+                    window.open(data['image_url'], '_blank'); // 새 창에서 이미지 URL 열기
+                }
                 // 여기에서 data를 처리합니다. 예: 텍스트를 화면에 표시
             })
             //.then(response => {

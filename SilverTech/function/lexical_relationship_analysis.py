@@ -5,7 +5,7 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
 # API 키 작성된 메모장 주소
-keys_file_path = os.path.join('API', 'api_keys.txt')
+keys_file_path = os.path.join('../API', 'api_keys.txt')
 
 # 파일에서 API 키를 로드하는 함수
 with open(keys_file_path, 'r', encoding='utf-8') as file:
@@ -63,7 +63,7 @@ def check_similarity_multithreading(user_keyword, base_keyword):
     return similarity_result, average_score, base_keyword
 
 def user_base_similarity(THEMA, results):
-    with open('make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
+    with open('../make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
         label_data = json.load(f)
 
     true_word = set() # 정답률 체크
