@@ -42,7 +42,7 @@ def lex_rel_anal(firstWord, secondWord):
     # JSON 데이터를 파이썬 딕셔너리로 변환
     data = json.loads(response.data)
 
-    print(data)
+    # print(data)
 
     # 'Similarity' 키에 해당하는 값을 추출
     similarities = data['return_object']['WWN WordRelInfo']['WordRelInfo']['Similarity']
