@@ -35,8 +35,9 @@ def proxy_to_naver_stt(request):
         print('초기 데이터:',data)
 
         if "text" in data:            
-            accuracy, whole_prompt = scoring_points(data['text']) 
+            accuracy, true_word, whole_prompt = scoring_points(data['text']) 
             data['accuracy'] = accuracy
+            data['len_true_word'] = len(true_word)
             data['p'] = list(whole_prompt)
 
         response_to_client = JsonResponse(data, safe=False)

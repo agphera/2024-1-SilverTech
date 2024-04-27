@@ -193,7 +193,7 @@
                 console.log("전체 데이터:", data);
                 console.log("STT 결과:", data['text']);
                 console.log("정확도:", data['accuracy'])
-                document.querySelector('.show-accuracy').innerHTML = `정확도: ${data['accuracy']}`;
+                document.querySelector('.show-accuracy').innerHTML = `맞힌 개수: ${data['len_true_word']}`;
                 return fetch('http://127.0.0.1:8000/func/make-pic/', {
                     method: 'POST',
                     headers: {
