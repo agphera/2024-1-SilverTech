@@ -4,7 +4,7 @@ from function.translation import translate_text_list
 from function.karlo import make_prompt, t2i, show_pic
 import time
 
-def scoring_points_create_picture(data):
+def scoring_points(data):
     #1 한국어 문장 입력
     INPUT_TEXT = data
     THEMA = "park1"
@@ -29,7 +29,11 @@ def scoring_points_create_picture(data):
     print(f"번역한 오답 단어: {false_word_trans}")
     whole_prompt = whole_prompt.union(false_word_trans)
 
+    return accuracy, whole_prompt
 
+def make_picture(whole_prompt):
+    THEMA = "park1"
+    
     #5 그림 생성
     print(whole_prompt)
     prompt = make_prompt(THEMA, list(whole_prompt))
@@ -38,4 +42,4 @@ def scoring_points_create_picture(data):
     response = t2i(prompt)
     print(response)
 
-    return accuracy, response
+    return response

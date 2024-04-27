@@ -1,9 +1,9 @@
 @import url('https://fonts.googleapis.com/css2?family=Orbit&display=swap');
 @import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Myeongjo&family=Noto+Serif+KR&display=swap');
 
+
 body, html, div, a { 
-    /*font-family: 'Orbit', sans-serif;*/
-    font-family: "Gowun Dodum", sans-serif; /*폰트 어때요.. 좀 더 상냥(?)해보이는 듯함..아님말고..*/
+   font-family: "Gowun Dodum", sans-serif; /*폰트 바뀔 수 있음*/
 }
 
 
@@ -34,15 +34,28 @@ nav {
 } 
 
 
+.navbar-progress-container {
+    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
+    transform: translateY(0); /* Initial state */
+    opacity: 1; /* Fully visible */
+}
+
+.navbar-progress-container.hide {
+    transform: translateY(-100%); /* Moves up out of view */
+    opacity: 0; /* Fades out */
+}
+
+
+
 .Help{
     background-color: rgb(235, 235, 240) !important;
-    color: rgb(63, 78, 60); /*?? 중복? 색 지정 완료*/    
+    color: rgb(63, 78, 60); 
 }
 
 .Instar,
 .Github {
     background-color: rgb(235, 235, 240) !important;
-    color: rgb(63, 78, 60); /*?? 중복? 색 지정 완료*/
+    color: rgb(63, 78, 60);
 }
 
 
@@ -61,17 +74,10 @@ nav {
     white-space: nowrap;
 }
 
-.navbar { /*기본 제공 nav-bar크기가 작다고 판단, 요소 오버라이드 하였음.*/
-    height: 3.9rem !important; /* nav-bar높이 조절 */
+.navbar { 
+    height: 3.9rem !important; /*기본 제공 nav-bar 높이 오버라이드*/
 }
 
-#nav_title1{/*'난이도조정' font크기*/
-    /* 기본 상태에서의 색상은 Bulma의 .has-text-white로 인해 이미 설정됨 */
-    font-size: 20px;
-}
-.navbar-start .navbar-item { /*'난이도조정' 단계 font 크기*/
-    font-size: 18px; /* 원하는 글씨 크기로 조정 */
-}
 
 .Help.button{
     font-size: 20px;
@@ -87,30 +93,12 @@ nav {
     font-size: 20px; /* 원하는 글씨 크기로 설정 */
 }
 
-
-#nav_title1:hover { /*마우스를 '난이도조정'에 올렸을때 검은색으로 변경*/
-    color: black !important;
-}
-
-.nav_hover:hover { /*중복 선언, 기존 코드 우선 남겨둠*/
-    /*color: rgb(63, 62, 71) !important;*/
-    color: black !important;
-}
-
 .text_colorWhite {
     color: rgb(235, 235, 240);
 }
 
 .text_colorBlack {
     color: rgb(0, 0, 0);
-}
-
-.navbar-link:not(.is-arrowless)::after { /*난이도 조정 바로 옆 아이콘*/
-    border-color: white !important;
-}
-
-.navbar-item:hover {
-    color: rgb(63, 62, 71) !important;
 }
 
 
@@ -132,16 +120,32 @@ progress::-webkit-progress-value {
    background-color: #a2af58;
 }
 
+.navbar-progress-container {
+    position: relative; /* 상대 위치 지정 */
+}
+
+
+#message {
+    position: absolute; /* 절대 위치 설정 */
+    top: 0; /* 상단 정렬 */
+    left: 0; /* 좌측 정렬 */
+    width: 100%; /* 컨테이너 너비와 동일하게 설정 */
+    display: none; /* 초기에는 표시하지 않음 */
+    text-align: center; /* 텍스트 중앙 정렬 */
+    font-size: 24px; /* 폰트 크기 조정 */
+    color: white; /* 텍스트 색상 */
+}
+
 
 
 /*main body*/
 /*left column-base image*/
 .image-container {
-    padding: 20px;
+    padding: 18px;
     background-color: #c0c5a4; /* 패딩 색상 설정 */
     text-align: center; /* 이미지를 중앙에 정렬 */
-    max-width: 38%; /* 이미지 컨테이너의 최대 너비 설정 */
-    margin: 38px auto 0 auto; /* 중앙 정렬 */
+    max-width: 35%; /* 이미지 컨테이너의 최대 너비 설정 */
+    margin: 80px auto 0 auto; /* 중앙 정렬 */
 }
 
 .image-container img {
@@ -163,12 +167,12 @@ progress::-webkit-progress-value {
 }
 
 .textboard{
-    padding: 38px;
+    padding: 45px;
 }
 
 .speak-icon-container{ /*말하는 아이콘 box*/
     text-align: center;
-    padding:10px;
+    /*padding:6px;*/
 }
 
 .speak-icon {
@@ -182,6 +186,40 @@ progress::-webkit-progress-value {
 .voice-recording {
     padding: 20px; /* 텍스트 보드와 음성 녹음 아이콘 주변의 패딩 */
 }
+
+
+/*로딩중 팝업*/
+.analysis-popup {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(0, 0, 0, 0.8);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 24px;
+    display: none; /* Initially hidden */
+    
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0; /* Start hidden */
+    
+}
+
+.analysis-content {
+    text-align: center;
+}
+
+.compare-message{
+    font-size: 60px;
+    font-weight: 500;
+    line-height: 170%;
+    text-align: center;
+}
+
+
 
 body{
     background-color: #ebe9e9;
