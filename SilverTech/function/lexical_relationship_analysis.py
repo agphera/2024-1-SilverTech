@@ -47,9 +47,6 @@ def lex_rel_anal(firstWord, secondWord):
             body=json.dumps(requestJson)
         )
 
-        # JSON 데이터를 파이썬 딕셔너리로 변환
-        data = json.loads(response.data)
-
         print(data)
         count += 1
 
