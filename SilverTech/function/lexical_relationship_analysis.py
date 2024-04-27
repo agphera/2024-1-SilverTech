@@ -33,19 +33,18 @@ def lex_rel_anal(firstWord, secondWord):
 
     http = urllib3.PoolManager()
 
-    data = {}
-    while 'return_object' not in data:
-        response = http.request(
-            "POST",
-            openApiURL,
-            headers={"Content-Type": "application/json; charset=UTF-8", "Authorization": accessKey},
-            body=json.dumps(requestJson)
-        )
 
-        # JSON 데이터를 파이썬 딕셔너리로 변환
-        data = json.loads(response.data)
+    response = http.request(
+        "POST",
+        openApiURL,
+        headers={"Content-Type": "application/json; charset=UTF-8", "Authorization": accessKey},
+        body=json.dumps(requestJson)
+    )
 
-        print(data)
+    # JSON 데이터를 파이썬 딕셔너리로 변환
+    data = json.loads(response.data)
+
+    print(data)
 
     # 'Similarity' 키에 해당하는 값을 추출
     similarities = data['return_object']['WWN WordRelInfo']['WordRelInfo']['Similarity']
