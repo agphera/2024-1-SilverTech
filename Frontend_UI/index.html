@@ -145,25 +145,14 @@
                     mediaRecorder.stop();
                     // 녹음이 중지되면 마이크 사용도 중지합니다.
                     stream.getTracks().forEach(track => track.stop());
-                }, 10000); // 10000ms = 10s
+                }, 14000); // 10000ms = 10s
 
 
                 mediaRecorder.addEventListener("stop", () => {
                     const audioBlob = new Blob(audioChunks, { type: 'audio/wav' }); // 원본은 WAV 타입
                     audioChunks = []; // 다음 녹음을 위해 초기화
 
-                    // 녹음 파일을 다운로드하기 위한 URL 생성
-                    const audioUrl = URL.createObjectURL(audioBlob);
 
-                    // 다운로드 링크 생성 및 자동 클릭 이벤트 발생
-                    const downloadLink = document.createElement('a');
-                    downloadLink.href = audioUrl;
-                    downloadLink.setAttribute('download', 'audio_recording.wav'); // 다운로드 될 파일의 이름
-                    document.body.appendChild(downloadLink); // DOM에 링크 추가 (시각적으로 보이지 않음)
-                    downloadLink.click(); // 링크 클릭 이벤트 강제 발생
-
-                    document.body.removeChild(downloadLink); // 다운로드 후 링크 요소 제거
-                    URL.revokeObjectURL(audioUrl); // URL 해제
 
                     // 이전 예제의 sendAudioToNaverSTT 함수 호출 부분
                     sendAudioToNaverSTT(audioBlob);
@@ -220,16 +209,16 @@
                     window.open(data['image_url'], '_blank', 'width=800,height=800'); // 새 창에서 이미지 URL 열기
                 }
             })
-            //.then(response => {
-            //    console.log("HTTP 상태: "); // HTTP 상태 코드 출력
-            //    console.log(response.status); 
-            //    if (!response.ok) {
-            //      throw new Error('Network response was not ok');
-            //    }
-            //    return response.json(); // 응답 본문을 JSON으로 파싱
-            //})
-
             .catch(error => console.error('Error:', error));
+
+        //.then(response => {
+        //    console.log("HTTP 상태: "); // HTTP 상태 코드 출력
+        //    console.log(response.status); 
+        //    if (!response.ok) {
+        //      throw new Error('Network response was not ok');
+        //    }
+        //    return response.json(); // 응답 본문을 JSON으로 파싱
+        //})
 
     }
 
