@@ -38,7 +38,7 @@ def lex_rel_anal(firstWord, secondWord):
     count = 0
     while 'return_object' not in data:
         if count >= 5:  # count가 5 이상이면 False 반환하고 종료
-            return False
+            return (False, 0)
 
         response = http.request(
             "POST",
