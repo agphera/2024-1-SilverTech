@@ -35,7 +35,11 @@ def lex_rel_anal(firstWord, secondWord):
     http = urllib3.PoolManager()
 
     data = {}
+    count = 0
     while 'return_object' not in data:
+        if count >= 5:  # count가 5 이상이면 False 반환하고 종료
+            return False
+
         response = http.request(
             "POST",
             openApiURL,
@@ -47,6 +51,8 @@ def lex_rel_anal(firstWord, secondWord):
         data = json.loads(response.data)
 
         print(data)
+        count += 1
+
 
     # 'Similarity' 키에 해당하는 값을 추출
     similarities = data['return_object']['WWN WordRelInfo']['WordRelInfo']['Similarity']
