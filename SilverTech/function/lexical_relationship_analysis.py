@@ -1,6 +1,7 @@
 import os
 import urllib3
 import json
+import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 
@@ -58,10 +59,11 @@ def lex_rel_anal(firstWord, secondWord):
     average_score = average_score / 5
     return (True if average_score > 0.6 else False, average_score) 
 
-def check_similarity_multithreading(user_keyword, base_keyword):
+def check_similarity_multithreading(user_keyword, base_keyword, delay):
     """
     lex_rel_anal 함수를 호출하고 결과를 반환하는 래퍼 함수.
     """
+    time.sleep(delay)  # 대기 시간 적용
     similarity_result, average_score = lex_rel_anal(user_keyword, base_keyword)
     return similarity_result, average_score, base_keyword
 
@@ -87,10 +89,11 @@ def user_base_similarity(THEMA, results):
         
         # 멀티 스레드를 사용하여 모든 base_keyword에 대해 병렬로 유사성 검사
         with ThreadPoolExecutor() as executor:
-            future_to_base_keyword = {executor.submit(check_similarity_multithreading, user_keyword, base_keyword): base_keyword for base_keyword in label_keyword}
+            # 각 스레드가 요청하는 시간 사이에 0.1s의 간격을 준다.
+            future_to_base_keyword = {executor.submit(check_similarity_multithreading, user_keyword, base_keyword, index * 0.1): base_keyword for index, base_keyword in enumerate(label_keyword)}
             
             similarity_results = []
-
+            
             for future in as_completed(future_to_base_keyword):
                 th_result = future.result()
                 if th_result[0]:
