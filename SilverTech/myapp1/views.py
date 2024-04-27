@@ -21,7 +21,7 @@ NAVER_API_KEY = f"{keys['naver_api_keys']}"
 @csrf_exempt
 def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
-
+        print('잘 들어옴')
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
             "Content-Type": "application/octet-stream",  # 오디오 파일의 유형에 따라 수정할 수 있습니다.
@@ -32,7 +32,8 @@ def proxy_to_naver_stt(request):
         audio_file = request.FILES['audioFile'].read()
         response = requests.post(naver_api_url, headers=headers, data=audio_file)
         data = response.json()
-        
+        print('초기 데이터:',data)
+
         if "text" in data:            
             accuracy, whole_prompt = scoring_points(data['text']) 
             data['accuracy'] = accuracy
@@ -42,6 +43,7 @@ def proxy_to_naver_stt(request):
         response_to_client["Access-Control-Allow-Origin"] = "*"
         response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         response_to_client["Access-Control-Allow-Headers"] = "Content-Type"
+        print('최종 반환:', response_to_client)
         return response_to_client
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
