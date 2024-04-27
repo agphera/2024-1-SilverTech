@@ -2,4 +2,5 @@
 /API
 /Just_Testing
 /SilverTech/google-cloud-sdk
+venv
 *.pyc
