@@ -29,7 +29,7 @@ def scoring_points(data):
     print(f"번역한 오답 단어: {false_word_trans}")
     whole_prompt = whole_prompt.union(false_word_trans)
 
-    return accuracy, whole_prompt
+    return accuracy, true_word, whole_prompt
 
 def make_picture(whole_prompt):
     THEMA = "park1"
