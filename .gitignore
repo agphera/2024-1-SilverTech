@@ -3,6 +3,7 @@
 /Just_Testing
 /SilverTech/google-cloud-sdk
 venv
+/venv
 *.pyc
 /SilverTech/Media
 /SilverTech/function/encodings.pickle

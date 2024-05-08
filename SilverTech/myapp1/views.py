@@ -83,6 +83,12 @@ urlpatterns = [
 def index(request):
     return render(request, '../Frontend_UI/Camera.html')
 
+@csrf_exempt
+def second_page(request):
+    return render(request, '../Frontend_UI/index.html')
+
+
+
 def send_audio_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         audio_file = request.FILES['audioFile'].read()  # 파일을 메모리에 로드합니다.

@@ -18,12 +18,13 @@ Including another URLconf
 
 
 from django.urls import path
-from myapp1.views import index, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
+from myapp1.views import index, second_page ,send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
 from myapp1.views import proxy_to_naver_stt, make_pic_karlo
 from myapp1.views import upload_image
 
 urlpatterns = [
     path('', index, name='index'),  # 직접 임포트된 'index' 뷰를 사용합니다.
+    path('second_page', second_page, name = 'second_page'),
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
     path('func/make-pic/', make_pic_karlo, name='make_pic_karlo'),
     path('image/', upload_image, name='upload_image')    
