@@ -133,3 +133,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #모든 도메인에서의 요청을 허용하려면 CORS_ALLOW_ALL_ORIGINS 설정을 True
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+
+import os
+
+# Django 프로젝트의 기본 디렉토리 설정
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# MEDIA_ROOT 설정을 상대 경로로 지정
+MEDIA_ROOT = os.path.join(BASE_DIR, './Media')
+
+# MEDIA_URL 설정
+MEDIA_URL = '/Media/'

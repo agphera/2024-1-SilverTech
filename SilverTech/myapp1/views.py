@@ -108,3 +108,27 @@ def send_audio_to_naver_stt(request):
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
+#웹 캠 이용해서 사진 저장 
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.conf import settings
+
+@csrf_exempt
+def upload_image(request):
+    if request.method == 'POST':
+        # 'photo' 키로 전송된 파일을 가져옵니다.
+        image = request.FILES.get('photo')
+        if image:
+            # 파일 이름을 설정합니다. 실제 프로젝트에서는 중복을 피하기 위해 이름을 변경할 수 있습니다.
+            file_name = 'uploads/captured_image.jpg'
+            
+            # Django의 default_storage를 사용하여 파일을 저장합니다.
+            path = default_storage.save(file_name, ContentFile(image.read()))
+            full_path = os.path.join(settings.MEDIA_ROOT, path)
+            #기본 MEDIA_ROOT 설정 해둬야 하는데 여기에 DB 연결하는게 되려나? 
+            
+            return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
+        else:
+            return JsonResponse({'error': 'No image provided'}, status=400)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
