@@ -104,15 +104,15 @@ def make_prompt(subject, words = None):
         keywords = words
 
     #2 키워드 사이에 'and'를 넣어서 하나의 string으로 병합
-    words_placeholder = ' and '.join(keywords)
+    words_string = ' and '.join(keywords)
 
     #3 주제 뒤에 붙은 버전을 전처리 한 뒤, 주제에 맞게 사용할 프롬프트와 네거티브 프롬프트를 설정함
     subject = subject[:-1]
     if subject in classic_template_subjects:
-        prompt = f"clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {words_placeholder}, high-end graphic illustration, high contrast, realistic colors."
+        prompt = f"clear style, appropriate distance between objects, purest form of minimalistic perfection, the {subject}-themed {words_string}, high-end graphic illustration, high contrast, realistic colors."
         negative_prompt = CLASSIC_NEGATIVE_PROMPT
     elif subject in memory_template_subjects:
-        prompt = f"The {subject}-themed {words_placeholder}, Korea, East Asia, Korea, clear style, In modern and contemporary history, pastel colors, Korea."
+        prompt = f"The {subject}-themed {words_string}, Korea, East Asia, Korea, clear style, In modern and contemporary history, pastel colors, Korea."
         negative_prompt = MEMORY_NEGATIVE_PROMPT
 
     return (prompt, negative_prompt)

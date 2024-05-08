@@ -21,7 +21,6 @@ NAVER_API_KEY = f"{keys['naver_api_keys']}"
 @csrf_exempt
 def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
-        print('잘 들어옴')
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
             "Content-Type": "application/octet-stream",  # 오디오 파일의 유형에 따라 수정할 수 있습니다.
