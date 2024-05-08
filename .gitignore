@@ -5,3 +5,4 @@
 venv
 *.pyc
 /SilverTech/Media
+/SilverTech/function/encodings.pickle
