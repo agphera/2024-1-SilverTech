@@ -73,34 +73,92 @@
         cameraView.srcObject = stream;
       });
     }
-
+    //0.3초마다 서버 호출 
     function captureAndUpload() {
-      var canvas = document.createElement('canvas');
-      canvas.width = 640; // 적절한 크기로 설정
-      canvas.height = 480; // 적절한 크기로 설정
-      var context = canvas.getContext('2d');
-      var video = document.getElementById('cameraview');
+      var captureInterval = 300; // 0.3초 간격
+      var totalDuration = 30000; // 30초
+      var captureCount = totalDuration / captureInterval; // 총 캡처할 사진 수
+      var count = 0;
+
+      var intervalId = setInterval(function() {
+          var canvas = document.createElement('canvas');
+          canvas.width = 640; // 적절한 크기로 설정
+          canvas.height = 480; // 적절한 크기로 설정
+          var context = canvas.getContext('2d');
+          var video = document.getElementById('cameraview');
+          
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+          canvas.toBlob(blob => {
+              var formData = new FormData();
+              formData.append('photo', blob, 'capture.jpg');
+              
+              fetch('http://127.0.0.1:8000/image/', {
+                  method: 'POST',
+                  body: formData
+              })
+              .then(response => response.json())
+              .then(result => {
+                  console.log('Success:', result);
+              })
+              .catch(error => {
+                  console.error('Error:', error);
+              });
+          }, 'image/jpeg');
+
+          if (++count >= captureCount) {
+              clearInterval(intervalId);
+              console.log('Capture complete');
+          }
+      }, captureInterval);
+  }
+
+  //한번에 100장 보내기 
+  function startCaptureAndUpload() {
+    var canvas = document.createElement('canvas');
+    canvas.width = 640; // 적절한 크기로 설정
+    canvas.height = 480; // 적절한 크기로 설정
+    var context = canvas.getContext('2d');
+    var video = document.getElementById('cameraview');
+    var formData = new FormData();
+    var captureCount = 0;
+  
+    // 0.3초 간격으로 사진 캡처
+    var captureInterval = setInterval(() => {
+      if (captureCount >= 100) {
+        clearInterval(captureInterval); // 100장 캡처 후 중단
+        uploadImages(formData); // 서버로 이미지 업로드
+        return;
+      }
+  
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-      // canvas에서 이미지 데이터를 blob 형태로 추출
       canvas.toBlob(blob => {
-        var formData = new FormData();
-        formData.append('photo', blob, 'capture.jpg');
-
-        // formData를 사용하여 사진을 서버로 전송
-        fetch('http://127.0.0.1:8000/api/naver-stt/', {
-          method: 'POST',
-          body: formData
-        })
-          .then(response => response.json())
-          .then(result => {
-            console.log('Success:', result);
-          })
-          .catch(error => {
-            console.error('Error:', error);
-          });
+        formData.append(`photo_${captureCount}`, blob, `capture_${captureCount}.jpg`);
+        captureCount++;
       }, 'image/jpeg');
-    }
+    }, 300);
+  }
+  
+  function uploadImages(formData) {
+    // formData를 사용하여 사진을 서버로 전송
+    fetch('http://127.0.0.1:8000/api/upload/', { // 업로드 URL을 적절히 수정해야 합니다.
+      method: 'POST',
+      body: formData,
+    })
+    .then(response => response.json())
+    .then(result => {
+      console.log('Success:', result);
+    })
+    .catch(error => {
+      console.error('Error:', error);
+    });
+  }
+  
+
+
+
+
+
   </script>
 </body>
 

@@ -78,9 +78,10 @@ urlpatterns = [
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
 ]
 
+#시작 html 결정
 @csrf_exempt
 def index(request):
-    return render(request, '../Frontend_UI/index.html')
+    return render(request, '../Frontend_UI/Camera.html')
 
 def send_audio_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
@@ -109,26 +110,54 @@ def send_audio_to_naver_stt(request):
 
 
 #웹 캠 이용해서 사진 저장 
+import os
+from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from django.conf import settings
+from django.http import JsonResponse
 
 @csrf_exempt
 def upload_image(request):
     if request.method == 'POST':
-        # 'photo' 키로 전송된 파일을 가져옵니다.
         image = request.FILES.get('photo')
         if image:
-            # 파일 이름을 설정합니다. 실제 프로젝트에서는 중복을 피하기 위해 이름을 변경할 수 있습니다.
-            file_name = 'uploads/captured_image.jpg'
+            # 세션에서 이미지 카운터를 가져옵니다.
+            image_counter = request.session.get('image_counter', 0)
+            image_counter += 1
             
-            # Django의 default_storage를 사용하여 파일을 저장합니다.
+            # 기본 폴더 경로 설정
+            base_folder_name = 'uploads/my_images'
+            
+            # 실제 저장될 폴더 경로 설정
+            folder_name = base_folder_name
+            
+            # 폴더가 이미 존재하는지 확인하고, 존재한다면 새로운 폴더 이름을 생성합니다.
+            if default_storage.exists(base_folder_name):
+                folder_version = 1
+                folder_name = f"{base_folder_name}_{folder_version}"
+                while default_storage.exists(folder_name):
+                    folder_version += 1
+                    folder_name = f"{base_folder_name}_{folder_version}"
+            
+            # 파일 이름 설정 (여기서는 세션의 이미지 카운터를 사용)
+            file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+            
+            # 이미지 저장
             path = default_storage.save(file_name, ContentFile(image.read()))
             full_path = os.path.join(settings.MEDIA_ROOT, path)
-            #기본 MEDIA_ROOT 설정 해둬야 하는데 여기에 DB 연결하는게 되려나? 
             
+            # 세션에 이미지 카운터 업데이트
+            request.session['image_counter'] = image_counter
+            
+            # 100번째 이미지 후 세션 리셋
+            if image_counter >= 100:
+                del request.session['image_counter']
+            
+            print(f"Image {image_counter} uploaded successfully to {full_path}")
             return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
         else:
+            print("No image provided")
             return JsonResponse({'error': 'No image provided'}, status=400)
     else:
+        print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
