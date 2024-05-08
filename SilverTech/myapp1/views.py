@@ -126,20 +126,29 @@ def upload_image(request):
             image_counter += 1
             
             # 기본 폴더 경로 설정
-            base_folder_name = 'uploads/my_images'
+            base_folder_name = 'User_images'
             
             # 실제 저장될 폴더 경로 설정
             folder_name = base_folder_name
             
-            # 폴더가 이미 존재하는지 확인하고, 존재한다면 새로운 폴더 이름을 생성합니다.
-            if default_storage.exists(base_folder_name):
+            # 폴더가 이미 존재하는지 확인하고, 존재한다면 가장 마지막에 생성된 폴더 이름을 사용합니다.
+            if image_counter > 1:
                 folder_version = 1
-                folder_name = f"{base_folder_name}_{folder_version}"
-                while default_storage.exists(folder_name):
+                temp_folder_name = f"{base_folder_name}_{folder_version}"
+                while default_storage.exists(temp_folder_name):
+                    folder_name = temp_folder_name  # 사용 가능한 마지막 폴더 이름 업데이트
                     folder_version += 1
+                    temp_folder_name = f"{base_folder_name}_{folder_version}"
+            else:
+                # 이미지 카운터가 1인 경우 새로운 폴더를 만듭니다.
+                if default_storage.exists(folder_name):
+                    folder_version = 1
                     folder_name = f"{base_folder_name}_{folder_version}"
+                    while default_storage.exists(folder_name):
+                        folder_version += 1
+                        folder_name = f"{base_folder_name}_{folder_version}"
             
-            # 파일 이름 설정 (여기서는 세션의 이미지 카운터를 사용)
+            # 파일 이름 설정
             file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
             
             # 이미지 저장
@@ -161,3 +170,5 @@ def upload_image(request):
     else:
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
+
+

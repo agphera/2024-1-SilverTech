@@ -142,7 +142,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 # MEDIA_ROOT 설정을 상대 경로로 지정
-MEDIA_ROOT = os.path.join(BASE_DIR, './Media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
 
 # MEDIA_URL 설정
 MEDIA_URL = '/Media/'
