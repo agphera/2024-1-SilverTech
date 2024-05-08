@@ -20,10 +20,11 @@ def lex_rel_anal(firstWord, secondWord):
     openApiURL = "http://aiopen.etri.re.kr:8000/WiseWWN/WordRel"
     accessKey = AI_API_KEY
     
+    # 1. API를 사용해 응답을 받아온다.
+    # 1-1. 요청을 위한 준비 
     firstWord, firstSenseId = firstWord.split('_') if '_' in firstWord else (firstWord, None)
     secondWord, secondSenseId = secondWord.split('_') if '_' in secondWord else (secondWord, None)
-
-    requestJson = {   
+    requestJson = { 
         "argument": {
             'first_word': firstWord,
             'first_sense_id': firstSenseId,
@@ -31,15 +32,14 @@ def lex_rel_anal(firstWord, secondWord):
             'second_sense_id': secondSenseId
         }
     }
-
     http = urllib3.PoolManager()
-
     data = {}
     count = 0
-    while 'return_object' not in data:
-        if count >= 5:  # count가 5 이상이면 False 반환하고 종료
+    # 1-2. 요청 작업
+    while 'return_object' not in data: # 올바른 응답이 오지 않은 경우 재요청
+        if count >= 5:  # 5번 이상 정상적인 응답이 돌아오지 않는다면 False 반환하고 종료
             return (False, 0)
-
+        
         response = http.request(
             "POST",
             openApiURL,
@@ -49,18 +49,15 @@ def lex_rel_anal(firstWord, secondWord):
 
         # JSON 데이터를 파이썬 딕셔너리로 변환
         data = json.loads(response.data)
-
-        print(data)
         count += 1
 
-
-    # 'Similarity' 키에 해당하는 값을 추출
+    # 2. 유사도 측정 결과를 추출 
     similarities = data['return_object']['WWN WordRelInfo']['WordRelInfo']['Similarity']
 
+    # 3. 특정 알고리즘의 score만 사용해 평균값을 구한다.
     average_score = 0
-    # 각 알고리즘의 이름과 점수를 출력
     for sim in similarities:
-        if sim['Algorithm'] not in ['Banerjee and Pedersen', 'Jiang and Conrath', 'Patwardhan', 'Leacock and Chodorow', 'Lin', 'Wu & Palmer']:
+        if sim['Algorithm'] in ['ETRI', 'Resnik', 'Hirst and St-Onge', 'Pekar et al', 'Lin + GraSM']:
             average_score += sim['SimScore']
     average_score = average_score / 5
     return (True if average_score > 0.6 else False, average_score) 
@@ -79,7 +76,7 @@ def user_base_similarity(THEMA, results):
 
     true_word = set() # 정답률 체크
     false_word = set() # 오답단어 번역용
-    whole_prompt = set() # 프롬프트 생성용 
+    whole_prompt_word = set() # 프롬프트 생성용 
 
     for data in label_data:
         if data["picture"] == THEMA:
@@ -95,9 +92,9 @@ def user_base_similarity(THEMA, results):
         
         # 멀티 스레드를 사용하여 모든 base_keyword에 대해 병렬로 유사성 검사
         with ThreadPoolExecutor() as executor:
-            # 각 스레드가 요청하는 시간 사이에 0.1s의 간격을 준다.
-            future_to_base_keyword = {executor.submit(check_similarity_multithreading, user_keyword, base_keyword, index * 0.1): base_keyword for index, base_keyword in enumerate(label_keyword)}
-            
+            # 각 스레드가 요청하는 시간 사이에 0.5s의 간격을 준다.
+            future_to_base_keyword = {executor.submit(check_similarity_multithreading, user_keyword, base_keyword, index * 0.2): 
+                                        base_keyword for index, base_keyword in enumerate(label_keyword)}
             similarity_results = []
             
             for future in as_completed(future_to_base_keyword):
@@ -113,31 +110,15 @@ def user_base_similarity(THEMA, results):
                 label_keyword.remove(base_keyword) # 한 번 사용된 라벨은 label_keyword 자체에서 제거 (중복 채점 방지 및 연산 속도 증가)
                 
                 if base_keyword in label_prompt:
-                    whole_prompt.add(label_prompt[base_keyword])
+                    whole_prompt_word.add(label_prompt[base_keyword])
                     
         if not found_word:
             false_word.add(user_keyword)
         print(true_word, false_word)
-    return true_word, false_word, len(true_word)/len_label_keyword, whole_prompt
 
-    # for user_keyword in results:
-    #     print(user_keyword)
-    #     found_word = False
-    #     for base_keyword in label_keyword:
-    #         #print(user_keyword,"와 ",base_keyword,"를 비교하겠습니다.") #비교 확인용 코드
-    #         similarity_result, _ = lex_rel_anal(user_keyword, base_keyword)
+        accuracy = len(true_word)/len_label_keyword
 
-    #         if similarity_result:
-    #             found_word = True
-    #             true_word.add(base_keyword) # true_word에 추가 (이때는 매칭되는 base 키워드가 들어감)
-    #             label_keyword.remove(base_keyword) # 한 번 사용된 라벨은 label_keyword 자체에서 제거 (중복 채점 방지 및 연산 속도 증가)
-                
-    #             if base_keyword in label_prompt:
-    #                 whole_prompt.add(label_prompt[base_keyword])
-    #             break
-    #     if not found_word:
-    #         false_word.add(user_keyword)
-    #     print(true_word, false_word)
+    return true_word, false_word, accuracy, whole_prompt_word
 
 if __name__ == "__main__":
     print(lex_rel_anal('예', '길_0101'))

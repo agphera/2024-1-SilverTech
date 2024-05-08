@@ -50,7 +50,7 @@ def lex_rel_anal(firstWord, secondWord):
     average_score = 0
     # 각 알고리즘의 이름과 점수를 출력
     for sim in similarities:
-        if sim['Algorithm'] not in ['Banerjee and Pedersen', 'Jiang and Conrath', 'Patwardhan', 'Leacock and Chodorow', 'Lin', 'Wu & Palmer']:
+        if sim['Algorithm'] in ['ETRI', 'Resnik', 'Hirst and St-Onge', 'Pekar et al', 'Lin + GraSM']:
             average_score += sim['SimScore']
     average_score = average_score / 5
     return (True if average_score > 0.6 else False, average_score) 
@@ -90,11 +90,12 @@ def user_base_similarity(THEMA, results):
 
             for future in as_completed(future_to_base_keyword):
                 th_result = future.result()
-                if th_result[0]:
+                if th_result[0]: # True(유사), False(유사하지 않음)
                     similarity_results.append(th_result[1:])
                     
-            if len(similarity_results) != 0:
+            if len(similarity_results) != 0: # 유사한 단어를 찾은 경우
                 found_word = True
+                # 유사 스코어가 가장 높은 키워드만 정답으로 인정
                 max_score_keyword = max(similarity_results, key=lambda x: x[0])
                 base_keyword = max_score_keyword[1]
                 true_word.add(base_keyword) # true_word에 추가 (이때는 매칭되는 base 키워드가 들어감)
@@ -106,6 +107,7 @@ def user_base_similarity(THEMA, results):
         if not found_word:
             false_word.add(user_keyword)
         print(true_word, false_word)
+        
     return true_word, false_word, len(true_word)/len_label_keyword, whole_prompt
 
     # for user_keyword in results:
@@ -128,6 +130,9 @@ def user_base_similarity(THEMA, results):
     #     print(true_word, false_word)
 
 if __name__ == "__main__":
-    print(lex_rel_anal('예', '길_0101'))
-    print()
-    print(lex_rel_anal('예_0100', '길_0101'))
+    # results = ['새', '호수', '강']
+    # user_base_similarity('park1', results)
+
+    term1 = "꽃"
+    term2 = "장미"
+    print("{}, {} 비교 결과: {}".format(term1, term2, lex_rel_anal(term1, term2)))

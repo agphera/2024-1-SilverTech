@@ -18,9 +18,6 @@ def translate_text_list(text: list) -> dict:
 
     translate_client = translate.Client()
 
-    if isinstance(text, bytes):
-        text = text.decode("utf-8")
-    
     results = []
     with ThreadPoolExecutor() as executor:
         future_to_text = {executor.submit(translate_text_single, te, translate_client): te for te in text}
@@ -28,6 +25,23 @@ def translate_text_list(text: list) -> dict:
             results.append(future.result())
     
     return results
+
+
+
+def translate_text_single(te, translate_client):
+    return translate_client.translate(te, target_language="en")["translatedText"] # API 호출
+
+def translate_text_list(text: list) -> dict:
+    translate_client = translate.Client()
+
+    results = []
+    with ThreadPoolExecutor() as executor: # 멀티스레딩을 사용해 병렬적으로 API 호출
+        future_to_text = {executor.submit(translate_text_single, te, translate_client): te for te in text}
+        for future in as_completed(future_to_text):
+            results.append(future.result())
+    
+    return results # 번역된 결과 반환
+
 
 if __name__ == "__main__":
     print(translate_text_list(['배', '바다', '돛', '선장']))
