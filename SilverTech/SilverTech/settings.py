@@ -141,7 +141,7 @@ import os
 # Django 프로젝트의 기본 디렉토리 설정
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# MEDIA_ROOT 설정을 상대 경로로 지정
+# MEDIA_ROOT 설정을 상대 경로로 지정, 저장 경로를 정해드립니다. 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
 
 # MEDIA_URL 설정
