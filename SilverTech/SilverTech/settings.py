@@ -11,7 +11,8 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
 from pathlib import Path
-
+import os
+import json
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,6 +36,7 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'corsheaders',
     'myapp1',  # 이 줄을 추가하세요.
+    'user_level',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -78,10 +80,22 @@ WSGI_APPLICATION = 'SilverTech.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# API 키 작성된 메모장 주소
+keys_file_path = os.path.join('../API', 'api_keys.txt')
+
+# 파일에서 API 키를 로드하는 함수
+with open(keys_file_path, 'r', encoding='utf-8') as file:
+    keys = json.load(file)
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'OSS',
+        'USER': 'root',
+        'PASSWORD': f"{keys['mysql_pw']}",
+        'HOST': '35.194.147.127',
+        'PORT': '3306',
     }
 }
 
