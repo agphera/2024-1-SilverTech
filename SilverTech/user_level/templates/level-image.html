@@ -70,11 +70,51 @@
         document.getElementById("current-image-level").innerText =
           "그림 순서: " + order;
       }
+
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + "=")) {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      function changeLevel(change) {
+        fetch("http://127.0.0.1:8000/picture-load/adjust-level/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify({ action: change }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              alert("Error: " + data.error);
+            } else {
+              alert("새로운 레벨: " + data.new_level);
+              document.getElementById("current-level").innerText =
+                "당신의 난이도: " + data.new_level;
+              fetchOrderImage();
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
     </script>
   </head>
   <body>
     <h1>사용자 난이도 정보</h1>
-    <p>당신의 난이도: {{ level }}</p>
+    <p id="current-level">당신의 난이도: {{ level }}</p>
     <p id="current-image-url">그림 URL: {{ url }}</p>
     <p id="current-image-level">그림 순서: {{ order }}</p>
 

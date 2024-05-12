@@ -48,41 +48,5 @@
           .catch((error) => console.error("Error:", error));
       }
     </script>
-
-    <script>
-      function changeLevel(change) {
-        const currentLevel = parseInt(
-          document.getElementById("current-level").innerText
-        );
-        const newLevel = currentLevel + change;
-        if (newLevel >= 0 && newLevel <= 4) {
-          // 레벨 범위 설정
-          fetch(`http://127.0.0.1:8000/change-level/?newLevel=${newLevel}`)
-            .then((response) => response.json())
-            .then((data) => {
-              document.getElementById(
-                "current-level"
-              ).innerText = `현재 레벨: ${data.newLevel}`;
-              loadLevelImage(data.newLevel); // 새 레벨의 이미지를 불러오는 함수 호출
-            })
-            .catch((error) => console.error("Error:", error));
-        } else {
-          alert("레벨 범위를 벗어났습니다.");
-        }
-      }
-
-      function loadLevelImage(level) {
-        fetch(`http://127.0.0.1:8000/request/?picture=${level}`)
-          .then((response) => response.json())
-          .then((data) => {
-            const imageDisplay = document.getElementById("image-display");
-            imageDisplay.innerHTML = ""; // 기존 이미지 제거
-            const img = document.createElement("img");
-            img.src = data.url;
-            imageDisplay.appendChild(img);
-          })
-          .catch((error) => console.error("Error:", error));
-      }
-    </script>
   </body>
 </html>

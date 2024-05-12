@@ -1,12 +1,15 @@
 import json
 import random
 from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
 
 picture_number_by_level = [2, 5, 3]
+
+# http://127.0.0.1:8000/picture-load/
 
 # Create your views here.
 def test_picture_load(request):
@@ -96,7 +99,6 @@ def change_base_picture(request):
 
 @require_http_methods(["GET"])
 def get_picture(request):
-    # http://127.0.0.1:8000/picture-load/
 
     picture_id = request.GET.get('picture', None)
     
@@ -109,3 +111,27 @@ def get_picture(request):
             return JsonResponse({'error': 'Button not found'}, status=404)
     else:
         return JsonResponse({'error': 'No button name provided'}, status=400)
+
+@require_http_methods(["POST"])
+@csrf_exempt
+def adjust_level(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'User not authenticated'}, status=401)
+    data = json.loads(request.body.decode('utf-8'))
+    action = data.get('action')
+    try:
+        user_proceeding = UserProceeding.objects.get(user__user_id=user_id)
+        if action == 1 and user_proceeding.level < 4:
+            user_proceeding.level += 1
+        elif action == -1 and user_proceeding.level > 0:
+            user_proceeding.level -= 1
+        user_proceeding.save()
+
+        request.session['level'] = user_proceeding.level
+        picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+        request.session['picture_level'] = picture_level
+
+        return JsonResponse({'new_level': user_proceeding.level}, status=200)
+    except UserProceeding.DoesNotExist:
+        return JsonResponse({'error': 'User proceeding not found'}, status=404)
