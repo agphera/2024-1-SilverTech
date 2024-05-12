@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
 
-picture_number_by_level = [2, 5, 3]
+picture_number_by_level = [2, 5, 3, 5, 3]
 
 # http://127.0.0.1:8000/picture-load/
 
@@ -72,6 +72,10 @@ def change_base_picture(request):
         picture_level = request.session.get('picture_level')
         user_proceeding = UserProceeding.objects.get(user_id=user_id)
 
+        # 난이도 3, 4를 처리하되 picture_number_by_level 범위 확인
+        if level >= len(picture_number_by_level):
+            return JsonResponse({'error': 'Level out of range'}, status=400)
+        
         # 원래는 조건을 user_proceeding.is_order로 해서 사용자에 따라 구분해야함.
         # 현재는 테스트를 위해 is_order 값 자체를 request로 받고 있음
         if is_order: 
@@ -96,6 +100,7 @@ def change_base_picture(request):
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
     except BasePictures.DoesNotExist:
         return JsonResponse({'error': 'Base picture not found'}, status=404)
+
 
 @require_http_methods(["GET"])
 def get_picture(request):
@@ -129,8 +134,7 @@ def adjust_level(request):
         user_proceeding.save()
 
         request.session['level'] = user_proceeding.level
-        picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
-        request.session['picture_level'] = picture_level
+        request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
 
         return JsonResponse({'new_level': user_proceeding.level}, status=200)
     except UserProceeding.DoesNotExist:
