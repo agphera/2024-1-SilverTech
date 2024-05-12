@@ -4,10 +4,17 @@ from function.translation import translate_text_list
 from function.karlo import make_prompt, t2i, show_pic
 import time
 
+def level_choose(data):
+    #if 사용자정보 x -> level = 1
+    #else level=user_level
+    #level 에 따른 그림 분류해놓고 thema = level1[0]
+    pass
+
+
 def scoring_points(data):
     #1 한국어 문장 입력
     INPUT_TEXT = data
-    THEMA = "park1"
+    THEMA = thema
     print(f"입력 받은 문장: {INPUT_TEXT}")
 
 
