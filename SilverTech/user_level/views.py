@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
 
-picture_number_by_level = [2, 5, 3, 5, 3]
+picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에서 list over되어 5, 3 추가함
 
 # http://127.0.0.1:8000/picture-load/
 
@@ -78,19 +78,30 @@ def change_base_picture(request):
         
         # 원래는 조건을 user_proceeding.is_order로 해서 사용자에 따라 구분해야함.
         # 현재는 테스트를 위해 is_order 값 자체를 request로 받고 있음
-        if is_order: 
-            # 1. last_order 업데이트
-            user_proceeding.last_order = (user_proceeding.last_order + 1) % picture_number_by_level[level]
-
-            # 2. last_order에 맞는 그림을 불러옴
-            base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+        # 난이도 3, 4일때 역순으로 출력
+        if level == 3 or level == 4:
+            if is_order:
+                # 1. last_order를 역순으로 업데이트
+                user_proceeding.last_order = (user_proceeding.last_order - 1 + picture_number_by_level[level]) % picture_number_by_level[level]
+                # 2. 역순 업데이트된 last_order에 맞는 그림을 불러옴
+                base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+            else:
+                # 1. 동일 레벨에서 무작위로 base_picture 선정 (직전에 본 그림은 제외)
+                base_picture_list = BasePictures.objects.filter(level=picture_level).exclude(order=user_proceeding.last_order)
+                base_picture = random.choice(base_picture_list)
+                # 2. 뽑은 그림으로 last_order 업데이트
+                user_proceeding.last_order = base_picture.order
         else:
-            # 1. 동일 레벨에서 무작위로 base_picture 선정 (직전에 본 그림은 제외)
-            base_picture_list = BasePictures.objects.filter(level=picture_level).exclude(order=user_proceeding.last_order)
-            base_picture = random.choice(base_picture_list)
-
-            # 2. 뽑은 그림으로 last_order 업데이트
-            user_proceeding.last_order = base_picture.order
+            if is_order:
+                # 1. last_order 업데이트
+                user_proceeding.last_order = (user_proceeding.last_order + 1) % picture_number_by_level[level]
+                # 2. last_order에 맞는 그림을 불러옴
+                base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+            else:
+                # 랜덤 동일
+                base_picture_list = BasePictures.objects.filter(level=picture_level).exclude(order=user_proceeding.last_order)
+                base_picture = random.choice(base_picture_list)
+                user_proceeding.last_order = base_picture.order
 
         user_proceeding.save() # 변경된 last_order 값을 DB에 반영
         
@@ -100,6 +111,8 @@ def change_base_picture(request):
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
     except BasePictures.DoesNotExist:
         return JsonResponse({'error': 'Base picture not found'}, status=404)
+    except IndexError:
+        return JsonResponse({'error': 'Index out of range'}, status=400)
 
 
 @require_http_methods(["GET"])
@@ -117,22 +130,28 @@ def get_picture(request):
     else:
         return JsonResponse({'error': 'No button name provided'}, status=400)
 
+# 사용자 난이도 조정
 @require_http_methods(["POST"])
-@csrf_exempt
+@csrf_exempt 
 def adjust_level(request):
-    user_id = request.session.get('user_id')
+    user_id = request.session.get('user_id') # 세션에서 user_id를 가져오기
+
+    # user_id가 없으면 인증되지 않은 사용자로 간주하고 오류 메시지를 반환
     if not user_id:
         return JsonResponse({'error': 'User not authenticated'}, status=401)
+    
+    # 요청에서 JSON 데이터를 파싱 후 'action'값 추출
     data = json.loads(request.body.decode('utf-8'))
     action = data.get('action')
     try:
         user_proceeding = UserProceeding.objects.get(user__user_id=user_id)
-        if action == 1 and user_proceeding.level < 4:
+        if action == 1 and user_proceeding.level < 4: # action 값이 1이면 난이도를 증가
             user_proceeding.level += 1
-        elif action == -1 and user_proceeding.level > 0:
+        elif action == -1 and user_proceeding.level > 0: # action 값이 -1이면 난이도를 감소
             user_proceeding.level -= 1
-        user_proceeding.save()
+        user_proceeding.save() # 변경된 난이도 정보를 데이터베이스에 저장
 
+        # 난이도 정보 업데이트
         request.session['level'] = user_proceeding.level
         request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
 
