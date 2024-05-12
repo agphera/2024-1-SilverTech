@@ -77,8 +77,16 @@ urlpatterns = [
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
 ]
 
+@csrf_exempt 
+def StartingPage(request): #
+    return render(request,'../Frontend_UI/StartingPage.html')
+
 @csrf_exempt
-def index(request):
+def Camera(request): #
+    return render(request,'../Frontend_UI/Camera.html')
+
+@csrf_exempt
+def index(request): #
     return render(request, '../Frontend_UI/index.html')
 
 def send_audio_to_naver_stt(request):

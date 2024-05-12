@@ -23,6 +23,15 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let progressInterval = setInterval(updateProgressBar, 100);
 
+  //GoOut Button 기능
+  document.getElementById("goOutButton").addEventListener('click', function() {
+    var exitPopup = document.getElementById("exitPopup");
+    exitPopup.style.display = "flex"; // 팝업 창 보이기
+    setTimeout(function() {
+        window.close(); // 3초 후 팝업 창 닫기
+    }, 3000);
+});
+
   /*navbar+progressbar 사라짐 + 로딩중 팝업 */
   function hideElements() {
     container.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s';

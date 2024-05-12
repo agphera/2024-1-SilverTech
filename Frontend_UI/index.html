@@ -3,12 +3,13 @@
 
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
-    <title>4조 프로젝트</title>
+    <title>그림 인지 훈련</title>
     {% load static %}
     <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}">
     <link rel="stylesheet" href="{% static 'index.css' %}" type="text/css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
     <script src="{% static 'index.js' %}" type="module"></script>
+    <script src="{% static 'popup.js' %}" type="module"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 </head>
 
@@ -38,13 +39,13 @@
                 <div class="navbar-end">
                     <div class="navbar-item">
                         <div class="buttons">
-                            <a class="Help button">
+                            <a id="helpButton" class="Help button">
                                 <strong>도움말</strong>
                             </a>
-                            <a class="Instar button">
+                            <a id="goOutButton" class="GoOut button">
                                 <strong>나가기</strong>
                             </a>
-                            <a class="Github button">
+                            <a class="Mode button">
                                 <strong>개발자모드</strong>
                             </a>
                         </div>
@@ -84,25 +85,33 @@
     </div>
     <!-- 메인 화면 끝 -->
 
-    <!--로딩중 팝업-->
-    <div id="analysisPopup" class="analysis-popup">
+   <!--로딩중 팝업-->
+   <div id="analysisPopup" class="analysis-popup">
         <div class="analysis-content">
-            <p>결과를 분석하는 중입니다...</p>
+            <p>결과를 분석하는 중입니다.<br>잠시만 기다려주세요!</p>
+        </div>
+    </div>    
+
+
+    <!--생성이미지 비교 구현 중-->
+
+
+    <!--종료 3초전 팝업-->
+    <div id="exitPopup" class="modal">
+        <div class="modal-background"></div>
+            <div class="modal-content">
+                <p class="modal-text">프로그램을 3초 후에 종료합니다.</p>
+            </div>
         </div>
     </div>
-    <!--이미지 비교 코멘트-->
-    <div id="messageContainer" class="message-container">
 
-    </div>
-
-    <!--생성 이미지 팝업-->
-    <div></div>
-    <!-- 메인 화면 끝 -->
 </body>
 
 
 <input type="file" id="fileInput">
 <script>
+
+
     let mediaRecorder;
     let audioChunks = []; // audioChunks를 전역 변수로 초기화
 
@@ -205,8 +214,12 @@
             })
             .then(response => response.json())
             .then(data => {
+                //if (data['image_url']) {
+                //    window.open(data['image_url'], '_blank', 'width=800,height=800'); // 새 창에서 이미지 URL 열기
+                //}
                 if (data['image_url']) {
-                    window.open(data['image_url'], '_blank', 'width=800,height=800'); // 새 창에서 이미지 URL 열기
+                   // 이미지 URL을 <img> 태그의 src 속성으로 설정
+                    document.getElementById('generatedImage').src = data['image_url'];
                 }
             })
             .catch(error => console.error('Error:', error));
