@@ -1,87 +1,92 @@
 <!DOCTYPE html>
 <html lang="ko">
-<head>
-    <meta charset="UTF-8">
+  <head>
+    <meta charset="UTF-8" />
     <title>난이도 정보로 그림 제공</title>
     <script>
-        // DOM이 로드된 후 초기 이미지를 로드하는 함수 실행
-        window.onload = function() {
-            loadImage('{{ url }}');
-        }
+      // DOM이 로드된 후 초기 이미지를 로드하는 함수 실행
+      window.onload = function () {
+        loadImage("{{ url }}");
+      };
 
-        // 서버로부터 새로운 이미지 URL을 받아오고 이미지를 로드하는 함수
-        function fetchOrderImage() {
-            // 예시로 서버의 이미지 제공 URL을 사용합니다. 실제 URL로 교체해주세요.
-            fetch("http://127.0.0.1:8000/picture-load/new/", {
-                method: 'POST', // POST 메소드 사용
-                headers: {
-                    'Content-Type': 'application/json', // 요청 본문의 타입 지정
-                },
-                body: JSON.stringify({is_order: true}) // is_order 값을 True로 설정하여 요청 본문에 포함
-            })
-                .then(response => response.json()) // 서버에서 받은 응답을 JSON으로 변환
-                .then(data => {
-                    var imageUrl = data.url; // JSON에서 이미지 URL 추출
-                    var imageOrder = data.order; // JSON에서 이미지 URL 추출
-                    loadImage(imageUrl);
-                    loadInfo(imageUrl, imageOrder);
-                })
-                .catch(error => console.error('Error:', error)); // 오류 처리
-        }
+      // 서버로부터 새로운 이미지 URL을 받아오고 이미지를 로드하는 함수
+      function fetchOrderImage() {
+        // 예시로 서버의 이미지 제공 URL을 사용합니다. 실제 URL로 교체해주세요.
+        fetch("http://127.0.0.1:8000/picture-load/new/", {
+          method: "POST", // POST 메소드 사용
+          headers: {
+            "Content-Type": "application/json", // 요청 본문의 타입 지정
+          },
+          body: JSON.stringify({ is_order: true }), // is_order 값을 True로 설정하여 요청 본문에 포함
+        })
+          .then((response) => response.json()) // 서버에서 받은 응답을 JSON으로 변환
+          .then((data) => {
+            var imageUrl = data.url; // JSON에서 이미지 URL 추출
+            var imageOrder = data.order; // JSON에서 이미지 URL 추출
+            loadImage(imageUrl);
+            loadInfo(imageUrl, imageOrder);
+          })
+          .catch((error) => console.error("Error:", error)); // 오류 처리
+      }
 
-        function fetchRandomImage() {
-            // 예시로 서버의 이미지 제공 URL을 사용합니다. 실제 URL로 교체해주세요.
-            fetch("http://127.0.0.1:8000/picture-load/new/", {
-                method: 'POST', // POST 메소드 사용
-                headers: {
-                    'Content-Type': 'application/json', // 요청 본문의 타입 지정
-                },
-                body: JSON.stringify({is_order: false}) // is_order 값을 false로 설정하여 요청 본문에 포함
-            })
-                .then(response => response.json()) // 서버에서 받은 응답을 JSON으로 변환
-                .then(data => {
-                    var imageUrl = data.url; // JSON에서 이미지 URL 추출
-                    var imageOrder = data.order; // JSON에서 이미지 URL 추출
-                    loadImage(imageUrl);
-                    loadInfo(imageUrl, imageOrder);
-                })
-                .catch(error => console.error('Error:', error)); // 오류 처리
-        }
+      function fetchRandomImage() {
+        // 예시로 서버의 이미지 제공 URL을 사용합니다. 실제 URL로 교체해주세요.
+        fetch("http://127.0.0.1:8000/picture-load/new/", {
+          method: "POST", // POST 메소드 사용
+          headers: {
+            "Content-Type": "application/json", // 요청 본문의 타입 지정
+          },
+          body: JSON.stringify({ is_order: false }), // is_order 값을 false로 설정하여 요청 본문에 포함
+        })
+          .then((response) => response.json()) // 서버에서 받은 응답을 JSON으로 변환
+          .then((data) => {
+            var imageUrl = data.url; // JSON에서 이미지 URL 추출
+            var imageOrder = data.order; // JSON에서 이미지 URL 추출
+            loadImage(imageUrl);
+            loadInfo(imageUrl, imageOrder);
+          })
+          .catch((error) => console.error("Error:", error)); // 오류 처리
+      }
 
-        // 이미지를 로드하고 화면에 표시하는 함수
-        function loadImage(imageUrl) {
-            var imageDisplayDiv = document.getElementById("image-display");
-            // 기존 이미지 제거
-            imageDisplayDiv.innerHTML = '';
+      // 이미지를 로드하고 화면에 표시하는 함수
+      function loadImage(imageUrl) {
+        var imageDisplayDiv = document.getElementById("image-display");
+        // 기존 이미지 제거
+        imageDisplayDiv.innerHTML = "";
 
-            // 이미지 엘리먼트 생성
-            var image = new Image();
-            image.src = imageUrl;
-            image.style.width = "100%";
-            image.style.height = "100%";
+        // 이미지 엘리먼트 생성
+        var image = new Image();
+        image.src = imageUrl;
+        image.style.width = "100%";
+        image.style.height = "100%";
 
-            // 이미지를 div에 추가
-            imageDisplayDiv.appendChild(image);
-        }
+        // 이미지를 div에 추가
+        imageDisplayDiv.appendChild(image);
+      }
 
-        function loadInfo(url, order){
-            document.getElementById("current-image-url").innerText = "그림 URL: " + url;
-            document.getElementById("current-image-level").innerText = "그림 순서: " + order;
-        }
-
+      function loadInfo(url, order) {
+        document.getElementById("current-image-url").innerText =
+          "그림 URL: " + url;
+        document.getElementById("current-image-level").innerText =
+          "그림 순서: " + order;
+      }
     </script>
-</head>
-<body>
+  </head>
+  <body>
     <h1>사용자 난이도 정보</h1>
     <p>당신의 난이도: {{ level }}</p>
     <p id="current-image-url">그림 URL: {{ url }}</p>
     <p id="current-image-level">그림 순서: {{ order }}</p>
 
-    <button onclick="fetchOrderImage()">다음 그림 보기</button> 
-    <button onclick="fetchRandomImage()">무작위 그림 보기(난이도는 동일)</button>
+    <button onclick="fetchOrderImage()">다음 그림 보기</button>
+    <button onclick="fetchRandomImage()">
+      무작위 그림 보기(난이도는 동일)
+    </button>
+    <button onclick="changeLevel(-1)">레벨 내리기</button>
+    <button onclick="changeLevel(1)">레벨 올리기</button>
 
-    <div id="image-display" style="width:600px;height:600px">
-        <!-- 이미지를 띄울 공간 -->
+    <div id="image-display" style="width: 600px; height: 600px">
+      <!-- 이미지를 띄울 공간 -->
     </div>
-</body>
+  </body>
 </html>

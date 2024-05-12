@@ -1,48 +1,52 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="UTF-8">
-        <title>이미지 로드 테스트</title>
-        <style>
-            #image-display {
-                display: flex;
-                justify-content: center;
-            }
-        </style>
-    </head>
-    <body>
-        <div id="buttons">
-            <!-- 버튼 생성 -->
-            <script>
-                for (let i = 1; i <= 10; i++) {
-                    let button = document.createElement("button");
-                    button.innerText = `${i}`;
-                    button.onclick = function() { sendRequest(`${i}`); };
-                    document.getElementById("buttons").appendChild(button);
-                }
-            </script>
-        </div>
+  <head>
+    <meta charset="UTF-8" />
+    <title>이미지 로드 테스트</title>
+    <style>
+      #image-display {
+        display: flex;
+        justify-content: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="buttons">
+      <!-- 버튼 생성 -->
+      <script>
+        for (let i = 1; i <= 10; i++) {
+          let button = document.createElement("button");
+          button.innerText = `${i}`;
+          button.onclick = function () {
+            sendRequest(`${i}`);
+          };
+          document.getElementById("buttons").appendChild(button);
+        }
+      </script>
+    </div>
 
-        <div id="image-display" style="width:600px;height:600px">
-            <!-- 이미지를 띄울 공간 -->
-        </div>
+    <div id="image-display" style="width: 600px; height: 600px">
+      <!-- 이미지를 띄울 공간 -->
+    </div>
 
-        <script>
-            function sendRequest(buttonName) {
-                // 서버에 요청 보내기 (여기서는 예시 URL을 사용)
-                fetch(`http://127.0.0.1:8000/picture-load/request?picture=${buttonName}`)
-                .then(response => response.json()) // 서버로부터 받은 응답을 JSON 형태로 변환
-                .then(data => {
-                    // 이미지 URL을 받아와서 화면에 표시
-                    const imageUrl = data.url; // 서버로부터 받은 이미지 URL
-                    const imageDisplay = document.getElementById("image-display");
-                    imageDisplay.innerHTML = ''; // 기존 이미지 제거
-                    const img = document.createElement("img");
-                    img.src = imageUrl;
-                    imageDisplay.appendChild(img);
-                })
-                .catch(error => console.error('Error:', error));
-            }
-        </script>
-    </body>
+    <script>
+      function sendRequest(buttonName) {
+        // 서버에 요청 보내기 (여기서는 예시 URL을 사용)
+        fetch(
+          `http://127.0.0.1:8000/picture-load/request?picture=${buttonName}`
+        )
+          .then((response) => response.json()) // 서버로부터 받은 응답을 JSON 형태로 변환
+          .then((data) => {
+            // 이미지 URL을 받아와서 화면에 표시
+            const imageUrl = data.url; // 서버로부터 받은 이미지 URL
+            const imageDisplay = document.getElementById("image-display");
+            imageDisplay.innerHTML = ""; // 기존 이미지 제거
+            const img = document.createElement("img");
+            img.src = imageUrl;
+            imageDisplay.appendChild(img);
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+    </script>
+  </body>
 </html>

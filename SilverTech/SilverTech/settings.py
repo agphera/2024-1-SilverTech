@@ -10,6 +10,9 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import pymysql
+pymysql.install_as_MySQLdb()
+
 from pathlib import Path
 import os
 import json
@@ -49,7 +52,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',#1번째줄 필수
     'corsheaders.middleware.CorsMiddleware',#2번째줄
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',#3번쨰줄
+    'django.contrib.sessions.middleware.SessionMiddleware',#3번째줄
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
