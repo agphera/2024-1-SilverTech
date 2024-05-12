@@ -39,6 +39,8 @@ def proxy_to_naver_stt(request):
             data['len_true_word'] = len(true_word)
             data['p'] = list(whole_prompt)
 
+        # accuracy가 일정 값 이상이면 정답 처리 -> 다음 그림을 보여줘야 하는데...
+
         response_to_client = JsonResponse(data, safe=False)
         response_to_client["Access-Control-Allow-Origin"] = "*"
         response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"

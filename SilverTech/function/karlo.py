@@ -22,8 +22,8 @@ REST_API_KEY = f"{keys['rest_api_keys']}"
 #%% Karlo 코드 실행
 # 이미지 생성하기 요청
 def t2i(prompt):
-    prompt = prompt[0]
     negative_prompt = prompt[1]
+    prompt = prompt[0]
     r = requests.post(
         'https://api.kakaobrain.com/v2/inference/karlo/t2i',
         json = {

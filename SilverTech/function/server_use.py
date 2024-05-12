@@ -2,7 +2,7 @@ from function.kiwi import sbg_noun_extractor
 from function.lexical_relationship_analysis import user_base_similarity
 from function.translation import translate_text_list
 from function.karlo import make_prompt, t2i, show_pic
-import time
+import json
 
 def level_choose(data):
     #if 사용자정보 x -> level = 1
@@ -24,41 +24,33 @@ def scoring_points(data):
 
 
     #3 유사도 측정으로 점수 결정
-    true_word, false_word, accuracy, whole_prompt_word = user_base_similarity(THEMA, results)
+    true_word, translate_word, accuracy, whole_prompt_word = user_base_similarity(THEMA, results)
     print("정답 키워드 개수:", len(true_word)) 
     print("정답 단어:", true_word)
     print("정답률:", accuracy)
-    print("오답 단어:", false_word)
+    print("번역할 단어:", translate_word)
 
 
-    #4 영어로 번역
-    false_word_trans = translate_text_list(false_word) #틀린 단어만 번역
-    print(f"번역한 오답 단어: {false_word_trans}")
+    if accuracy >= 0.99: 
+        # 정확도가 100%인 경우 base 그림과 동일한 프롬프트로 만듦
+        with open('../make-base-picture/base-picture/base-picture-labeling.json', 'r', encoding='utf-8') as f:
+            label_data = json.load(f)
 
-    #5 프롬프트에 들어갈 전체 단어 모음
-    whole_prompt_word = whole_prompt_word.union(false_word_trans)
+        for data in label_data:
+            if data["picture"] == THEMA:
+                label_prompt = data["prompt"] # 새: english, 꽃: english, 강: english
+                break
+        whole_prompt_word = label_prompt.values()
+
+    else:
+        #4 영어로 번역
+        word_trans = translate_text_list(translate_word) # 부가적인 정답 키워드 및 틀린 키워드 번역
+        print(f"번역한 단어: {word_trans}")
+
+        #5 프롬프트에 들어갈 전체 단어 모음
+        whole_prompt_word = whole_prompt_word.union(word_trans)
 
     return accuracy, true_word, whole_prompt_word
-
-# def scoring_points(data, thema):
-#     #1 STT 데이터와 그림 주제 저장
-#     INPUT_TEXT = data
-#     THEMA = thema
-
-#     #2 명사(키워드) 추출
-#     results = sbg_noun_extractor(INPUT_TEXT)
-
-#     #3 유사도 측정으로 점수 결정
-#     true_word, false_word, accuracy, whole_prompt_word = user_base_similarity(THEMA, results)
-
-#     #4 영어로 번역
-#     false_word_trans = translate_text_list(false_word) #틀린 단어만 번역
-
-#     #5 프롬프트에 들어갈 전체 단어 모음
-#     whole_prompt_word = whole_prompt_word.union(false_word_trans)
-
-#     return accuracy, true_word, whole_prompt_word
-
 
 def make_picture(whole_prompt_word):
     THEMA = "park1"
