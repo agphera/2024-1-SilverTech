@@ -12,50 +12,50 @@ picture_number_by_level = [2, 5, 3]
 def test_picture_load(request):
     return render(request, "test-image-load.html") # templates 폴더 안에 test-image-load.html가 존재함
 
-# 로그인이나 회원 가입하면 첫 그림을 제공하는 함수
-def load_base_picture(request):
-    # request에서 로그인 정보를 추출하는 코드
-    # name = request.GET.get('login_name', None)
-    
-    # 결과 확인하려면 
-    # http://127.0.0.1:8000/picture-load/ 
-    # 여기 접속하면 됩니다.
-
-    # 사용자 로그인 정보 뽑고 => 임의로 설정
+#회원정보 확인
+def fetch_user_info(request):
+    #request에서 로그인 정보를 추출하는 코드 추후 추가
+    #사용자 정보 임의 설정
     user_name = 'suchae'
-
     if user_name:
         try:
             # DB 접근해서 해당 사용자 난이도 정보를 가져옴
             user = User.objects.get(name=user_name)
             user_proceeding = UserProceeding.objects.get(user_id=user.user_id)
-            level = user_proceeding.level
-            # 3 -> 1, 4 -> 2
-            picture_level = level if level <= 2 else level - 2 
 
-            # 세션에 user_name, user_id 저장
-            # 이렇게 해두면 사용자별로 각각 저장됨
+            # 세션에 사용자 정보 저장
             request.session['user_name'] = user_name
             request.session['user_id'] = user.user_id
             request.session['level'] = user_proceeding.level
-            request.session['picture_level'] = picture_level
 
-            # last_order인 그림을 가져옴 
-            base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
-            url = base_picture.url
-            # 반환
-            return render(request, 'level-image.html', {'level': level, 'url': url, 'order': base_picture.order})
-        
+            return user_proceeding, None  # 사용자 진행 객체와 None을 반환
         except User.DoesNotExist:
-            return JsonResponse({'error': 'User not found'}, status=404)
-        except UserAccuracy.DoesNotExist:
-            return JsonResponse({'error': 'User accuracy not found'}, status=404)
+            return None, JsonResponse({'error': 'User not found'}, status=404)
         except UserProceeding.DoesNotExist:
-            return JsonResponse({'error': 'User proceeding not found'}, status=404)
-        except BasePictures.DoesNotExist:
-            return JsonResponse({'error': 'Base picture not found'}, status=404)
+            return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
     else:
-        return JsonResponse({'error': 'No name provided'}, status=400)
+        return None, JsonResponse({'error': 'No name provided'}, status=400)
+
+def load_base_picture(request):
+    user_proceeding, error_response = fetch_user_info(request)
+    if error_response:
+        return error_response  # 오류 응답 반환
+
+    try:
+        level = user_proceeding.level
+        picture_level = level if level <= 2 else level - 2  # 레벨 조정 로직
+        request.session['picture_level'] = picture_level
+
+        # last_order에 해당하는 그림을 가져옴
+        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+        return render(request, 'level-image.html', {
+            'level': level,
+            'url': base_picture.url,
+            'order': base_picture.order
+        })
+    except BasePictures.DoesNotExist:
+        return JsonResponse({'error': 'Base picture not found'}, status=404)
+
 
 # 다음 order의 그림을 가져오는 함수
 @csrf_exempt
