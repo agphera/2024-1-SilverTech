@@ -2,9 +2,5 @@
 /API
 /Just_Testing
 /SilverTech/google-cloud-sdk
-<<<<<<< Updated upstream
-/venv/include/google-cloud-sdk/bin/anthoscli
-=======
 venv
 *.pyc
->>>>>>> Stashed changes

@@ -19,8 +19,9 @@ Including another URLconf
 
 from django.urls import path
 from myapp1.views import index, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
-from myapp1.views import proxy_to_naver_stt 
+from myapp1.views import proxy_to_naver_stt, make_pic_karlo
 urlpatterns = [
     path('', index, name='index'),  # 직접 임포트된 'index' 뷰를 사용합니다.
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
+    path('func/make-pic/', make_pic_karlo, name='make_pic_karlo')    
 ]

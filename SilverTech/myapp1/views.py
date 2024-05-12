@@ -5,6 +5,7 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json
+from function.server_use import scoring_points, make_picture
 
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
@@ -20,7 +21,6 @@ NAVER_API_KEY = f"{keys['naver_api_keys']}"
 @csrf_exempt
 def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
-
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
             "Content-Type": "application/octet-stream",  # 오디오 파일의 유형에 따라 수정할 수 있습니다.
@@ -31,24 +31,47 @@ def proxy_to_naver_stt(request):
         audio_file = request.FILES['audioFile'].read()
         response = requests.post(naver_api_url, headers=headers, data=audio_file)
         data = response.json()
-        
+        print('초기 데이터:',data)
+
         if "text" in data:            
-            accuracy, image_response = scoring_points_create_picture(data['text']) #주석
+            accuracy, true_word, whole_prompt = scoring_points(data['text']) 
             data['accuracy'] = accuracy
-            data['image_url'] = image_response['images'][0]['image']
+            data['len_true_word'] = len(true_word)
+            data['p'] = list(whole_prompt)
 
         response_to_client = JsonResponse(data, safe=False)
         response_to_client["Access-Control-Allow-Origin"] = "*"
         response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
         response_to_client["Access-Control-Allow-Headers"] = "Content-Type"
+        print('최종 반환:', response_to_client)
         return response_to_client
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@csrf_exempt
+def make_pic_karlo(request):
+    if request.method == 'POST':
+        print('함수 호출 완료')
+        body_unicode = request.body.decode('utf-8')
+        body_data = json.loads(body_unicode)
+
+        whole_prompt = body_data.get('text', '')
+        image_response = make_picture(whole_prompt)
+        data = {'image_url': image_response['images'][0]['image']}
+        
+        print(data)
+
+        response_to_client = JsonResponse(data, safe=False)
+        response_to_client["Access-Control-Allow-Origin"] = "*"
+        response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+        response_to_client["Access-Control-Allow-Headers"] = "Content-Type"
+
+        return response_to_client
+
+
 # urls.py
 from django.urls import path
 from .views import proxy_to_naver_stt
-from function.server_use import scoring_points_create_picture
 
 urlpatterns = [
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
