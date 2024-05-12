@@ -91,11 +91,12 @@ with open(keys_file_path, 'r', encoding='utf-8') as file:
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'OSS',
+        'NAME': 'oss',
         'USER': 'root',
         'PASSWORD': f"{keys['mysql_pw']}",
         'HOST': '35.194.147.127',
         'PORT': '3306',
+        
     }
 }
 

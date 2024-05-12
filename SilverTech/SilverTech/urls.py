@@ -22,7 +22,6 @@ from django.contrib import admin
 from django.urls import include, path
 from myapp1.views import index, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
 from myapp1.views import proxy_to_naver_stt, make_pic_karlo
-from user_level.views import picture_func, get_picture
 
 
 urlpatterns = [
