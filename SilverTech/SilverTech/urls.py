@@ -21,7 +21,7 @@ from django.urls import path
 from django.contrib import admin
 from django.urls import include, path
 from myapp1.views import index, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
-from myapp1.views import proxy_to_naver_stt, make_pic_karlo
+from myapp1.views import proxy_to_naver_stt, make_pic_karlo, load_base_picture
 
 
 urlpatterns = [
@@ -29,4 +29,5 @@ urlpatterns = [
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
     path('func/make-pic/', make_pic_karlo, name='make_pic_karlo'),
     path('picture-load/', include('user_level.urls')),
+    path('load_base_picture/', load_base_picture, name='load_base_picture'),
 ]

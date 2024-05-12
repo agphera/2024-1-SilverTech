@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render
 from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
+from function.server_use import scoring_points
 
 picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에서 list over되어 5, 3 추가함
 
@@ -156,5 +157,54 @@ def adjust_level(request):
         request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
 
         return JsonResponse({'new_level': user_proceeding.level}, status=200)
+    except UserProceeding.DoesNotExist:
+        return JsonResponse({'error': 'User proceeding not found'}, status=404)
+    
+# 난이도 자동 조정 구현 테스트 필요    
+@csrf_exempt
+def adjust_level_with_accuracy(request):
+    user_id = request.session.get('user_id')
+    if not user_id:
+        return JsonResponse({'error': 'User not authenticated'}, status=401)
+
+    # JSON 데이터에서 accuracy 값을 추출
+    data = json.loads(request.body)
+    accuracy = data.get('accuracy', 0)  # 기본값 설정
+
+    try:
+        user_accuracy = UserAccuracy.objects.get(user_id=user_id)
+        user_proceeding = UserProceeding.objects.get(user=user_id)
+
+        if accuracy >= 0.6:
+            user_accuracy.successive_correct += 1
+            user_accuracy.successive_wrong = 0 #상 기록시 하 리셋
+        elif accuracy < 0.2:
+            user_accuracy.successive_wrong += 1
+            user_accuracy.successive_correct = 0 #하 기록시 상 리셋
+        else:
+            user_accuracy.successive_correct = 0 #중 기록시 상,하 리셋
+            user_accuracy.successive_wrong = 0
+
+        # 연속 3회 '상'을 달성하거나, 연속 2회 '하'를 달성한 경우 레벨 조정
+        if user_accuracy.successive_correct >= 3:
+            if user_proceeding.level < 4:
+                user_proceeding.level += 1
+            user_accuracy.successive_correct = 0
+        elif user_accuracy.successive_wrong >= 2:
+            if user_proceeding.level > 0:
+                user_proceeding.level -= 1
+            user_accuracy.successive_wrong = 0
+
+        user_proceeding.save()
+        user_accuracy.save()
+
+        return JsonResponse({
+            'new_level': user_proceeding.level,
+            'successive_correct': user_accuracy.successive_correct,
+            'successive_wrong': user_accuracy.successive_wrong
+        }, status=200)
+
+    except UserAccuracy.DoesNotExist:
+        return JsonResponse({'error': 'User accuracy record not found'}, status=404)
     except UserProceeding.DoesNotExist:
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
