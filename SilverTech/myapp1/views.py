@@ -81,11 +81,11 @@ urlpatterns = [
 #시작 html 결정
 @csrf_exempt
 def index(request):
-    return render(request, '../Frontend_UI/Camera.html')
+    return render(request, '../Frontend_UI/index.html')
 
 @csrf_exempt
 def second_page(request):
-    return render(request, '../Frontend_UI/index.html')
+    return render(request, '../Frontend_UI/Camera.html')
 
 
 
