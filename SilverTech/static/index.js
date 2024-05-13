@@ -26,13 +26,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
 
   //GoOut Button 기능
-  document.getElementById("goOutButton").addEventListener('click', function() {
-    exitPopup.style.display = "flex";
-    setTimeout(() => { exitPopup.style.opacity = 1; }, 10); 
-    setTimeout(function() {
-        window.close(); // 3초 후 창 닫기
-    }, 4000);
-});
+  
+  //
 
   /*navbar+progressbar 사라짐 + 로딩중 팝업 */
   function hideElements() {
@@ -61,9 +56,9 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
 
-  var byebye = ["벌써 가시나요? 다음에 또 봐요.", "안녕히가세요!", "다음에 또 오실거죠? 기다리고 있을게요."];
-    var randomByebye = byebye[Math.floor(Math.random() * byebye.length)]; // 랜덤인사
-    document.getElementById('random-byebye').textContent = randomByebye; 
+  //var byebye = ["벌써 가시나요? 다음에 또 봐요.", "안녕히가세요!", "다음에 또 오실거죠? 기다리고 있을게요."];
+  //  var randomByebye = byebye[Math.floor(Math.random() * byebye.length)]; // 랜덤인사
+  //  document.getElementById('random-byebye').textContent = randomByebye; 
   
 });
 
