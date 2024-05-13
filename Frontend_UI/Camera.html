@@ -36,7 +36,6 @@ document.addEventListener("DOMContentLoaded", function () {
   <button id="captureBtn">Capture</button>
   <script>
 
-
     var streamVideo;
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
@@ -186,6 +185,20 @@ document.addEventListener("DOMContentLoaded", function () {
 
   </script>
 </body>
+
+<script>
+  // DOM이 완전히 로드된 후 실행
+  document.addEventListener("DOMContentLoaded", function () {
+    // 3초 후에 실행될 함수 설정
+    setTimeout(function () {
+      // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
+      window.location.href = document.getElementById('redirectLink').href;
+    }, 10000); // 3000밀리초 = 3초
+    });
+  </script>
+  
+  <a id="redirectLink" href="{% url 'index' %}" style="display:none;">이동</a>
+  
 
 </html>
 
