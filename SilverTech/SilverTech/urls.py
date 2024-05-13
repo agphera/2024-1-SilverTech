@@ -37,4 +37,5 @@ urlpatterns = [
     path('func/make-pic/', make_pic_karlo, name='make_pic_karlo'),
     path('picture-load/', include('user_level.urls')),
     path('load_base_picture/', load_base_picture, name='load_base_picture'),
+    path('image/', upload_image, name='upload_image') 
 ]

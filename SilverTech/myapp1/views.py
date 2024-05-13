@@ -132,6 +132,12 @@ def Camera(request): #
 def index(request): #
     return render(request, '../Frontend_UI/index.html')
 
+@csrf_exempt
+def second_page(request):
+    return render(request, '../Frontend_UI/Camera.html')
+
+
+
 def send_audio_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         audio_file = request.FILES['audioFile'].read()  # 파일을 메모리에 로드합니다.
@@ -165,6 +171,69 @@ def send_audio_to_naver_stt(request):
             # 네이버 API 응답 본문을 포함하여 오류 메시지를 개선합니다.
             return JsonResponse({'error': 'Failed to process audio file', 'message': response.text}, status=rescode)
     else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+#웹 캠 이용해서 사진 저장 
+import os
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.http import JsonResponse
+
+@csrf_exempt
+def upload_image(request):
+    if request.method == 'POST':
+        image = request.FILES.get('photo')
+        if image:
+            # 세션에서 이미지 카운터를 가져옵니다.
+            image_counter = request.session.get('image_counter', 0)
+            image_counter += 1
+            
+            # 기본 폴더 경로 설정
+            base_folder_name = 'User_images'
+            
+            # 실제 저장될 폴더 경로 설정
+            folder_name = base_folder_name
+            
+            # 폴더가 이미 존재하는지 확인하고, 존재한다면 가장 마지막에 생성된 폴더 이름을 사용합니다.
+            if image_counter > 1:
+                folder_version = 1
+                temp_folder_name = f"{base_folder_name}_{folder_version}"
+                while default_storage.exists(temp_folder_name):
+                    folder_name = temp_folder_name  # 사용 가능한 마지막 폴더 이름 업데이트
+                    folder_version += 1
+                    temp_folder_name = f"{base_folder_name}_{folder_version}"
+            else:
+                # 이미지 카운터가 1인 경우 새로운 폴더를 만듭니다.
+                if default_storage.exists(folder_name):
+                    folder_version = 1
+                    folder_name = f"{base_folder_name}_{folder_version}"
+                    while default_storage.exists(folder_name):
+                        folder_version += 1
+                        folder_name = f"{base_folder_name}_{folder_version}"
+            
+            # 파일 이름 설정
+            file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+            
+            # 이미지 저장
+            path = default_storage.save(file_name, ContentFile(image.read()))
+            full_path = os.path.join(settings.MEDIA_ROOT, path)
+            
+            # 세션에 이미지 카운터 업데이트
+            request.session['image_counter'] = image_counter
+            
+            # 100번째 이미지 후 세션 리셋
+            if image_counter >= 100:
+                del request.session['image_counter']
+            
+            print(f"Image {image_counter} uploaded successfully to {full_path}")
+            return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
+        else:
+            print("No image provided")
+            return JsonResponse({'error': 'No image provided'}, status=400)
+    else:
+        print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
