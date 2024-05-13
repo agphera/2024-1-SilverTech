@@ -6,6 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import json
 from function.server_use import scoring_points, make_picture
+from .models import User, UserProceeding, BasePictures
 
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
@@ -39,6 +40,8 @@ def proxy_to_naver_stt(request):
             data['len_true_word'] = len(true_word)
             data['p'] = list(whole_prompt)
 
+        # accuracy가 일정 값 이상이면 정답 처리 -> 다음 그림을 보여줘야 하는데...
+
         response_to_client = JsonResponse(data, safe=False)
         response_to_client["Access-Control-Allow-Origin"] = "*"
         response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
@@ -67,6 +70,46 @@ def make_pic_karlo(request):
         response_to_client["Access-Control-Allow-Headers"] = "Content-Type"
 
         return response_to_client
+
+def fetch_user_info(request):
+    #request에서 로그인 정보를 추출하는 코드 추후 추가
+    #사용자 정보 임의 설정
+    user_name = 'suchae'
+    if user_name:
+        try:
+            # DB 접근해서 해당 사용자 난이도 정보를 가져옴
+            user = User.objects.get(name=user_name)
+            user_proceeding = UserProceeding.objects.get(user_id=user.user_id)
+
+            # 세션에 사용자 정보 저장
+            request.session['user_name'] = user_name
+            request.session['user_id'] = user.user_id
+            request.session['level'] = user_proceeding.level
+
+            return user_proceeding, None  # 사용자 진행 객체와 None을 반환
+        except User.DoesNotExist:
+            return None, JsonResponse({'error': 'User not found'}, status=404)
+        except UserProceeding.DoesNotExist:
+            return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
+    else:
+        return None, JsonResponse({'error': 'No name provided'}, status=400)
+
+def load_base_picture(request):
+    user_proceeding, error_response = fetch_user_info(request)
+    if error_response:
+        return error_response  # If error, return early
+
+    try:
+        # 사용자의 현재 레벨을 바탕으로 picture_level 계산
+        current_level = user_proceeding.level
+        # 예를 들어, picture_level은 현재 레벨보다 2 레벨 낮게 설정하되 최소 레벨은 1로 설정
+        picture_level = max(1, current_level - 2)
+
+        # DB에서 해당 레벨과 순서에 맞는 그림 정보를 가져옴
+        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+        return JsonResponse({'url': base_picture.url})  # 이미지 URL을 JSON 형식으로 전송
+    except BasePictures.DoesNotExist:
+        return JsonResponse({'error': 'Base picture not found'}, status=404)
 
 
 # urls.py

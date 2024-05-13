@@ -126,25 +126,25 @@ def make_all_base_picture():
         thread.join()
 
 if __name__ == "__main__":
-    pass
+    # pass
     # make_all_base_picture() # 모든 베이스 그림 전부 재생성
 
-    # # 만들어낼 그림 주제
-    # """ 
-    # subject: "mountain1", "mountain2", "park1", "park2", "sky1", "sky2"
-    # final-subject: "stream1", "stream2", "farming1", "farming2"
-    # """
-    # subject = "stream1"
+    # 만들어낼 그림 주제
+    """ 
+    subject: "mountain1", "mountain2", "park1", "park2", "sky1", "sky2"
+    final-subject: "stream1", "stream2", "farming1", "farming2"
+    """
+    subject = "park1"
 
-    # # 프롬프트에 사용할 제시어
-    # prompt = make_prompt(subject)
-    # print(prompt)
+    # 프롬프트에 사용할 제시어
+    prompt = make_prompt(subject)
+    print(prompt)
 
-    # # 이미지 생성하기 REST API 호출
-    # response = t2i(prompt)
+    # 이미지 생성하기 REST API 호출
+    response = t2i(prompt)
 
-    # # 응답의 첫 번째 이미지 생성 결과 출력하기
-    # result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
-    # result.show()
+    # 응답의 첫 번째 이미지 생성 결과 출력하기
+    result = Image.open(urllib.request.urlopen(response.get("images")[0].get("image")))
+    result.show()
 
     # result.save(f'make-base-picture/base-picture/{subject}-base-picture.png','PNG') 

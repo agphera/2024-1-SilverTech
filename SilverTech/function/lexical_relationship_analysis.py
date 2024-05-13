@@ -75,7 +75,7 @@ def user_base_similarity(THEMA, results):
         label_data = json.load(f)
 
     true_word = set() # 정답률 체크
-    false_word = set() # 오답단어 번역용
+    translate_word = set() # 번역용 단어
     whole_prompt_word = set() # 프롬프트 생성용 
 
     for data in label_data:
@@ -88,7 +88,7 @@ def user_base_similarity(THEMA, results):
 
     for user_keyword in results:
         print(user_keyword)
-        found_word = False
+        is_trans_word = True
         
         # 멀티 스레드를 사용하여 모든 base_keyword에 대해 병렬로 유사성 검사
         with ThreadPoolExecutor() as executor:
@@ -102,23 +102,24 @@ def user_base_similarity(THEMA, results):
                 if th_result[0]:
                     similarity_results.append(th_result[1:])
                     
-            if len(similarity_results) != 0:
-                found_word = True
-                max_score_keyword = max(similarity_results, key=lambda x: x[0])
-                base_keyword = max_score_keyword[1]
-                true_word.add(base_keyword) # true_word에 추가 (이때는 매칭되는 base 키워드가 들어감)
-                label_keyword.remove(base_keyword) # 한 번 사용된 라벨은 label_keyword 자체에서 제거 (중복 채점 방지 및 연산 속도 증가)
-                
-                if base_keyword in label_prompt:
-                    whole_prompt_word.add(label_prompt[base_keyword])
+        if len(similarity_results) != 0:
+            max_score_keyword = max(similarity_results, key=lambda x: x[0])
+            base_keyword = max_score_keyword[1]
+            true_word.add(base_keyword) # true_word에 추가 (이때는 매칭되는 base 키워드가 들어감)
+            label_keyword.remove(base_keyword) # 한 번 사용된 라벨은 label_keyword 자체에서 제거 (중복 채점 방지 및 연산 속도 증가)
+            
+            if base_keyword in label_prompt:
+                whole_prompt_word.add(label_prompt[base_keyword]) # 생성용 단어에 주요 키워드 추가
+                is_trans_word = False
                     
-        if not found_word:
-            false_word.add(user_keyword)
-        print(true_word, false_word)
+        if is_trans_word:
+            translate_word.add(user_keyword) # 부가적인 정답 키워드 및 틀린 단어 번역할 준비
+        
+        print(true_word, translate_word)
 
         accuracy = len(true_word)/len_label_keyword
 
-    return true_word, false_word, accuracy, whole_prompt_word
+    return true_word, translate_word, accuracy, whole_prompt_word
 
 if __name__ == "__main__":
     print(lex_rel_anal('예', '길_0101'))
