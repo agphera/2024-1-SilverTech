@@ -1,27 +1,71 @@
-//nav_bar burger mobile menu
-function burgerOn() {
-    var element = document.getElementById("nav-links");
-    var name1 = document.getElementById("nav_title1");
-    var name2 = document.getElementById("nav_title2");
-    var name3 = document.getElementById("nav_title3");
-    var name4 = document.getElementById("nav_title4");
-    
-    if (element.className === "navbar-menu is-centered") {
-      element.className = "is-active navbar-menu is-centered";
-      name1.className = "nav_hover text_colorBlack";
-      name2.className = "nav_hover text_colorBlack";
-      name3.className = "nav_hover text_colorBlack";
-      name4.className = "nav_hover text_colorBlack";
-    } else {
-      element.className = "navbar-menu is-centered";
-      name1.className = "nav_hover text_color";
-      name2.className = "nav_hover text_color";
-      name3.className = "nav_hover text_color";
-      name4.className = "nav_hover text_color";
+
+document.addEventListener("DOMContentLoaded", function() {
+  let container = document.querySelector('.navbar-progress-container');
+  let progressBar = document.querySelector('progress');
+  let popup = document.getElementById("analysisPopup");
+  let exitPopup=document.getElementById("exitPopup");
+  //let messageContainer = document.getElementById("messageContainer"); // 비슷한것같나요 메시지 컨테이너
+  //let imagePopup = document.getElementById("imagePopup"); // 비교이미지 팝업
+
+  /*시간 설정*/
+  let duration = 15000; // 프로그레스바 15초
+  //let hideDuration = 30000; // navbar+progressbar 사라지는 시간 30초(변수만 설정, 아직 미구현)
+  let popupDuration = 15000; // 분석중입니다 팝업시간 15초
+
+  /*프로그레스바 감소*/
+  function updateProgressBar() {
+    let decrementAmount = progressBar.max / (duration / 100); // Calculate decrement per 100ms
+    progressBar.value -= decrementAmount;
+    if (progressBar.value <= 0) {
+      clearInterval(progressInterval);
+      hideElements(); //프로그레스바 0 -> 요소사라짐
     }
+  }
 
-}
+  let progressInterval = setInterval(updateProgressBar, 100);
 
+
+  //GoOut Button 기능
+  document.getElementById("goOutButton").addEventListener('click', function() {
+    exitPopup.style.display = "flex";
+    setTimeout(() => { exitPopup.style.opacity = 1; }, 10); 
+    setTimeout(function() {
+        window.close(); // 3초 후 창 닫기
+    }, 4000);
+});
+
+  /*navbar+progressbar 사라짐 + 로딩중 팝업 */
+  function hideElements() {
+    container.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s';
+    container.style.transform = 'translateY(-100%)';
+    container.style.opacity = 0; //네비게이션바+프로그레스바 숨기기
+
+    popup.style.display = "flex"; //analysis popup 보이기
+    setTimeout(function() {
+      popup.style.opacity = 1; // 부드러운 효과
+    }, 10);
+
+    setTimeout(function() {
+      popup.style.opacity = 0; // 부드러운 효과
+      setTimeout(function() {
+        popup.style.display = "none"; // analaysis popup 사라지기
+        //imagePopup.style.display = "block"; // Show image popup
+        showElements(); //navbar+progressbar 다시 보여주는 함수
+      }, 500);
+    }, popupDuration); //분석중 팝업 15초 보여줌. 
+  }
+
+  function showElements() { //여기에 비교 텍스트, 비교이미지 보여주는 것 구현 추가할 예정
+    container.style.transform = 'translateY(0)'; //navbar+progress bar 다시 보여주기
+    container.style.opacity = 1;
+  }
+
+
+  var byebye = ["벌써 가시나요? 다음에 또 봐요.", "안녕히가세요!", "다음에 또 오실거죠? 기다리고 있을게요."];
+    var randomByebye = byebye[Math.floor(Math.random() * byebye.length)]; // 랜덤인사
+    document.getElementById('random-byebye').textContent = randomByebye; 
+  
+});
 
 
 

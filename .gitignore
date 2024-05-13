@@ -2,4 +2,5 @@
 /API
 /Just_Testing
 /SilverTech/google-cloud-sdk
-/venv/include/google-cloud-sdk/bin/anthoscli
+venv
+*.pyc
