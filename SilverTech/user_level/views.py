@@ -23,23 +23,33 @@ def fetch_user_info(request):
     user_name = 'suchae'
     if user_name:
         try:
-            # DB 접근해서 해당 사용자 난이도 정보를 가져옴
+            # DB에서 해당 사용자의 난이도 정보를 가져옴
             user = User.objects.get(name=user_name)
-            user_proceeding = UserProceeding.objects.get(user_id=user.user_id)
-
-            # 세션에 사용자 정보 저장
-            request.session['user_name'] = user_name
-            request.session['user_id'] = user.user_id
-            request.session['level'] = user_proceeding.level
-
-            return user_proceeding, None  # 사용자 진행 객체와 None을 반환
         except User.DoesNotExist:
-            return None, JsonResponse({'error': 'User not found'}, status=404)
-        except UserProceeding.DoesNotExist:
-            return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
+            # 사용자가 존재하지 않는 경우 새로운 사용자를 생성하고 저장
+            user = User(name=user_name)
+            user.save()
+            # 새로운 사용자에 대해 UserProceeding을 초기화
+            user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=0)
+            user_proceeding.save()
+        else:
+            # 사용자가 존재하는 경우 UserProceeding 가져오기
+            try:
+                user_proceeding = UserProceeding.objects.get(user=user)
+            except UserProceeding.DoesNotExist:
+                # UserProceeding이 존재하지 않을 경우 error
+                return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
+        
+        # 세션에 사용자 정보 저장
+        request.session['user_name'] = user_name
+        request.session['user_id'] = user.user_id
+        request.session['level'] = user_proceeding.level
+
+        return user_proceeding, None  # UserProceeding 객체와 None 반환
     else:
         return None, JsonResponse({'error': 'No name provided'}, status=400)
 
+#base그림 출력
 def load_base_picture(request):
     user_proceeding, error_response = fetch_user_info(request)
     if error_response:
