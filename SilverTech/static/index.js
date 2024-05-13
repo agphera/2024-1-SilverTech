@@ -3,12 +3,13 @@ document.addEventListener("DOMContentLoaded", function() {
   let container = document.querySelector('.navbar-progress-container');
   let progressBar = document.querySelector('progress');
   let popup = document.getElementById("analysisPopup");
+  let exitPopup=document.getElementById("exitPopup");
   //let messageContainer = document.getElementById("messageContainer"); // 비슷한것같나요 메시지 컨테이너
   //let imagePopup = document.getElementById("imagePopup"); // 비교이미지 팝업
 
   /*시간 설정*/
   let duration = 15000; // 프로그레스바 15초
-  let hideDuration = 30000; // navbar+progressbar 사라지는 시간 30초(변수만 설정, 아직 미구현)
+  //let hideDuration = 30000; // navbar+progressbar 사라지는 시간 30초(변수만 설정, 아직 미구현)
   let popupDuration = 15000; // 분석중입니다 팝업시간 15초
 
   /*프로그레스바 감소*/
@@ -23,22 +24,23 @@ document.addEventListener("DOMContentLoaded", function() {
 
   let progressInterval = setInterval(updateProgressBar, 100);
 
+
   //GoOut Button 기능
   document.getElementById("goOutButton").addEventListener('click', function() {
-    var exitPopup = document.getElementById("exitPopup");
-    exitPopup.style.display = "flex"; // 팝업 창 보이기
+    exitPopup.style.display = "flex";
+    setTimeout(() => { exitPopup.style.opacity = 1; }, 10); 
     setTimeout(function() {
-        window.close(); // 3초 후 팝업 창 닫기
-    }, 3000);
+        window.close(); // 3초 후 창 닫기
+    }, 4000);
 });
 
   /*navbar+progressbar 사라짐 + 로딩중 팝업 */
   function hideElements() {
     container.style.transition = 'transform 0.5s ease-in-out, opacity 0.5s';
     container.style.transform = 'translateY(-100%)';
-    container.style.opacity = 0;
+    container.style.opacity = 0; //네비게이션바+프로그레스바 숨기기
 
-    popup.style.display = "flex"; // analysis popup 보여주기
+    popup.style.display = "flex"; //analysis popup 보이기
     setTimeout(function() {
       popup.style.opacity = 1; // 부드러운 효과
     }, 10);

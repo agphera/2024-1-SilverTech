@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", function() {
   
     // 3초후 팝업
     setTimeout(function() {
-        popup.style.display = "block";  
-        popup.style.opacity = 1;        
+      popup.style.display = "flex";
+      setTimeout(() => { popup.style.opacity = 1; }, 10);      
     }, 3000);
   
     var greetings = ["와우~ 반갑습니다!", "우와, 안녕하세요!", "짝짝짝, 환영합니다!", "기다리고 있었어요!"];

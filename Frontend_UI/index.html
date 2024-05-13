@@ -67,8 +67,7 @@
 
         <div class="column is-half"> <!--중심을 기준으로 오른쪽 화면-->
             <div class="textboard">
-                <p>그림을<br>
-                    설명해주세요!</p>
+                <p>그림을<br>설명해주세요!</p>
             </div>
             <div class="speak-icon-container">
                 <img src="{% static 'Main_source/speaking_icon.png'%}" alt="speak icon" class="speak-icon">
@@ -98,17 +97,16 @@
 
     <!--종료 3초전 팝업-->
     <div id="exitPopup" class="modal">
-        <div class="modal-background"></div>
-            <div class="modal-content">
-                <p class="modal-text">프로그램을 3초 후에 종료합니다.</p>
-            </div>
+        <div class="modal-content">
+            <p class="modal-text">프로그램을 종료합니다.<br>다음에 또 봐요!</p><!--4초뒤 종료로 설정-->
         </div>
     </div>
-
+    
 </body>
 
 
-<input type="file" id="fileInput">
+<!--<input type="file" id="fileInput">-->
+
 <script>
 
 
@@ -214,13 +212,13 @@
             })
             .then(response => response.json())
             .then(data => {
-                //if (data['image_url']) {
+                //if (data['image_url']) { //기존코드
                 //    window.open(data['image_url'], '_blank', 'width=800,height=800'); // 새 창에서 이미지 URL 열기
-                //}
-                if (data['image_url']) {
+                //} //기존코드
+                if (data['image_url']) { // test
                    // 이미지 URL을 <img> 태그의 src 속성으로 설정
                     document.getElementById('generatedImage').src = data['image_url'];
-                }
+                } //test
             })
             .catch(error => console.error('Error:', error));
 
