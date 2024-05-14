@@ -83,39 +83,36 @@ def change_base_picture(request):
         picture_level = request.session.get('picture_level')
         user_proceeding = UserProceeding.objects.get(user_id=user_id)
 
-        # 난이도 3, 4를 처리하되 picture_number_by_level 범위 확인
         if level >= len(picture_number_by_level):
             return JsonResponse({'error': 'Level out of range'}, status=400)
-        
-        # 원래는 조건을 user_proceeding.is_order로 해서 사용자에 따라 구분해야함.
-        # 현재는 테스트를 위해 is_order 값 자체를 request로 받고 있음
-        # 난이도 3, 4일때 역순으로 출력
-        if level == 3 or level == 4:
-            if is_order:
-                # 1. last_order를 역순으로 업데이트
-                user_proceeding.last_order = (user_proceeding.last_order - 1 + picture_number_by_level[level]) % picture_number_by_level[level]
-                # 2. 역순 업데이트된 last_order에 맞는 그림을 불러옴
-                base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
-            else:
-                # 1. 동일 레벨에서 무작위로 base_picture 선정 (직전에 본 그림은 제외)
-                base_picture_list = BasePictures.objects.filter(level=picture_level).exclude(order=user_proceeding.last_order)
-                base_picture = random.choice(base_picture_list)
-                # 2. 뽑은 그림으로 last_order 업데이트
-                user_proceeding.last_order = base_picture.order
-        else:
-            if is_order:
-                # 1. last_order 업데이트
-                user_proceeding.last_order = (user_proceeding.last_order + 1) % picture_number_by_level[level]
-                # 2. last_order에 맞는 그림을 불러옴
-                base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
-            else:
-                # 랜덤 동일
-                base_picture_list = BasePictures.objects.filter(level=picture_level).exclude(order=user_proceeding.last_order)
-                base_picture = random.choice(base_picture_list)
-                user_proceeding.last_order = base_picture.order
 
-        user_proceeding.save() # 변경된 last_order 값을 DB에 반영
-        
+        if is_order:
+            # is_order가 참일 때 역순 로직 적용 (레벨 3, 4에 대한 조건)
+            if level == 3 or level == 4:
+                # 역순으로 그림 업데이트
+                new_order = (user_proceeding.last_order - 1 + picture_number_by_level[level]) % picture_number_by_level[level]
+                user_proceeding.last_order = new_order
+            else:
+                # 기타 레벨에서는 정순 로직 적용
+                new_order = (user_proceeding.last_order + 1) % picture_number_by_level[level]
+                user_proceeding.last_order = new_order
+        else:
+            # is_order가 거짓일 때 랜덤 선택 로직 적용
+            all_pictures = list(BasePictures.objects.filter(level=picture_level).values_list('order', flat=True))
+            seen_pictures = user_proceeding.seen_pictures or []
+            available_pictures = [order for order in all_pictures if order not in seen_pictures]
+            if not available_pictures:
+                seen_pictures = []  # 이미 본 그림 목록 리셋
+                available_pictures = all_pictures
+
+            chosen_order = random.choice(available_pictures)
+            user_proceeding.last_order = chosen_order
+            seen_pictures.append(chosen_order)
+            user_proceeding.seen_pictures = seen_pictures
+
+        user_proceeding.save()
+
+        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
         return JsonResponse({'url': base_picture.url, 'order': base_picture.order}, status=200)
 
     except UserProceeding.DoesNotExist:
@@ -145,30 +142,48 @@ def get_picture(request):
 @require_http_methods(["POST"])
 @csrf_exempt 
 def adjust_level(request):
-    user_id = request.session.get('user_id') # 세션에서 user_id를 가져오기
+    user_id = request.session.get('user_id')
 
-    # user_id가 없으면 인증되지 않은 사용자로 간주하고 오류 메시지를 반환
     if not user_id:
         return JsonResponse({'error': 'User not authenticated'}, status=401)
-    
-    # 요청에서 JSON 데이터를 파싱 후 'action'값 추출
+
     data = json.loads(request.body.decode('utf-8'))
     action = data.get('action')
+
     try:
         user_proceeding = UserProceeding.objects.get(user__user_id=user_id)
-        if action == 1 and user_proceeding.level < 4: # action 값이 1이면 난이도를 증가
+        old_level = user_proceeding.level
+        if action == 1 and user_proceeding.level < 4:
             user_proceeding.level += 1
-        elif action == -1 and user_proceeding.level > 0: # action 값이 -1이면 난이도를 감소
+        elif action == -1 and user_proceeding.level > 0:
             user_proceeding.level -= 1
-        user_proceeding.save() # 변경된 난이도 정보를 데이터베이스에 저장
 
-        # 난이도 정보 업데이트
-        request.session['level'] = user_proceeding.level
-        request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+        # 레벨 변경이 있을 경우 last_order를 0으로 설정하고 seen_pictures 초기화
+        if old_level != user_proceeding.level:
+            user_proceeding.last_order = 0  # 항상 레벨 변경 시 0번 그림부터 시작
+            user_proceeding.seen_pictures = [0]  # seen_pictures 초기화 및 첫 번째 그림 번호 추가
+            user_proceeding.save()  # 변경 사항을 데이터베이스에 저장
 
-        return JsonResponse({'new_level': user_proceeding.level}, status=200)
+            # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
+            picture = BasePictures.objects.filter(level=user_proceeding.level, order=user_proceeding.last_order).first()
+            if picture:
+                image_url = picture.url
+            else:
+                image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
+
+            request.session['level'] = user_proceeding.level
+            request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+
+            return JsonResponse({
+                'new_level': user_proceeding.level,
+                'first_picture_order': user_proceeding.last_order,
+                'url': image_url
+            }, status=200)
+        
     except UserProceeding.DoesNotExist:
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
+    except BasePictures.DoesNotExist:
+        return JsonResponse({'error': 'No base picture found for this level and order'}, status=404)
     
 # 난이도 자동 조정 구현 테스트 필요    
 @csrf_exempt

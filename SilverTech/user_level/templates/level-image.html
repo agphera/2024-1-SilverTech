@@ -16,13 +16,15 @@
           method: "POST", // POST 메소드 사용
           headers: {
             "Content-Type": "application/json", // 요청 본문의 타입 지정
+            "Cache-Control": "no-cache", // 캐시 방지
           },
           body: JSON.stringify({ is_order: true }), // is_order 값을 True로 설정하여 요청 본문에 포함
         })
           .then((response) => response.json()) // 서버에서 받은 응답을 JSON으로 변환
           .then((data) => {
+            console.log("Received data:", data);
             var imageUrl = data.url; // JSON에서 이미지 URL 추출
-            var imageOrder = data.order; // JSON에서 이미지 URL 추출
+            var imageOrder = data.order; // JSON에서 이미지 order 추출
             loadImage(imageUrl);
             loadInfo(imageUrl, imageOrder);
           })
