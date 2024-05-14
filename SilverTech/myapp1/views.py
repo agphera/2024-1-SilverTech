@@ -168,15 +168,15 @@ def upload_image(request):
             # 세션에 이미지 카운터 업데이트
             request.session['image_counter'] = image_counter
             
+            print(f"Image {image_counter} uploaded successfully to {full_path}")
+            
             # 100번째 이미지 후 세션 리셋
             if image_counter >= 10:
                 del request.session['image_counter']
-                print(path)
-                # 모든 이미지 처리가 성공적으로 완료된 후 모델 훈련 함수 실행
-                if path is not None:
-                    train_model_again(full_path)
+                train_model_again(os.path.join(settings.MEDIA_ROOT, folder_name))
             
-            print(f"Image {image_counter} uploaded successfully to {full_path}")
+            
+
             return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
         else:
             print("No image provided")
@@ -226,4 +226,41 @@ def train_model_again(request):
     with open("encodings.pickle", "wb") as f:
         f.write(pickle.dumps(data))
     f.close()
+
+
+
+
+def train_model_again1(image_folder_path):
+    # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
+    with open("../SilverTech/function/encodings.pickle", "rb") as f:
+        data = pickle.load(f)
+    knownEncodings = data["encodings"]
+    knownNames = data["names"]
+
+    # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
+    newImagePaths = list(paths.list_images(image_folder_path))
+
+    # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
+    for (i, imagePath) in enumerate(newImagePaths):
+        print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
+        name = imagePath.split(os.path.sep)[-2]
+
+        image = cv2.imread(imagePath)
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        boxes = face_recognition.face_locations(rgb, model="hog")
+        encodings = face_recognition.face_encodings(rgb, boxes)
+
+        for encoding in encodings:
+            knownEncodings.append(encoding)
+            knownNames.append(name)
+
+    # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
+    print("[INFO] serializing encodings...")
+    data = {"encodings": knownEncodings, "names": knownNames}
+    with open("../SilverTech/function/encodings.pickle", "wb") as f:
+        f.write(pickle.dumps(data))
+
+
+
 
