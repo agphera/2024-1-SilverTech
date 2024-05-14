@@ -20,7 +20,7 @@ def test_picture_load(request):
 def fetch_user_info(request):
     #request에서 로그인 정보를 추출하는 코드 추후 추가
     #사용자 정보 임의 설정
-    user_name = 'test1'
+    user_name = 'test7'
     if user_name:
         try:
             # DB에서 해당 사용자의 난이도 정보를 가져옴
@@ -30,7 +30,7 @@ def fetch_user_info(request):
             user = User(name=user_name)
             user.save()
             # 새로운 사용자에 대해 UserProceeding을 초기화
-            user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=0)
+            user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=0, seen_pictures=[], clear_level=[])
             user_proceeding.save()
             # UserAccuracy도 초기화
             user_accuracy = UserAccuracy(user=user, successive_correct=0, successive_wrong=0)
@@ -52,7 +52,7 @@ def fetch_user_info(request):
     else:
         return None, JsonResponse({'error': 'No name provided'}, status=400)
 
-#base그림 출력
+# 초기 동작 함수
 def load_base_picture(request):
     # fetch_user_info 함수를 호출하여 사용자 진행 정보를 가져옴
     # 오류가 발생하면 error_response를 반환
@@ -70,24 +70,35 @@ def load_base_picture(request):
         # 현재 진행 상태의 last_order에 해당하는 그림을 가져옴
         base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
         
+        user_name = request.session.get('user_name')
+
         # 가져온 그림의 URL, 레벨, 순서를 템플릿에 전달하여 렌더링
         return render(request, 'level-image.html', {
+            'name': user_name,
             'level': level,
             'url': base_picture.url,
             'order': base_picture.order
         })
+
+
+### 버그 발생 => 모든 base그림 다보고 F5로 재접하면 볼 수 있는 그림이 없어서 오류뜸
     except BasePictures.DoesNotExist:
         # 그림이 존재하지 않는 경우 오류 응답 반환
         return JsonResponse({'error': 'Base picture not found'}, status=404)
 
 
+@csrf_exempt
+def fetch_picture(request):
+    level_changed = request.session.get('level_changed')
+    if level_changed:
+        request.session['level_changed'] = False # 레벨 변경 여부 초기화
+        return adjust_level(request)
+    else:
+        return change_base_picture(request)
+
 # 다음 order의 그림을 가져오는 함수
 @csrf_exempt
 def change_base_picture(request):
-    # 요청의 body에서 JSON 데이터를 파싱하여 'is_order' 값을 가져옴
-    data = json.loads(request.body.decode('utf-8'))
-    is_order = data.get('is_order', False)
-
     try:
         # 세션에서 사용자 ID, 레벨, 그림 레벨을 가져옴
         user_id = request.session.get('user_id')
@@ -101,7 +112,7 @@ def change_base_picture(request):
         if level >= len(picture_number_by_level):
             return JsonResponse({'error': 'Level out of range'}, status=400)
 
-        if is_order:
+        if user_proceeding.is_order:
             # is_order가 참일 때: 다음 순서의 그림을 역순으로 가져오는 로직
             if level == 3 or level == 4:
                 # 레벨 3, 4일 때 역순으로 그림을 가져옴
@@ -134,7 +145,7 @@ def change_base_picture(request):
         # 선택된 그림을 데이터베이스에서 가져옴
         base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
         # 그림의 URL과 순서를 JSON 형태로 반환
-        return JsonResponse({'url': base_picture.url, 'order': base_picture.order}, status=200)
+        return JsonResponse({'url': base_picture.url, 'order': base_picture.order, 'level': user_proceeding.level}, status=200)
 
     except UserProceeding.DoesNotExist:  # 사용자 진행 정보 x
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
@@ -143,25 +154,6 @@ def change_base_picture(request):
     except IndexError:  # 인덱스 범위 아웃
         return JsonResponse({'error': 'Index out of range'}, status=400)
 
-
-@require_http_methods(["GET"])
-def get_picture(request):
-    picture_id = request.GET.get('picture', None) #picture 요청
-    
-    if picture_id:
-        try:
-            picture_id = int(picture_id) - 1 #인덱스 0부터 시작
-            picture = BasePictures.objects.get(picture_id=picture_id) # 해당 ID의 그림을 데이터베이스에서 가져옴
-            return JsonResponse({'url': picture.url})
-        except BasePictures.DoesNotExist:
-            return JsonResponse({'error': 'Button not found'}, status=404)
-    else:
-        # 'picture' 매개변수가 제공되지 않았을 경우 오류 반환
-        return JsonResponse({'error': 'No button name provided'}, status=400)
-
-@require_http_methods(["POST"])
-@csrf_exempt 
-@require_http_methods(["POST"])
 @csrf_exempt 
 def adjust_level(request):
     user_id = request.session.get('user_id')  # 사용자ID
@@ -169,73 +161,53 @@ def adjust_level(request):
     if not user_id:  # 사용자ID 없으면 인증오류 반환
         return JsonResponse({'error': 'User not authenticated'}, status=401)
 
-    data = json.loads(request.body.decode('utf-8'))
-    action = data.get('action')  # action 값 가져오기
-
     try:
         user_proceeding = UserProceeding.objects.get(user__user_id=user_id)  # 사용자 진행정보 DB 접근 
-        old_level = user_proceeding.level
 
-        # 'action' 값에 따라 레벨을 증가 또는 감소
-        if action == 1 and user_proceeding.level < 4:
-            user_proceeding.level += 1
-        elif action == -1 and user_proceeding.level > 0:
-            user_proceeding.level -= 1
+        # 사용자가 이전에 클리어한 레벨이면 is_order=false // 아니면 true
+        user_proceeding.is_order = False if user_proceeding.level in user_proceeding.clear_level else True
 
-        # 레벨 변경이 있을 경우 order를 조정하고 seen_pictures 초기화
-        if old_level != user_proceeding.level:
+        if user_proceeding.is_order:
             if user_proceeding.level in [0, 1, 2]:
                 # 레벨 0, 1, 2는 0번 그림부터 시작
                 user_proceeding.last_order = 0
-            elif user_proceeding.level == 3:
-                # picture_level 1의 마지막 그림 order를 찾음
-                last_picture = BasePictures.objects.filter(level=1).order_by('-order').first()
+            else: # 레벨 3, 4는 마지막 그림부터 시작
+                last_picture = BasePictures.objects.filter(level=user_proceeding.level-2).order_by('-order').first()
                 user_proceeding.last_order = last_picture.order if last_picture else 0
-            elif user_proceeding.level == 4:
-                # picture_level 2의 마지막 그림 order를 찾음
-                last_picture = BasePictures.objects.filter(level=2).order_by('-order').first()
-                user_proceeding.last_order = last_picture.order if last_picture else 0
-            
-            # 본 그림 목록 초기화
-            user_proceeding.seen_pictures = []
-            
-            # 사용자 정확도 정보 초기화
-            user_accuracy = UserAccuracy.objects.get(user_id=user_id)
-            user_accuracy.successive_correct = 0
-            user_accuracy.successive_wrong = 0
-            user_accuracy.save()  # 변경 사항을 데이터베이스에 저장
-            user_proceeding.save() 
-
-            # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
-            picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
-            picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
-            if picture:
-                image_url = picture.url
-                # seen_pictures에 현재 last_order를 추가하고 저장
-                user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
-                user_proceeding.save()
-            else:
-                image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
-
-            # 세션에 새 레벨과 그림 레벨 저장
-            request.session['level'] = user_proceeding.level
-            request.session['picture_level'] = picture_level
-
-            return JsonResponse({
-                'new_level': user_proceeding.level,
-                'first_picture_order': user_proceeding.last_order,
-                'url': image_url
-            }, status=200)
         else:
-            # 레벨 변경이 없는 경우에도 기본 응답 반환
-            picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
-            picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
-            image_url = picture.url if picture else None
-            return JsonResponse({
-                'new_level': user_proceeding.level,
-                'first_picture_order': user_proceeding.last_order,
-                'url': image_url
-            }, status=200)
+            # 레벨에 맞춰 범위 중에 하나의 그림 선택
+            user_proceeding.last_order = random.randrange(picture_number_by_level[user_proceeding.level])          
+        # 본 그림 목록 초기화
+        user_proceeding.seen_pictures = []
+        
+        # 사용자 정확도 정보 초기화
+        user_accuracy = UserAccuracy.objects.get(user_id=user_id)
+        user_accuracy.successive_correct = 0
+        user_accuracy.successive_wrong = 0
+        user_accuracy.save()  # 변경 사항을 데이터베이스에 저장
+        user_proceeding.save() 
+
+        # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
+        picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+        picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
+        if picture:
+            image_url = picture.url
+            # seen_pictures에 현재 last_order를 추가하고 저장
+            user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
+            user_proceeding.save()
+        else:
+            image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
+
+        # 세션에 새 레벨과 그림 레벨 저장
+        request.session['level'] = user_proceeding.level
+        request.session['picture_level'] = picture_level
+
+        return JsonResponse({
+            'level': user_proceeding.level,
+            'order': user_proceeding.last_order,
+            'url': image_url
+        }, status=200)
+
 
     except UserProceeding.DoesNotExist:
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
@@ -259,7 +231,7 @@ def adjust_level_with_accuracy(request):
         # 사용자 정확도와 진행 정보를 DB에서 가져옴
         user_accuracy = UserAccuracy.objects.get(user_id=user_id)
         user_proceeding = UserProceeding.objects.get(user=user_id)
-        level_changed = False # 레벨 변경 여부 초기화
+        request.session['level_changed'] = False # 레벨 변경 여부 초기화
 
         # accuracy 값에 따라 연속 정답 또는 오답 수를 갱신
         if accuracy >= 0.6:
@@ -274,15 +246,19 @@ def adjust_level_with_accuracy(request):
 
         # 연속 정답 수가 3 이상이면 레벨을 1 증가
         if user_accuracy.successive_correct >= 3:
+            # 클리어한 레벨에 추가 (중복 없이 추가)
+            if user_proceeding.level not in user_proceeding.clear_level:
+                user_proceeding.clear_level.append(user_proceeding.level)
+
             if user_proceeding.level < 4:
                 user_proceeding.level += 1
-                level_changed = True #level 변경
+                request.session['level_changed'] = 1 #level 변경
             user_accuracy.successive_correct = 0
         # 연속 오답 수가 2 이상이면 레벨을 1 감소
         elif user_accuracy.successive_wrong >= 2:
             if user_proceeding.level > 0:
                 user_proceeding.level -= 1
-                level_changed = True #level 변경
+                request.session['level_changed'] = -1 #level 변경
             user_accuracy.successive_wrong = 0
 
         # 변경된 진행 정보와 정확도 정보를 저장
@@ -292,11 +268,26 @@ def adjust_level_with_accuracy(request):
         return JsonResponse({
             'current_level': user_proceeding.level,
             'successive_correct': user_accuracy.successive_correct,
-            'successive_wrong': user_accuracy.successive_wrong,
-            'level_changed': level_changed
+            'successive_wrong': user_accuracy.successive_wrong
         }, status=200)
 
     except UserAccuracy.DoesNotExist:
         return JsonResponse({'error': 'User accuracy record not found'}, status=404)
     except UserProceeding.DoesNotExist:
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
+
+
+@require_http_methods(["GET"])
+def get_picture(request):
+    picture_id = request.GET.get('picture', None) #picture 요청
+    
+    if picture_id:
+        try:
+            picture_id = int(picture_id) - 1 #인덱스 0부터 시작
+            picture = BasePictures.objects.get(picture_id=picture_id) # 해당 ID의 그림을 데이터베이스에서 가져옴
+            return JsonResponse({'url': picture.url})
+        except BasePictures.DoesNotExist:
+            return JsonResponse({'error': 'Button not found'}, status=404)
+    else:
+        # 'picture' 매개변수가 제공되지 않았을 경우 오류 반환
+        return JsonResponse({'error': 'No button name provided'}, status=400)

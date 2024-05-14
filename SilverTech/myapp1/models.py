@@ -11,7 +11,7 @@ class User(models.Model):
 
 
 class UserAccuracy(models.Model):
-    user_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(User, models.DO_NOTHING, primary_key=True)
     successive_correct = models.IntegerField()
     successive_wrong = models.IntegerField()
 
@@ -26,10 +26,12 @@ class UserProceeding(models.Model):
     last_order = models.IntegerField()
     is_order = models.IntegerField()
     seen_pictures = models.JSONField(blank=True, null=True)
+    clear_level = models.JSONField(blank=True, null=True)
 
     class Meta:
         managed = False
         db_table = 'UserProceeding'
+
 
 
 class AuthGroup(models.Model):
