@@ -46,7 +46,7 @@
         sendAccuracy() // sendAccuracy를 먼저 실행하고 완료 후 이미지 로드
           .then((data) => {
             // 레벨이 변경되었을 경우, 변경된 레벨에 해당하는 그림을 직접 가져옴
-            fetch("http://127.0.0.1:8000/picture-load/fetch_picture/", {
+            fetch("http://127.0.0.1:8000/picture-load/fetch-picture/", {
               method: "GET"
             })
               .then((response) => response.json())

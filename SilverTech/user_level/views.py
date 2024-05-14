@@ -3,7 +3,8 @@ import random
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
 from function.server_use import scoring_points
@@ -13,14 +14,11 @@ picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에�
 # http://127.0.0.1:8000/picture-load/
 
 # Create your views here.
-def test_picture_load(request):
-    return render(request, "test-image-load.html") # templates 폴더 안에 test-image-load.html가 존재함
+def login_picture_load(request):
+    return render(request, "test-login.html") # templates 폴더 안에 test-image-load.html가 존재함
 
-#회원정보 확인
-def fetch_user_info(request):
-    #request에서 로그인 정보를 추출하는 코드 추후 추가
-    #사용자 정보 임의 설정
-    user_name = 'test7'
+# 회원정보 확인해서 로그인하거나 및 회원가입하는 함수
+def fetch_user_info(request, user_name):
     if user_name:
         try:
             # DB에서 해당 사용자의 난이도 정보를 가져옴
@@ -53,38 +51,48 @@ def fetch_user_info(request):
         return None, JsonResponse({'error': 'No name provided'}, status=400)
 
 # 초기 동작 함수
-def load_base_picture(request):
-    # fetch_user_info 함수를 호출하여 사용자 진행 정보를 가져옴
-    # 오류가 발생하면 error_response를 반환
-    user_proceeding, error_response = fetch_user_info(request)
-    if error_response:
-        return error_response  # 오류 응답 반환
+from django.shortcuts import render, redirect
+from django.views.decorators.http import require_http_methods
+from django.http import JsonResponse
 
-    try:
-        # 사용자 진행 정보에서 현재 레벨을 가져옴
-        level = user_proceeding.level
-        # 레벨 조정 로직: 레벨이 2 이하이면 그대로 사용하고, 3 이상이면 2를 뺌
-        picture_level = level if level <= 2 else level - 2  
-        request.session['picture_level'] = picture_level  # 세션에 조정된 레벨을 저장
-
-        # 현재 진행 상태의 last_order에 해당하는 그림을 가져옴
-        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+@require_http_methods(["GET", "POST"])
+def picture_training(request):
+    if request.method == "POST":
+        name = request.POST.get('name')
         
-        user_name = request.session.get('user_name')
-
-        # 가져온 그림의 URL, 레벨, 순서를 템플릿에 전달하여 렌더링
-        return render(request, 'level-image.html', {
-            'name': user_name,
-            'level': level,
-            'url': base_picture.url,
-            'order': base_picture.order
-        })
-
-
-### 버그 발생 => 모든 base그림 다보고 F5로 재접하면 볼 수 있는 그림이 없어서 오류뜸
-    except BasePictures.DoesNotExist:
-        # 그림이 존재하지 않는 경우 오류 응답 반환
-        return JsonResponse({'error': 'Base picture not found'}, status=404)
+        user_proceeding, error_response = fetch_user_info(request, name)
+        if error_response:
+            return error_response  # 오류 응답 반환
+        
+        try:
+            level = user_proceeding.level
+            picture_level = level if level <= 2 else level - 2
+            request.session['picture_level'] = picture_level  # 세션에 조정된 레벨 저장
+            
+            base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+            
+            # 세션에 필요한 정보 저장
+            request.session['user_name'] = name
+            request.session['level'] = level
+            request.session['picture_url'] = base_picture.url
+            request.session['picture_order'] = base_picture.order
+            print(request)
+            # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
+            return redirect('../picture-training')  
+        except BasePictures.DoesNotExist:
+            return JsonResponse({'error': 'Base picture not found'}, status=404)
+        except Exception as e:
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
+    else:
+        # GET 요청을 처리하고, 세션에서 정보를 가져와 템플릿을 렌더링
+        context = {
+            'name': request.session.get('user_name', 'Guest'),
+            'level': request.session.get('level', 1),
+            'url': request.session.get('picture_url', None),
+            'order': request.session.get('picture_order', 0),
+        }
+        print(context)
+        return render(request, 'level-image.html', context)
 
 
 @csrf_exempt
@@ -275,19 +283,3 @@ def adjust_level_with_accuracy(request):
         return JsonResponse({'error': 'User accuracy record not found'}, status=404)
     except UserProceeding.DoesNotExist:
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
-
-
-@require_http_methods(["GET"])
-def get_picture(request):
-    picture_id = request.GET.get('picture', None) #picture 요청
-    
-    if picture_id:
-        try:
-            picture_id = int(picture_id) - 1 #인덱스 0부터 시작
-            picture = BasePictures.objects.get(picture_id=picture_id) # 해당 ID의 그림을 데이터베이스에서 가져옴
-            return JsonResponse({'url': picture.url})
-        except BasePictures.DoesNotExist:
-            return JsonResponse({'error': 'Button not found'}, status=404)
-    else:
-        # 'picture' 매개변수가 제공되지 않았을 경우 오류 반환
-        return JsonResponse({'error': 'No button name provided'}, status=400)

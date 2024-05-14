@@ -2,11 +2,8 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
-    path('', views.load_base_picture),
-    path('test/', views.test_picture_load),
-    path('fetch_picture/', views.fetch_picture),
-    path('change-base-picture/', views.change_base_picture),
-    path('request/', views.get_picture, name='get_picture'),
-    path('adjust-level/', views.adjust_level, name='adjust-level'),
+    path('', views.login_picture_load),
+    path('picture-training/', views.picture_training),
+    path('fetch-picture/', views.fetch_picture),
     path('adjust-level-with-accuracy', views.adjust_level_with_accuracy, name='adjust-level-with-accuracy')
 ]
