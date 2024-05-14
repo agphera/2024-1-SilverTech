@@ -139,6 +139,7 @@ def get_picture(request):
         return JsonResponse({'error': 'No button name provided'}, status=400)
 
 # 사용자 난이도 조정
+# 사용자 난이도 조정
 @require_http_methods(["POST"])
 @csrf_exempt 
 def adjust_level(request):
@@ -158,21 +159,32 @@ def adjust_level(request):
         elif action == -1 and user_proceeding.level > 0:
             user_proceeding.level -= 1
 
-        # 레벨 변경이 있을 경우 last_order를 0으로 설정하고 seen_pictures 초기화
+        # 레벨 변경이 있을 경우 order를 조정하고 seen_pictures 초기화
         if old_level != user_proceeding.level:
-            user_proceeding.last_order = 0  # 항상 레벨 변경 시 0번 그림부터 시작
-            user_proceeding.seen_pictures = [0]  # seen_pictures 초기화 및 첫 번째 그림 번호 추가
+            if user_proceeding.level in [0, 1, 2]:
+                user_proceeding.last_order = 0  # 레벨 0, 1, 2는 0번 그림부터 시작
+            elif user_proceeding.level == 3:
+                # picture_level 1의 마지막 그림 order를 찾음
+                last_picture = BasePictures.objects.filter(level=1).order_by('-order').first()
+                user_proceeding.last_order = last_picture.order if last_picture else 0
+            elif user_proceeding.level == 4:
+                # picture_level 2의 마지막 그림 order를 찾음
+                last_picture = BasePictures.objects.filter(level=2).order_by('-order').first()
+                user_proceeding.last_order = last_picture.order if last_picture else 0
+
+            user_proceeding.seen_pictures = []  # seen_pictures 초기화
             user_proceeding.save()  # 변경 사항을 데이터베이스에 저장
 
             # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
-            picture = BasePictures.objects.filter(level=user_proceeding.level, order=user_proceeding.last_order).first()
+            picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+            picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
             if picture:
                 image_url = picture.url
             else:
                 image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
 
             request.session['level'] = user_proceeding.level
-            request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+            request.session['picture_level'] = picture_level
 
             return JsonResponse({
                 'new_level': user_proceeding.level,
