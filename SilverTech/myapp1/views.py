@@ -121,42 +121,24 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import JsonResponse
-
 @csrf_exempt
 def upload_image(request):
     path = None
     full_path = None
- 
+
     if request.method == 'POST':
         image = request.FILES.get('photo')
         if image:
             # 세션에서 이미지 카운터를 가져옵니다.
             image_counter = request.session.get('image_counter', 0)
+            folder_counter = request.session.get('folder_counter', 1)
             image_counter += 1
             
-            # 기본 폴더 경로 설정
+            # 기본 폴더 이름 설정
             base_folder_name = 'User_images'
             
-            # 실제 저장될 폴더 경로 설정
-            folder_name = base_folder_name
-            
-            # 폴더가 이미 존재하는지 확인하고, 존재한다면 가장 마지막에 생성된 폴더 이름을 사용합니다.
-            if image_counter > 1:
-                folder_version = 1
-                temp_folder_name = f"{base_folder_name}_{folder_version}"
-                while default_storage.exists(temp_folder_name):
-                    folder_name = temp_folder_name  # 사용 가능한 마지막 폴더 이름 업데이트
-                    folder_version += 1
-                    temp_folder_name = f"{base_folder_name}_{folder_version}"
-            else:
-                # 이미지 카운터가 1인 경우에도 존재하는 폴더의 버전을 찾아서 새로운 폴더를 만듭니다.
-                folder_version = 1
-                temp_folder_name = f"{base_folder_name}_{folder_version}"
-                while default_storage.exists(temp_folder_name):
-                    folder_name = temp_folder_name
-                    folder_version += 1
-                    temp_folder_name = f"{base_folder_name}_{folder_version}"
-                folder_name = f"{base_folder_name}_{folder_version}"  # 새로운 폴더 이름 설정
+            # 실제 저장될 폴더 이름 설정
+            folder_name = f"{base_folder_name}_{folder_counter}"
             
             # 파일 이름 설정
             file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
@@ -165,17 +147,18 @@ def upload_image(request):
             path = default_storage.save(file_name, ContentFile(image.read()))
             full_path = os.path.join(settings.MEDIA_ROOT, path)
             
-            # 세션에 이미지 카운터 업데이트
+            # 세션에 이미지 카운터와 폴더 카운터 업데이트
             request.session['image_counter'] = image_counter
+            request.session['folder_counter'] = folder_counter
             
             print(f"Image {image_counter} uploaded successfully to {full_path}")
             
-            # 100번째 이미지 후 세션 리셋
+            # 10번째 이미지 후 세션 리셋 및 폴더 카운터 증가
             if image_counter >= 10:
-                del request.session['image_counter']
+                request.session['image_counter'] = 0  # 이미지 카운터 리셋
+                request.session['folder_counter'] = folder_counter + 1  # 폴더 카운터 증가
+                
                 train_model_again(os.path.join(settings.MEDIA_ROOT, folder_name))
-            
-            
 
             return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
         else:
@@ -184,8 +167,6 @@ def upload_image(request):
     else:
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
-
-
 
 #모델 추가 학습
 from imutils import paths
