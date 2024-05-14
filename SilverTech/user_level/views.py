@@ -20,7 +20,7 @@ def test_picture_load(request):
 def fetch_user_info(request):
     #request에서 로그인 정보를 추출하는 코드 추후 추가
     #사용자 정보 임의 설정
-    user_name = 'suchae'
+    user_name = 'test1'
     if user_name:
         try:
             # DB에서 해당 사용자의 난이도 정보를 가져옴
@@ -32,6 +32,9 @@ def fetch_user_info(request):
             # 새로운 사용자에 대해 UserProceeding을 초기화
             user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=0)
             user_proceeding.save()
+            # UserAccuracy도 초기화
+            user_accuracy = UserAccuracy(user=user, successive_correct=0, successive_wrong=0)
+            user_accuracy.save()
         else:
             # 사용자가 존재하는 경우 UserProceeding 가져오기
             try:

@@ -11,7 +11,7 @@ class User(models.Model):
 
 
 class UserAccuracy(models.Model):
-    user_id = models.AutoField(primary_key=True)
+    user = models.OneToOneField(User, models.DO_NOTHING, primary_key=True)
     successive_correct = models.IntegerField()
     successive_wrong = models.IntegerField()
 
