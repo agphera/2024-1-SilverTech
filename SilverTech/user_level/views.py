@@ -57,10 +57,11 @@ def load_base_picture(request):
 
     try:
         level = user_proceeding.level
-        request.session['picture_level'] = level if level <= 2 else level - 2  # 레벨 조정 로직
+        picture_level = level if level <= 2 else level - 2  # 레벨 조정 로직
+        request.session['picture_level'] = picture_level
 
         # last_order에 해당하는 그림을 가져옴
-        base_picture = BasePictures.objects.get(level=level, order=user_proceeding.last_order)
+        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
         return render(request, 'level-image.html', {
             'level': level,
             'url': base_picture.url,
@@ -79,6 +80,7 @@ def change_base_picture(request):
     try:
         user_id = request.session.get('user_id')
         level = request.session.get('level')
+        picture_level = request.session.get('picture_level')
         user_proceeding = UserProceeding.objects.get(user_id=user_id)
 
         if level >= len(picture_number_by_level):
@@ -96,7 +98,7 @@ def change_base_picture(request):
                 user_proceeding.last_order = new_order
         else:
             # is_order가 거짓일 때 랜덤 선택 로직 적용
-            all_pictures = list(BasePictures.objects.filter(level=level).values_list('order', flat=True))
+            all_pictures = list(BasePictures.objects.filter(level=picture_level).values_list('order', flat=True))
             seen_pictures = user_proceeding.seen_pictures or []
             available_pictures = [order for order in all_pictures if order not in seen_pictures]
             if not available_pictures:
@@ -110,7 +112,7 @@ def change_base_picture(request):
 
         user_proceeding.save()
 
-        base_picture = BasePictures.objects.get(level=level, order=user_proceeding.last_order)
+        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
         return JsonResponse({'url': base_picture.url, 'order': base_picture.order}, status=200)
 
     except UserProceeding.DoesNotExist:
@@ -170,6 +172,7 @@ def adjust_level(request):
                 image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
 
             request.session['level'] = user_proceeding.level
+            request.session['picture_level'] = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
 
             return JsonResponse({
                 'new_level': user_proceeding.level,
