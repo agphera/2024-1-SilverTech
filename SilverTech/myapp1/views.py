@@ -81,11 +81,11 @@ urlpatterns = [
 #시작 html 결정
 @csrf_exempt
 def index(request):
-    return render(request, '../Frontend_UI/index.html')
+    return render(request, '../Frontend_UI/Camera.html')
 
 @csrf_exempt
 def second_page(request):
-    return render(request, '../Frontend_UI/Camera.html')
+    return render(request, '../Frontend_UI/index.html')
 
 
 
@@ -124,6 +124,9 @@ from django.http import JsonResponse
 
 @csrf_exempt
 def upload_image(request):
+    path = None
+    full_path = None
+ 
     if request.method == 'POST':
         image = request.FILES.get('photo')
         if image:
@@ -146,13 +149,14 @@ def upload_image(request):
                     folder_version += 1
                     temp_folder_name = f"{base_folder_name}_{folder_version}"
             else:
-                # 이미지 카운터가 1인 경우 새로운 폴더를 만듭니다.
-                if default_storage.exists(folder_name):
-                    folder_version = 1
-                    folder_name = f"{base_folder_name}_{folder_version}"
-                    while default_storage.exists(folder_name):
-                        folder_version += 1
-                        folder_name = f"{base_folder_name}_{folder_version}"
+                # 이미지 카운터가 1인 경우에도 존재하는 폴더의 버전을 찾아서 새로운 폴더를 만듭니다.
+                folder_version = 1
+                temp_folder_name = f"{base_folder_name}_{folder_version}"
+                while default_storage.exists(temp_folder_name):
+                    folder_name = temp_folder_name
+                    folder_version += 1
+                    temp_folder_name = f"{base_folder_name}_{folder_version}"
+                folder_name = f"{base_folder_name}_{folder_version}"  # 새로운 폴더 이름 설정
             
             # 파일 이름 설정
             file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
@@ -165,8 +169,12 @@ def upload_image(request):
             request.session['image_counter'] = image_counter
             
             # 100번째 이미지 후 세션 리셋
-            if image_counter >= 100:
+            if image_counter >= 10:
                 del request.session['image_counter']
+                print(path)
+                # 모든 이미지 처리가 성공적으로 완료된 후 모델 훈련 함수 실행
+                if path is not None:
+                    train_model_again(full_path)
             
             print(f"Image {image_counter} uploaded successfully to {full_path}")
             return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
@@ -177,4 +185,45 @@ def upload_image(request):
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+
+
+#모델 추가 학습
+from imutils import paths
+import face_recognition
+#import argparse
+import pickle
+import cv2
+import os
+
+def train_model_again(request):
+    # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
+    with open("../SilverTech/function/encodings.pickle", "rb") as f:
+        data = pickle.load(f)
+    knownEncodings = data["encodings"]
+    knownNames = data["names"]
+
+    # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
+    newImagePaths = list(paths.list_images(request))
+
+    # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
+    for (i, imagePath) in enumerate(newImagePaths):
+        print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
+        name = imagePath.split(os.path.sep)[-2]
+
+        image = cv2.imread(imagePath)
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        boxes = face_recognition.face_locations(rgb, model="hog")
+        encodings = face_recognition.face_encodings(rgb, boxes)
+
+        for encoding in encodings:
+            knownEncodings.append(encoding)
+            knownNames.append(name)
+
+    # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
+    print("[INFO] serializing encodings...")
+    data = {"encodings": knownEncodings, "names": knownNames}
+    with open("encodings.pickle", "wb") as f:
+        f.write(pickle.dumps(data))
+    f.close()
 
