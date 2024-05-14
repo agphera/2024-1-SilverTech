@@ -57,10 +57,7 @@ def load_base_picture(request):
 
     try:
         level = user_proceeding.level
-        if level >2:
-            level -= 2
-
-        request.session['level'] = level
+        request.session['picture_level'] = level if level <= 2 else level - 2  # 레벨 조정 로직
 
         # last_order에 해당하는 그림을 가져옴
         base_picture = BasePictures.objects.get(level=level, order=user_proceeding.last_order)
