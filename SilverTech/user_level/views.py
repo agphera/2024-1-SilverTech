@@ -139,7 +139,6 @@ def get_picture(request):
         return JsonResponse({'error': 'No button name provided'}, status=400)
 
 # 사용자 난이도 조정
-# 사용자 난이도 조정
 @require_http_methods(["POST"])
 @csrf_exempt 
 def adjust_level(request):
@@ -173,13 +172,21 @@ def adjust_level(request):
                 user_proceeding.last_order = last_picture.order if last_picture else 0
 
             user_proceeding.seen_pictures = []  # seen_pictures 초기화
-            user_proceeding.save()  # 변경 사항을 데이터베이스에 저장
+            
+            # successive_correct와 successive_wrong 초기화
+            user_accuracy = UserAccuracy.objects.get(user_id=user_id)
+            user_accuracy.successive_correct = 0
+            user_accuracy.successive_wrong = 0
+            user_accuracy.save() # 변경 사항을 데이터베이스에 저장
+            user_proceeding.save() 
 
             # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
             picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
             picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
             if picture:
                 image_url = picture.url
+                user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
+                user_proceeding.save()  # seen_pictures 저장
             else:
                 image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
 
@@ -222,7 +229,7 @@ def adjust_level_with_accuracy(request):
             user_accuracy.successive_correct = 0 #중 기록시 상,하 리셋
             user_accuracy.successive_wrong = 0
 
-        # 연속 3회 '상'을 달성하거나, 연속 2회 '하'를 달성한 경우 레벨 조정
+        
         if user_accuracy.successive_correct >= 3:
             if user_proceeding.level < 4:
                 user_proceeding.level += 1
@@ -236,7 +243,7 @@ def adjust_level_with_accuracy(request):
         user_accuracy.save()
 
         return JsonResponse({
-            'new_level': user_proceeding.level,
+            'current_level': user_proceeding.level,
             'successive_correct': user_accuracy.successive_correct,
             'successive_wrong': user_accuracy.successive_wrong
         }, status=200)
