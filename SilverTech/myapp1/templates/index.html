@@ -80,6 +80,10 @@
                 <button id="stopBtn">녹음 중지</button>
                 <audio id="audioPlayback" controls></audio>
             </div>
+            <!--생성 이미지 팝업-->
+            <div class="generated-image-container" id="generatedImageContainer">
+                <img id="generatedImage" alt="Generated Image"/>
+            </div>
         </div>
     </div>
     <!-- 메인 화면 끝 -->
@@ -217,7 +221,7 @@
                 //} //기존코드
                 if (data['image_url']) { // test
                    // 이미지 URL을 <img> 태그의 src 속성으로 설정
-                    document.getElementById('generatedImage').src = data['image_url'];
+                   showGeneratedImage(data['image_url']);
                 } //test
             })
             .catch(error => console.error('Error:', error));
@@ -233,6 +237,19 @@
 
     }
 
+
+        // 추가된 부분
+    function showGeneratedImage(url) {
+        const generatedImageContainer = document.getElementById('generatedImageContainer');
+        const generatedImage = document.getElementById('generatedImage');
+        generatedImage.src = url;
+        generatedImageContainer.classList.add('visible');
+        
+        // 몇 초 후에 이미지 숨기기
+        setTimeout(() => {
+            generatedImageContainer.classList.remove('visible');
+        }, 5000); // 5초 후 이미지 숨김
+    }
 
 </script>
 
