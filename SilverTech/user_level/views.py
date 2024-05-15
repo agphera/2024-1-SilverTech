@@ -2,12 +2,14 @@ import json
 import random
 from django.views.decorators.http import require_http_methods
 from django.views.decorators.http import require_POST
+from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
-from django.http import HttpResponseRedirect
 from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
-from function.server_use import scoring_points
+from drf_yasg import openapi
+from drf_yasg.utils import swagger_auto_schema
+
 
 picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에서 list over되어 5, 3 추가함
 
@@ -51,11 +53,36 @@ def fetch_user_info(request, user_name):
         return None, JsonResponse({'error': 'No name provided'}, status=400)
 
 # 초기 동작 함수
-from django.shortcuts import render, redirect
-from django.views.decorators.http import require_http_methods
-from django.http import JsonResponse
-
-@require_http_methods(["GET", "POST"])
+@swagger_auto_schema(
+    method='post',
+    operation_id='move_to_training_site',
+    operation_description='이 함수는 로그인/회원가입 정보를 받아 사용자를 훈련 사이트로 이동시킵니다.',
+    tags=['Login'],
+    request_body=openapi.Schema(
+        type=openapi.TYPE_OBJECT,
+        properties={
+            'name': openapi.Schema(type=openapi.TYPE_STRING, description='사용자 이름'),
+        },
+        required=['name'],
+    ),
+    responses={
+        200: openapi.Response(description='성공적으로 훈련 사이트로 이동'),
+        400: openapi.Response(description='잘못된 요청. 요청의 형식이 잘못되거나 필요한 정보가 누락되었습니다.'),
+        404: openapi.Response(description='요청한 리소스를 찾을 수 없습니다.'),
+    },
+)
+@swagger_auto_schema(  
+    method='get',
+    operation_id='fetch_training_site',
+    operation_description='이 함수는 내부적으로 사용됩니다.',
+    tags=['Login'],
+    responses={
+        200: openapi.Response(description='성공적으로 훈련 사이트를 가져옴'),
+        400: openapi.Response(description='잘못된 요청. 요청의 형식이 잘못되었습니다.'),
+        404: openapi.Response(description='요청한 훈련 사이트를 찾을 수 없습니다.'),
+    },
+)
+@api_view(["GET", "POST"])
 def picture_training(request):
     if request.method == "POST":
         name = request.POST.get('name')
@@ -78,7 +105,7 @@ def picture_training(request):
             request.session['picture_order'] = base_picture.order
             print(request)
             # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
-            return redirect('../picture-training')  
+            return redirect('../picture-training/')  
         except BasePictures.DoesNotExist:
             return JsonResponse({'error': 'Base picture not found'}, status=404)
         except Exception as e:
@@ -91,11 +118,30 @@ def picture_training(request):
             'url': request.session.get('picture_url', None),
             'order': request.session.get('picture_order', 0),
         }
-        print(context)
         return render(request, 'level-image.html', context)
 
-
-@csrf_exempt
+@swagger_auto_schema(
+    method='get',  # 요청 메소드
+    responses={  # 응답 형식
+        200: openapi.Response(
+            description="그림 URL과 순서 정보 반환",
+            examples={
+                "application/json": {
+                    "url": "URL",
+                    "order": 0,
+                    "level": 1
+                }
+            }
+        ),
+        400: openapi.Response(description="잘못된 요청"),
+        401: openapi.Response(description="인증 오류"),
+        404: openapi.Response(description="정보를 찾을 수 없음",),
+        500: openapi.Response(description="서버 내부 오류")
+    },
+    operation_description="사용자의 레벨과 진행 상태에 따라 적절한 그림을 반환하는 API",
+    tags=['Base picture'], 
+)
+@api_view(["GET"])
 def fetch_picture(request):
     level_changed = request.session.get('level_changed')
     if level_changed:
@@ -105,7 +151,6 @@ def fetch_picture(request):
         return change_base_picture(request)
 
 # 다음 order의 그림을 가져오는 함수
-@csrf_exempt
 def change_base_picture(request):
     try:
         # 세션에서 사용자 ID, 레벨, 그림 레벨을 가져옴
@@ -162,7 +207,6 @@ def change_base_picture(request):
     except IndexError:  # 인덱스 범위 아웃
         return JsonResponse({'error': 'Index out of range'}, status=400)
 
-@csrf_exempt 
 def adjust_level(request):
     user_id = request.session.get('user_id')  # 사용자ID
 
