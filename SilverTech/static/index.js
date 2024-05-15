@@ -61,9 +61,9 @@ document.addEventListener("DOMContentLoaded", function() {
   }
 
 
-  var byebye = ["벌써 가시나요? 다음에 또 봐요.", "안녕히가세요!", "다음에 또 오실거죠? 기다리고 있을게요."];
-    var randomByebye = byebye[Math.floor(Math.random() * byebye.length)]; // 랜덤인사
-    document.getElementById('random-byebye').textContent = randomByebye; 
+//  var byebye = ["벌써 가시나요? 다음에 또 봐요.", "안녕히가세요!", "다음에 또 오실거죠? 기다리고 있을게요."];
+//    var randomByebye = byebye[Math.floor(Math.random() * byebye.length)]; // 랜덤인사
+//    document.getElementById('random-byebye').textContent = randomByebye; 
   
 });
 

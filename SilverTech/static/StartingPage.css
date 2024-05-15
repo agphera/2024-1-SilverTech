@@ -83,3 +83,21 @@ body, html {
     font-weight: 500;
     
 }
+
+.log-popup{
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgb(63, 78, 60);
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 40px;
+    display: none; /* Initially hidden */
+    
+    transition: opacity 0.5s ease-in-out;
+    opacity: 0; /* Start hidden */
+}

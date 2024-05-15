@@ -12,21 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
     var randomGreeting = greetings[Math.floor(Math.random() * greetings.length)]; // 랜덤인사
     document.getElementById('random-greeting').textContent = randomGreeting; 
   
-  
-    //버튼으로 페이지 이동하기 js
-    //let FirstTimeButton = document.getElementById("FirstTimeButton");
-    //let NotFirstTimeButton = document.getElementById("NotFirstTimeButton");
-  
-    //FirstTimeButton.addEventListener("click", function() {
-    //  window.location.href = 'Camera.html'; // 처음 오신 분들을 위한 페이지로 이동
-    //});
-  
-    //NotFirstTimeButton.addEventListener("click", function() {
-    //  window.location.href = 'Camera.html'; // 재방문자를 위한 페이지로 이동
-    //});
-  //버튼으로 페이지 이동하기 js
-  
-  
   });
   
   

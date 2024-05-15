@@ -1,0 +1,54 @@
+@import url('https://fonts.googleapis.com/css2?family=Gowun+Dodum&family=Nanum+Myeongjo&family=Noto+Serif+KR&display=swap');
+
+
+body, html, div, a { 
+   font-family: "Gowun Dodum", sans-serif; /*폰트 바뀔 수 있음*/
+}
+
+
+body, html {
+    height: 100%;
+    width: 100%;
+    margin: 0;
+    background-color: rgb(63, 78, 60);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: "Gowun Dodum", sans-serif;
+}
+
+.camera-box {
+    text-align: center;
+}
+
+.camera-box video{
+    height: 80%;
+    width: 80%;
+}
+
+.camera-buttons {
+    margin-top: 20px;
+}
+
+.camera-buttons .button {
+    margin: 10px;
+}
+
+.camera-ment-box {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 50px;
+    justify-content: center;
+    align-items: center;
+}
+
+#cameraMent {
+    text-align: center;
+    color: white;
+    font-size: 50px;
+    transition: opacity 1s ease-in-out;
+}
