@@ -65,7 +65,7 @@
             <img src="{% static 'Main_source/park1-base-picture.png'%}" alt="Base Image">
         </div>
 
-        <div class="column is-half"> <!--중심을 기준으로 오른쪽 화면-->
+        <div class="column is-half right-container"> <!--중심을 기준으로 오른쪽 화면-->
             <div class="textboard">
                 <p>그림을<br>설명해주세요!</p>
             </div>
@@ -95,8 +95,6 @@
         </div>
     </div>    
 
-
-    <!--생성이미지 비교 구현 중-->
 
 
     <!--종료 3초전 팝업-->
@@ -219,10 +217,10 @@
                 //if (data['image_url']) { //기존코드
                 //    window.open(data['image_url'], '_blank', 'width=800,height=800'); // 새 창에서 이미지 URL 열기
                 //} //기존코드
-                if (data['image_url']) { // test
+                if (data['image_url']) { // html로 가져왔음
                    // 이미지 URL을 <img> 태그의 src 속성으로 설정
                    showGeneratedImage(data['image_url']);
-                } //test
+                } //html로 가져왔음. 
             })
             .catch(error => console.error('Error:', error));
 
@@ -238,7 +236,7 @@
     }
 
 
-        // 추가된 부분
+    //생성이미지url을 html로 가져오는 함수
     function showGeneratedImage(url) {
         const generatedImageContainer = document.getElementById('generatedImageContainer');
         const generatedImage = document.getElementById('generatedImage');
@@ -246,9 +244,9 @@
         generatedImageContainer.classList.add('visible');
         
         // 몇 초 후에 이미지 숨기기
-        setTimeout(() => {
-            generatedImageContainer.classList.remove('visible');
-        }, 5000); // 5초 후 이미지 숨김
+        //setTimeout(() => {
+        //    generatedImageContainer.classList.remove('visible');
+        //}, 5000); // 5초 후 이미지 숨김
     }
 
 </script>

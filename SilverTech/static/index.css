@@ -185,32 +185,39 @@ progress::-webkit-progress-value {
 
 /*생성이미지*/
 /* 추가된 부분 */
+/* 생성된 이미지 컨테이너 스타일 (오른쪽) */
+/* 오른쪽 컨테이너 스타일 */
+.right-container {
+    position: relative;
+}
+
+/* 생성된 이미지 컨테이너 스타일 */
 .generated-image-container {
     position: absolute;
     top: 0;
+    left: 0;
     right: 0;
     bottom: 0;
-    left: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    background-color: rgba(0, 0, 0, 0.8); /* 배경색 추가로 오른쪽 화면 요소 가림 */
-    z-index: 10; /* 오른쪽 화면 요소 위에 표시 */
-    visibility: hidden; /* 기본적으로 숨김 */
-    transition: visibility 0s, opacity 0.5s linear; /* 부드러운 페이드 효과 */
+    padding: 13px;
+    background-color: #c0c5a4; /* 패딩 색상 설정 */
+    text-align: center;
+    max-width: 70%;
+    margin: 80px auto 0 auto;
+    z-index: 10;
+    visibility: hidden;
+    transition: visibility 0s, opacity 0.5s linear;
     opacity: 0;
 }
 
 .generated-image-container img {
-    max-width: 100%;
-    max-height: 100%;
+    width: 100%;
+    height: auto;
 }
 
 .generated-image-container.visible {
     visibility: visible;
     opacity: 1;
 }
-
 
 
 /*로딩중 팝업*/
