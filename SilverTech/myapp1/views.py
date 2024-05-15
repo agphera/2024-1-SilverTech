@@ -79,15 +79,15 @@ urlpatterns = [
 
 @csrf_exempt 
 def StartingPage(request): #
-    return render(request,'../Frontend_UI/StartingPage.html')
+    return render(request,'StartingPage.html')
 
 @csrf_exempt
 def Camera(request): #
-    return render(request,'../Frontend_UI/Camera.html')
+    return render(request,'Camera.html')
 
 @csrf_exempt
 def index(request): #
-    return render(request, '../Frontend_UI/index.html')
+    return render(request, 'index.html')
 
 def send_audio_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
