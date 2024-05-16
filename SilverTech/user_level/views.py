@@ -83,7 +83,7 @@ def fetch_user_info(request, user_name):
     },
 )
 @api_view(["GET", "POST"])
-def picture_training(request):
+def login_to_training(request):
     if request.method == "POST":
         name = request.POST.get('name')
         
@@ -121,7 +121,7 @@ def picture_training(request):
         return render(request, 'level-image.html', context)
 
 @swagger_auto_schema(
-    method='get',  # 요청 메소드
+    method='post',  # 요청 메소드
     responses={  # 응답 형식
         200: openapi.Response(
             description="그림 URL과 순서 정보 반환",
@@ -141,189 +141,173 @@ def picture_training(request):
     operation_description="사용자의 레벨과 진행 상태에 따라 적절한 그림을 반환하는 API",
     tags=['Base picture'], 
 )
-@api_view(["GET"])
-def fetch_picture(request):
-    level_changed = request.session.get('level_changed')
-    if level_changed:
-        request.session['level_changed'] = False # 레벨 변경 여부 초기화
-        return adjust_level(request)
-    else:
-        return change_base_picture(request)
-
-# 다음 order의 그림을 가져오는 함수
-def change_base_picture(request):
+@api_view(["POST"])
+def load_next_base_picture(request):
     try:
-        # 세션에서 사용자 ID, 레벨, 그림 레벨을 가져옴
         user_id = request.session.get('user_id')
-        level = request.session.get('level')  # 현재 레벨을 세션에서 가져옴
-        picture_level = level if level <= 2 else level - 2  # 조정된 레벨 계산
-        
-        # 사용자 진행 정보를 데이터베이스에서 가져옴
-        user_proceeding = UserProceeding.objects.get(user_id=user_id)
+        if not user_id:
+            return JsonResponse({'error': 'User not authenticated'}, status=401)
 
-        # 레벨이 설정된 범위를 벗어나면 오류 반환
-        if level >= len(picture_number_by_level):
-            return JsonResponse({'error': 'Level out of range'}, status=400)
-
-        if user_proceeding.is_order:
-            # is_order가 참일 때: 다음 순서의 그림을 역순으로 가져오는 로직
-            if level == 3 or level == 4:
-                # 레벨 3, 4일 때 역순으로 그림을 가져옴
-                new_order = (user_proceeding.last_order - 1 + picture_number_by_level[level]) % picture_number_by_level[level]
-                user_proceeding.last_order = new_order
-            else:
-                # 기타 레벨에서는 정순으로 다음 순서의 그림을 가져옴
-                new_order = (user_proceeding.last_order + 1) % picture_number_by_level[level]
-                user_proceeding.last_order = new_order
-        else:
-            # is_order가 거짓일 때: 랜덤으로 그림을 선택하는 로직
-            all_pictures = list(BasePictures.objects.filter(level=picture_level).values_list('order', flat=True))
-            seen_pictures = user_proceeding.seen_pictures or []
-            available_pictures = [order for order in all_pictures if order not in seen_pictures]
-            
-            # 모든 그림을 본 경우, 본 그림 목록을 리셋하여 다시 선택할 수 있게 함
-            if not available_pictures:
-                seen_pictures = []  # 이미 본 그림 목록 리셋
-                available_pictures = all_pictures
-
-            # 랜덤으로 그림을 선택
-            chosen_order = random.choice(available_pictures)
-            user_proceeding.last_order = chosen_order
-            seen_pictures.append(chosen_order)
-            user_proceeding.seen_pictures = seen_pictures
-
-        # 변경된 진행 정보를 저장
-        user_proceeding.save()
-
-        # 선택된 그림을 데이터베이스에서 가져옴
-        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
-        # 그림의 URL과 순서를 JSON 형태로 반환
-        return JsonResponse({'url': base_picture.url, 'order': base_picture.order, 'level': user_proceeding.level}, status=200)
-
-    except UserProceeding.DoesNotExist:  # 사용자 진행 정보 x
-        return JsonResponse({'error': 'User proceeding not found'}, status=404)
-    except BasePictures.DoesNotExist:  # 선택된 그림x
-        return JsonResponse({'error': 'Base picture not found'}, status=404)
-    except IndexError:  # 인덱스 범위 아웃
-        return JsonResponse({'error': 'Index out of range'}, status=400)
-
-def adjust_level(request):
-    user_id = request.session.get('user_id')  # 사용자ID
-
-    if not user_id:  # 사용자ID 없으면 인증오류 반환
-        return JsonResponse({'error': 'User not authenticated'}, status=401)
-
-    try:
-        user_proceeding = UserProceeding.objects.get(user__user_id=user_id)  # 사용자 진행정보 DB 접근 
-
-        # 사용자가 이전에 클리어한 레벨이면 is_order=false // 아니면 true
-        user_proceeding.is_order = False if user_proceeding.level in user_proceeding.clear_level else True
-
-        if user_proceeding.is_order:
-            if user_proceeding.level in [0, 1, 2]:
-                # 레벨 0, 1, 2는 0번 그림부터 시작
-                user_proceeding.last_order = 0
-            else: # 레벨 3, 4는 마지막 그림부터 시작
-                last_picture = BasePictures.objects.filter(level=user_proceeding.level-2).order_by('-order').first()
-                user_proceeding.last_order = last_picture.order if last_picture else 0
-        else:
-            # 레벨에 맞춰 범위 중에 하나의 그림 선택
-            user_proceeding.last_order = random.randrange(picture_number_by_level[user_proceeding.level])          
-        # 본 그림 목록 초기화
-        user_proceeding.seen_pictures = []
-        
-        # 사용자 정확도 정보 초기화
-        user_accuracy = UserAccuracy.objects.get(user_id=user_id)
-        user_accuracy.successive_correct = 0
-        user_accuracy.successive_wrong = 0
-        user_accuracy.save()  # 변경 사항을 데이터베이스에 저장
-        user_proceeding.save() 
-
-        # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
-        picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
-        picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
-        if picture:
-            image_url = picture.url
-            # seen_pictures에 현재 last_order를 추가하고 저장
-            user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
-            user_proceeding.save()
-        else:
-            image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
-
-        # 세션에 새 레벨과 그림 레벨 저장
-        request.session['level'] = user_proceeding.level
-        request.session['picture_level'] = picture_level
-
-        return JsonResponse({
-            'level': user_proceeding.level,
-            'order': user_proceeding.last_order,
-            'url': image_url
-        }, status=200)
-
-
-    except UserProceeding.DoesNotExist:
-        return JsonResponse({'error': 'User proceeding not found'}, status=404)
-    except BasePictures.DoesNotExist:
-        return JsonResponse({'error': 'No base picture found for this level and order'}, status=404)
-    except Exception as e:
-        return JsonResponse({'error': str(e)}, status=500)
-
-# 난이도 자동 조정 구현 테스트 필요    
-@csrf_exempt
-def adjust_level_with_accuracy(request):
-    user_id = request.session.get('user_id')
-    if not user_id:
-        return JsonResponse({'error': 'User not authenticated'}, status=401)
-
-    # JSON 데이터에서 accuracy 값을 추출
-    data = json.loads(request.body)
-    accuracy = data.get('accuracy', 0)  # 기본값 설정
-
-    try:
         # 사용자 정확도와 진행 정보를 DB에서 가져옴
         user_accuracy = UserAccuracy.objects.get(user_id=user_id)
-        user_proceeding = UserProceeding.objects.get(user=user_id)
-        request.session['level_changed'] = False # 레벨 변경 여부 초기화
-
-        # accuracy 값에 따라 연속 정답 또는 오답 수를 갱신
-        if accuracy >= 0.6:
-            user_accuracy.successive_correct += 1
-            user_accuracy.successive_wrong = 0 #상 기록시 하 리셋
-        elif accuracy < 0.2:
-            user_accuracy.successive_wrong += 1
-            user_accuracy.successive_correct = 0 #하 기록시 상 리셋
+        user_proceeding = UserProceeding.objects.get(user__user_id=user_id)
+        
+        level_changed = check_change_level(request, user_accuracy, user_proceeding)
+        
+        print(level_changed)
+        if level_changed:
+            json_response = change_altered_level_base_picture(request, user_accuracy, user_proceeding)
         else:
-            user_accuracy.successive_correct = 0 #중 기록시 상,하 리셋
-            user_accuracy.successive_wrong = 0
-
-        # 연속 정답 수가 3 이상이면 레벨을 1 증가
-        if user_accuracy.successive_correct >= 3:
-            # 클리어한 레벨에 추가 (중복 없이 추가)
-            if user_proceeding.level not in user_proceeding.clear_level:
-                user_proceeding.clear_level.append(user_proceeding.level)
-
-            if user_proceeding.level < 4:
-                user_proceeding.level += 1
-                request.session['level_changed'] = 1 #level 변경
-            user_accuracy.successive_correct = 0
-        # 연속 오답 수가 2 이상이면 레벨을 1 감소
-        elif user_accuracy.successive_wrong >= 2:
-            if user_proceeding.level > 0:
-                user_proceeding.level -= 1
-                request.session['level_changed'] = -1 #level 변경
-            user_accuracy.successive_wrong = 0
-
-        # 변경된 진행 정보와 정확도 정보를 저장
+            json_response = change_same_level_base_picture(request, user_proceeding)
+        
+        # 변경된 진행 정보와 정확도 정보 저장
         user_proceeding.save()
         user_accuracy.save()
-
-        return JsonResponse({
-            'current_level': user_proceeding.level,
-            'successive_correct': user_accuracy.successive_correct,
-            'successive_wrong': user_accuracy.successive_wrong
-        }, status=200)
+        return json_response
 
     except UserAccuracy.DoesNotExist:
         return JsonResponse({'error': 'User accuracy record not found'}, status=404)
     except UserProceeding.DoesNotExist:
         return JsonResponse({'error': 'User proceeding not found'}, status=404)
+    except BasePictures.DoesNotExist:
+        return JsonResponse({'error': 'No base picture found for this level and order'}, status=404)
+    except IndexError:  # 인덱스 범위 아웃
+        return JsonResponse({'error': 'Index out of range'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
+
+# 다음 order의 그림을 가져오는 함수
+def change_same_level_base_picture(request, user_proceeding):
+    print('change_base_picture')
+    # 세션에서 레벨, 그림 레벨을 가져옴
+    level = request.session.get('level')  # 현재 레벨을 세션에서 가져옴
+    picture_level = level if level <= 2 else level - 2  # 조정된 레벨 계산
+    
+    # 레벨이 설정된 범위를 벗어나면 오류 반환
+    if level >= len(picture_number_by_level):
+        return JsonResponse({'error': 'Level out of range'}, status=400)
+
+    if user_proceeding.is_order:
+        # is_order가 참일 때: 다음 순서의 그림을 역순으로 가져오는 로직
+        if level == 3 or level == 4:
+            # 레벨 3, 4일 때 역순으로 그림을 가져옴
+            new_order = (user_proceeding.last_order - 1 + picture_number_by_level[level]) % picture_number_by_level[level]
+            user_proceeding.last_order = new_order
+        else:
+            # 기타 레벨에서는 정순으로 다음 순서의 그림을 가져옴
+            new_order = (user_proceeding.last_order + 1) % picture_number_by_level[level]
+            user_proceeding.last_order = new_order
+    else:
+        # is_order가 거짓일 때: 랜덤으로 그림을 선택하는 로직
+        all_pictures = list(BasePictures.objects.filter(level=picture_level).values_list('order', flat=True))
+        seen_pictures = user_proceeding.seen_pictures or []
+        available_pictures = [order for order in all_pictures if order not in seen_pictures]
+        
+        # 모든 그림을 본 경우, 본 그림 목록을 리셋하여 다시 선택할 수 있게 함
+        if not available_pictures:
+            seen_pictures = []  # 이미 본 그림 목록 리셋
+            available_pictures = all_pictures
+
+        # 랜덤으로 그림을 선택
+        chosen_order = random.choice(available_pictures)
+        user_proceeding.last_order = chosen_order
+        seen_pictures.append(chosen_order)
+        user_proceeding.seen_pictures = seen_pictures
+
+
+    # 선택된 그림을 데이터베이스에서 가져옴
+    base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+    # 그림의 URL과 순서를 JSON 형태로 반환
+    return JsonResponse({'url': base_picture.url, 'order': base_picture.order, 'level': user_proceeding.level}, status=200)
+
+
+
+def change_altered_level_base_picture(request, user_accuracy, user_proceeding):
+    print('adjust_level')
+    user_id = request.session.get('user_id')  # 사용자ID
+
+    if not user_id:  # 사용자ID 없으면 인증오류 반환
+        return JsonResponse({'error': 'User not authenticated'}, status=401)
+
+    # 사용자가 이전에 클리어한 레벨이면 is_order=false // 아니면 true
+    user_proceeding.is_order = False if user_proceeding.level in user_proceeding.clear_level else True
+
+    if user_proceeding.is_order:
+        if user_proceeding.level in [0, 1, 2]:
+            # 레벨 0, 1, 2는 0번 그림부터 시작
+            user_proceeding.last_order = 0
+        else: # 레벨 3, 4는 마지막 그림부터 시작
+            last_picture = BasePictures.objects.filter(level=user_proceeding.level-2).order_by('-order').first()
+            user_proceeding.last_order = last_picture.order if last_picture else 0
+    else:
+        # 레벨에 맞춰 범위 중에 하나의 그림 선택
+        user_proceeding.last_order = random.randrange(picture_number_by_level[user_proceeding.level])          
+    # 본 그림 목록 초기화
+    user_proceeding.seen_pictures = []
+    
+    # 사용자 정확도 정보 초기화
+    user_accuracy.successive_correct = 0
+    user_accuracy.successive_wrong = 0
+
+    # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
+    picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
+    picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
+    if picture:
+        image_url = picture.url
+        # seen_pictures에 현재 last_order를 추가하고 저장
+        user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
+        user_proceeding.save()
+    else:
+        image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
+
+    # 세션에 새 레벨과 그림 레벨 저장
+    request.session['level'] = user_proceeding.level
+    request.session['picture_level'] = picture_level
+
+    return JsonResponse({
+        'level': user_proceeding.level,
+        'order': user_proceeding.last_order,
+        'url': image_url
+    }, status=200)
+
+
+
+
+# 난이도 자동 조정 구현 테스트 필요    
+@csrf_exempt
+def check_change_level(request, user_accuracy, user_proceeding):
+    # JSON 데이터에서 accuracy 값을 추출
+    data = json.loads(request.body)
+    accuracy = data.get('accuracy', 0)  # 기본값 설정
+
+    level_changed = False # 레벨 변경 여부 초기화
+
+    # accuracy 값에 따라 연속 정답 또는 오답 수를 갱신
+    if accuracy >= 0.6:
+        user_accuracy.successive_correct += 1
+        user_accuracy.successive_wrong = 0 #상 기록시 하 리셋
+    elif accuracy < 0.2:
+        user_accuracy.successive_wrong += 1
+        user_accuracy.successive_correct = 0 #하 기록시 상 리셋
+    else:
+        user_accuracy.successive_correct = 0 #중 기록시 상,하 리셋
+        user_accuracy.successive_wrong = 0
+
+    # 연속 정답 수가 3 이상이면 레벨을 1 증가
+    if user_accuracy.successive_correct >= 3:
+        # 클리어한 레벨에 추가 (중복 없이 추가)
+        if user_proceeding.level not in user_proceeding.clear_level:
+            user_proceeding.clear_level.append(user_proceeding.level)
+
+        if user_proceeding.level < 4:
+            user_proceeding.level += 1
+            level_changed = 1 #level 변경
+        user_accuracy.successive_correct = 0
+    # 연속 오답 수가 2 이상이면 레벨을 1 감소
+    elif user_accuracy.successive_wrong >= 2:
+        if user_proceeding.level > 0:
+            user_proceeding.level -= 1
+            level_changed = -1 #level 변경
+        user_accuracy.successive_wrong = 0
+    
+    return level_changed
