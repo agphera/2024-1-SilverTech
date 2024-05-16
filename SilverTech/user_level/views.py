@@ -30,7 +30,7 @@ def fetch_user_info(request, user_name):
             user = User(name=user_name)
             user.save()
             # 새로운 사용자에 대해 UserProceeding을 초기화
-            user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=0, seen_pictures=[], clear_level=[])
+            user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=1, seen_pictures=[], clear_level=[])
             user_proceeding.save()
             # UserAccuracy도 초기화
             user_accuracy = UserAccuracy(user=user, successive_correct=0, successive_wrong=0)
@@ -46,7 +46,6 @@ def fetch_user_info(request, user_name):
         # 세션에 사용자 정보 저장
         request.session['user_name'] = user_name
         request.session['user_id'] = user.user_id
-        request.session['level'] = user_proceeding.level
 
         return user_proceeding, None  # UserProceeding 객체와 None 반환
     else:
@@ -94,7 +93,6 @@ def login_to_training(request):
         try:
             level = user_proceeding.level
             picture_level = level if level <= 2 else level - 2
-            request.session['picture_level'] = picture_level  # 세션에 조정된 레벨 저장
             
             base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
             
@@ -154,11 +152,10 @@ def load_next_base_picture(request):
         
         level_changed = check_change_level(request, user_accuracy, user_proceeding)
         
-        print(level_changed)
         if level_changed:
-            json_response = change_altered_level_base_picture(request, user_accuracy, user_proceeding)
+            json_response = fetch_altered_level_base_picture(request, user_accuracy, user_proceeding)
         else:
-            json_response = change_same_level_base_picture(request, user_proceeding)
+            json_response = fetch_same_level_base_picture(request, user_proceeding)
         
         # 변경된 진행 정보와 정확도 정보 저장
         user_proceeding.save()
@@ -177,10 +174,9 @@ def load_next_base_picture(request):
         return JsonResponse({'error': str(e)}, status=500)
 
 # 다음 order의 그림을 가져오는 함수
-def change_same_level_base_picture(request, user_proceeding):
-    print('change_base_picture')
+def fetch_same_level_base_picture(request, user_proceeding):
     # 세션에서 레벨, 그림 레벨을 가져옴
-    level = request.session.get('level')  # 현재 레벨을 세션에서 가져옴
+    level = user_proceeding.level 
     picture_level = level if level <= 2 else level - 2  # 조정된 레벨 계산
     
     # 레벨이 설정된 범위를 벗어나면 오류 반환
@@ -222,23 +218,16 @@ def change_same_level_base_picture(request, user_proceeding):
 
 
 
-def change_altered_level_base_picture(request, user_accuracy, user_proceeding):
-    print('adjust_level')
-    user_id = request.session.get('user_id')  # 사용자ID
-
-    if not user_id:  # 사용자ID 없으면 인증오류 반환
-        return JsonResponse({'error': 'User not authenticated'}, status=401)
-
+def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
     # 사용자가 이전에 클리어한 레벨이면 is_order=false // 아니면 true
     user_proceeding.is_order = False if user_proceeding.level in user_proceeding.clear_level else True
 
     if user_proceeding.is_order:
-        if user_proceeding.level in [0, 1, 2]:
+        if user_proceeding.level <= 2:
             # 레벨 0, 1, 2는 0번 그림부터 시작
             user_proceeding.last_order = 0
         else: # 레벨 3, 4는 마지막 그림부터 시작
-            last_picture = BasePictures.objects.filter(level=user_proceeding.level-2).order_by('-order').first()
-            user_proceeding.last_order = last_picture.order if last_picture else 0
+            user_proceeding.last_order = picture_number_by_level[user_proceeding.level]-1
     else:
         # 레벨에 맞춰 범위 중에 하나의 그림 선택
         user_proceeding.last_order = random.randrange(picture_number_by_level[user_proceeding.level])          
@@ -260,16 +249,11 @@ def change_altered_level_base_picture(request, user_accuracy, user_proceeding):
     else:
         image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
 
-    # 세션에 새 레벨과 그림 레벨 저장
-    request.session['level'] = user_proceeding.level
-    request.session['picture_level'] = picture_level
-
     return JsonResponse({
         'level': user_proceeding.level,
         'order': user_proceeding.last_order,
         'url': image_url
     }, status=200)
-
 
 
 
