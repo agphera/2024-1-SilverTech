@@ -24,7 +24,6 @@ document.addEventListener("DOMContentLoaded", function() {
     }  
     let progressInterval = setInterval(updateProgressBar, 100);  
 
-
   
     /*navbar+progressbar 사라짐 + 로딩중 팝업 */
     function hideElements(){

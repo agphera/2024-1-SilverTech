@@ -1,4 +1,4 @@
-import {showPopup} from './popup.js';
+import {showPopup,hidePopup} from './popup.js';
 
 
 document.addEventListener("DOMContentLoaded", function() {
