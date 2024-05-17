@@ -1,12 +1,17 @@
+import {showPopup} from './popup.js';
+
+
 document.addEventListener("DOMContentLoaded", function() {
   
     let popup = document.getElementById("GreetingPopup");
   
     // 3초후 팝업
     setTimeout(function() {
-        popup.style.display = "block";  
-        popup.style.opacity = 1;        
-    }, 3000);
+        //popup.style.display = "block";  
+        //popup.style.opacity = 1;        
+        showPopup("GreetingPopup");
+      }, 3000);
+
   
     var greetings = ["와우~ 반갑습니다!", "우와, 안녕하세요!", "짝짝짝, 환영합니다!", "기다리고 있었어요!"];
     var randomGreeting = greetings[Math.floor(Math.random() * greetings.length)]; // 랜덤인사
