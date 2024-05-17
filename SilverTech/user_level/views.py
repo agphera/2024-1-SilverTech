@@ -21,35 +21,22 @@ def login_picture_load(request):
 
 # 회원정보 확인해서 로그인하거나 및 회원가입하는 함수
 def fetch_user_info(request, user_name):
-    if user_name:
-        try:
-            # DB에서 해당 사용자의 난이도 정보를 가져옴
-            user = User.objects.get(name=user_name)
-        except User.DoesNotExist:
-            # 사용자가 존재하지 않는 경우 새로운 사용자를 생성하고 저장
-            user = User(name=user_name)
-            user.save()
-            # 새로운 사용자에 대해 UserProceeding을 초기화
-            user_proceeding = UserProceeding(user=user, level=1, last_order=0, is_order=1, seen_pictures=[], clear_level=[])
-            user_proceeding.save()
-            # UserAccuracy도 초기화
-            user_accuracy = UserAccuracy(user=user, successive_correct=0, successive_wrong=0)
-            user_accuracy.save()
-        else:
-            # 사용자가 존재하는 경우 UserProceeding 가져오기
-            try:
-                user_proceeding = UserProceeding.objects.get(user=user)
-            except UserProceeding.DoesNotExist:
-                # UserProceeding이 존재하지 않을 경우 error
-                return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
-        
-        # 세션에 사용자 정보 저장
-        request.session['user_name'] = user_name
-        request.session['user_id'] = user.user_id
-
-        return user_proceeding, None  # UserProceeding 객체와 None 반환
-    else:
+    if not user_name:
         return None, JsonResponse({'error': 'No name provided'}, status=400)
+    
+    user, created = User.objects.get_or_create(name=user_name)
+    if created:
+        UserProceeding.objects.create(user=user, level=1, last_order=0, is_order=1, seen_pictures=[], clear_level=[])
+        UserAccuracy.objects.create(user=user, successive_correct=0, successive_wrong=0)
+    
+    user_proceeding = UserProceeding.objects.filter(user=user).first()
+    if not user_proceeding:
+        return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
+
+    request.session['user_name'] = user_name
+    request.session['user_id'] = user.user_id
+
+    return user_proceeding, None
 
 # 초기 동작 함수
 @swagger_auto_schema(
@@ -153,23 +140,17 @@ def load_next_base_picture(request):
         level_changed = check_change_level(request, user_accuracy, user_proceeding)
         
         if level_changed:
-            json_response = fetch_altered_level_base_picture(request, user_accuracy, user_proceeding)
+            response = fetch_altered_level_base_picture(request, user_accuracy, user_proceeding)
         else:
-            json_response = fetch_same_level_base_picture(request, user_proceeding)
+            response = fetch_same_level_base_picture(request, user_proceeding)
         
         # 변경된 진행 정보와 정확도 정보 저장
         user_proceeding.save()
         user_accuracy.save()
-        return json_response
+        return response
 
-    except UserAccuracy.DoesNotExist:
-        return JsonResponse({'error': 'User accuracy record not found'}, status=404)
-    except UserProceeding.DoesNotExist:
-        return JsonResponse({'error': 'User proceeding not found'}, status=404)
-    except BasePictures.DoesNotExist:
-        return JsonResponse({'error': 'No base picture found for this level and order'}, status=404)
-    except IndexError:  # 인덱스 범위 아웃
-        return JsonResponse({'error': 'Index out of range'}, status=400)
+    except (UserAccuracy.DoesNotExist, UserProceeding.DoesNotExist, BasePictures.DoesNotExist) as e:
+        return JsonResponse({'error': str(e)}, status=404)
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
@@ -260,38 +241,29 @@ def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
 # 난이도 자동 조정 구현 테스트 필요    
 @csrf_exempt
 def check_change_level(request, user_accuracy, user_proceeding):
-    # JSON 데이터에서 accuracy 값을 추출
     data = json.loads(request.body)
-    accuracy = data.get('accuracy', 0)  # 기본값 설정
-
-    level_changed = False # 레벨 변경 여부 초기화
-
-    # accuracy 값에 따라 연속 정답 또는 오답 수를 갱신
+    accuracy = data.get('accuracy', 0)
+    level_changed = False
     if accuracy >= 0.6:
         user_accuracy.successive_correct += 1
-        user_accuracy.successive_wrong = 0 #상 기록시 하 리셋
+        user_accuracy.successive_wrong = 0
     elif accuracy < 0.2:
         user_accuracy.successive_wrong += 1
-        user_accuracy.successive_correct = 0 #하 기록시 상 리셋
+        user_accuracy.successive_correct = 0
     else:
-        user_accuracy.successive_correct = 0 #중 기록시 상,하 리셋
-        user_accuracy.successive_wrong = 0
+        user_accuracy.successive_correct = user_accuracy.successive_wrong = 0
 
-    # 연속 정답 수가 3 이상이면 레벨을 1 증가
     if user_accuracy.successive_correct >= 3:
-        # 클리어한 레벨에 추가 (중복 없이 추가)
         if user_proceeding.level not in user_proceeding.clear_level:
             user_proceeding.clear_level.append(user_proceeding.level)
-
         if user_proceeding.level < 4:
             user_proceeding.level += 1
-            level_changed = 1 #level 변경
+            level_changed = 1
         user_accuracy.successive_correct = 0
-    # 연속 오답 수가 2 이상이면 레벨을 1 감소
     elif user_accuracy.successive_wrong >= 2:
         if user_proceeding.level > 0:
             user_proceeding.level -= 1
-            level_changed = -1 #level 변경
+            level_changed = -1
         user_accuracy.successive_wrong = 0
-    
+
     return level_changed

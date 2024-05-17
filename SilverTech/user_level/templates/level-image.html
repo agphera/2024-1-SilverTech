@@ -42,7 +42,7 @@
       }
 
       // 그림 순차 출력 ** 프론트 **
-      function fetchImage() { 
+      function fetchImage() {
         const accuracyInput = document.getElementById("accuracy-input");
         let accuracy = parseFloat(accuracyInput.value);
         // 입력이 없으면 0.0으로 설정
@@ -57,7 +57,7 @@
             "Content-Type": "application/json",
             "X-CSRFToken": getCookie("csrftoken"),
           },
-        body: JSON.stringify(data),
+          body: JSON.stringify(data),
         })
           .then((response) => response.json())
           .then((data) => {
@@ -126,7 +126,7 @@
 
     <button onclick="fetchImage()">답변</button>
     <div>
-      Accuracy: <input type="text" id="accuracy-input" placeholder="0.0"/>
+      Accuracy: <input type="text" id="accuracy-input" placeholder="0.0" />
     </div>
 
     <div id="image-display" style="width: 600px; height: 600px">
