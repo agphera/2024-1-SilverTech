@@ -245,7 +245,7 @@ progress::-webkit-progress-value {
     font-size: 40px;
 }
 
-.scoring-popup{
+/*.scoring-popup{
     position: fixed;
     width: 100%;
     height: 100%;
@@ -260,7 +260,7 @@ progress::-webkit-progress-value {
 
     transition: opacity 0.5s ease-in-out;
     opacity: 0; /* Start hidden */
-}
+/*}*/
 
 
 /*비교 팝업*/
@@ -280,17 +280,19 @@ progress::-webkit-progress-value {
 /* 다음 단계 팝업 스타일 */
 .next-step-popup {
     position: fixed;
-    top: 0;
-    left: 0;
     width: 100%;
     height: 100%;
+    top: 0;
+    left: 0;
+    background-color: rgba(63, 78, 60, 0.9);
+    color: white;
     display: none;
     justify-content: center;
     align-items: center;
-    background-color: rgba(0, 0, 0, 0.8);
-    color: white;
-    opacity: 0;
+    font-size: 40px;
+
     transition: opacity 0.5s ease-in-out;
+    opacity: 0; /* Start hidden */
 }
 
 .next-step-content {
