@@ -6,8 +6,29 @@
     <script>
       // DOM이 로드된 후 초기 이미지를 로드하는 함수 실행
       window.onload = function () {
-        loadImage("{{ url }}"); //이미지 로드
+        updatePageState();
       };
+
+      function updatePageState() {
+        // Django 템플릿에서 초기 상태를 가져와 DOM 업데이트
+        const name = "{{ name }}";
+        const level = "{{ level }}";
+        const url = "{{ url }}";
+        const order = "{{ order }}";
+
+        document.getElementById("current-user-name").innerText =
+          "당신의 이름: " + name;
+        document.getElementById("current-level").innerText =
+          "당신의 난이도: " + level;
+        document.getElementById("current-image-url").innerText =
+          "그림 URL: " + url;
+        document.getElementById("current-image-order").innerText =
+          "그림 순서: " + order;
+
+        if (url) {
+          loadImage(url);
+        }
+      }
 
       // accuracy 값 전송
       function sendAccuracy() {
@@ -79,10 +100,10 @@
 
       // 이미지를 로드하고 화면에 표시하는 함수
       function loadImage(imageUrl) {
-        var imageDisplayDiv = document.getElementById("image-display");
+        const imageDisplayDiv = document.getElementById("image-display");
         imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
 
-        var image = new Image();
+        const image = new Image();
         image.src = imageUrl;
         image.style.width = "100%";
         image.style.height = "100%";
