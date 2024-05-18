@@ -60,7 +60,8 @@ while True:
             # 데이터셋에 있는 누군가가 식별되면 화면에 그들의 이름을 출력합니다.
             if currentname != name:
                 currentname = name
-                print(currentname) #이거 들고가시면 됩니다!!!!!
+                
+                print(currentname.replace('User_images_', '')) #이거 들고가면 됨!!! -> 숫자로 넘어가게하기 
                 vs.stop() # 비디오 스트림을 종료합니다.
                 fps.stop() # FPS 카운터를 종료합니다.
                 cv2.destroyAllWindows() # 모든 OpenCV 창을 닫습니다.

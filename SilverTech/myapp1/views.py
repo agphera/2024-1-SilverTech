@@ -156,7 +156,9 @@ def upload_image(request):
             # 10번째 이미지 후 세션 리셋 및 폴더 카운터 증가
             if image_counter >= 10:
                 request.session['image_counter'] = 0  # 이미지 카운터 리셋
+                print(folder_counter) #이거 들고가면 됨!!! 
                 request.session['folder_counter'] = folder_counter + 1  # 폴더 카운터 증가
+                
                 
                 train_model_again(os.path.join(settings.MEDIA_ROOT, folder_name))
 
@@ -170,6 +172,7 @@ def upload_image(request):
 
 #모델 추가 학습
 from imutils import paths
+import shutil  # 폴더 삭제에 사용됩니다.
 import face_recognition
 #import argparse
 import pickle
@@ -178,7 +181,7 @@ import os
 
 def train_model_again(request):
     # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
-    with open("../SilverTech/function/encodings.pickle", "rb") as f:
+    with open("../SilverTech/function/encodings.pickle", "rb") as f: 
         data = pickle.load(f)
     knownEncodings = data["encodings"]
     knownNames = data["names"]
@@ -204,43 +207,19 @@ def train_model_again(request):
     # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
     print("[INFO] serializing encodings...")
     data = {"encodings": knownEncodings, "names": knownNames}
-    with open("encodings.pickle", "wb") as f:
+    with open("encodings.pickle", "wb") as f:  #myapp1 바깥 쪽에 생김. 이거 위치 나중에 잡아주겠습니다. 
         f.write(pickle.dumps(data))
     f.close()
+    
 
+    # 폴더가 존재하는지 확인
+    if os.path.exists(request):
+        # 폴더 삭제
+        shutil.rmtree(request)
+        print(f"{request} 폴더가 성공적으로 삭제되었습니다.")
+    else:
+        print(f"{request} 폴더를 찾을 수 없습니다.")
 
-
-
-def train_model_again1(image_folder_path):
-    # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
-    with open("../SilverTech/function/encodings.pickle", "rb") as f:
-        data = pickle.load(f)
-    knownEncodings = data["encodings"]
-    knownNames = data["names"]
-
-    # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
-    newImagePaths = list(paths.list_images(image_folder_path))
-
-    # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
-    for (i, imagePath) in enumerate(newImagePaths):
-        print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
-        name = imagePath.split(os.path.sep)[-2]
-
-        image = cv2.imread(imagePath)
-        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        boxes = face_recognition.face_locations(rgb, model="hog")
-        encodings = face_recognition.face_encodings(rgb, boxes)
-
-        for encoding in encodings:
-            knownEncodings.append(encoding)
-            knownNames.append(name)
-
-    # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
-    print("[INFO] serializing encodings...")
-    data = {"encodings": knownEncodings, "names": knownNames}
-    with open("../SilverTech/function/encodings.pickle", "wb") as f:
-        f.write(pickle.dumps(data))
 
 
 
