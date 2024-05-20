@@ -134,7 +134,7 @@ def index(request): #
 
 @csrf_exempt
 def second_page(request):
-    return render(request, '../Frontend_UI/Camera.html')
+    return render(request, '../Frontend_UI/index.html')
 
 
 
@@ -180,38 +180,24 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import JsonResponse
-
 @csrf_exempt
 def upload_image(request):
+    path = None
+    full_path = None
+
     if request.method == 'POST':
         image = request.FILES.get('photo')
         if image:
             # 세션에서 이미지 카운터를 가져옵니다.
             image_counter = request.session.get('image_counter', 0)
+            folder_counter = request.session.get('folder_counter', 1)
             image_counter += 1
             
-            # 기본 폴더 경로 설정
+            # 기본 폴더 이름 설정
             base_folder_name = 'User_images'
             
-            # 실제 저장될 폴더 경로 설정
-            folder_name = base_folder_name
-            
-            # 폴더가 이미 존재하는지 확인하고, 존재한다면 가장 마지막에 생성된 폴더 이름을 사용합니다.
-            if image_counter > 1:
-                folder_version = 1
-                temp_folder_name = f"{base_folder_name}_{folder_version}"
-                while default_storage.exists(temp_folder_name):
-                    folder_name = temp_folder_name  # 사용 가능한 마지막 폴더 이름 업데이트
-                    folder_version += 1
-                    temp_folder_name = f"{base_folder_name}_{folder_version}"
-            else:
-                # 이미지 카운터가 1인 경우 새로운 폴더를 만듭니다.
-                if default_storage.exists(folder_name):
-                    folder_version = 1
-                    folder_name = f"{base_folder_name}_{folder_version}"
-                    while default_storage.exists(folder_name):
-                        folder_version += 1
-                        folder_name = f"{base_folder_name}_{folder_version}"
+            # 실제 저장될 폴더 이름 설정
+            folder_name = f"{base_folder_name}_{folder_counter}"
             
             # 파일 이름 설정
             file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
@@ -220,14 +206,21 @@ def upload_image(request):
             path = default_storage.save(file_name, ContentFile(image.read()))
             full_path = os.path.join(settings.MEDIA_ROOT, path)
             
-            # 세션에 이미지 카운터 업데이트
+            # 세션에 이미지 카운터와 폴더 카운터 업데이트
             request.session['image_counter'] = image_counter
-            
-            # 100번째 이미지 후 세션 리셋
-            if image_counter >= 100:
-                del request.session['image_counter']
+            request.session['folder_counter'] = folder_counter
             
             print(f"Image {image_counter} uploaded successfully to {full_path}")
+            
+            # 10번째 이미지 후 세션 리셋 및 폴더 카운터 증가
+            if image_counter >= 10:
+                request.session['image_counter'] = 0  # 이미지 카운터 리셋
+                print(folder_counter) #이거 들고가면 됨!!! 
+                request.session['folder_counter'] = folder_counter + 1  # 폴더 카운터 증가
+                
+                
+                train_model_again(os.path.join(settings.MEDIA_ROOT, folder_name))
+
             return JsonResponse({'message': 'Image uploaded successfully!', 'path': full_path})
         else:
             print("No image provided")
@@ -235,5 +228,58 @@ def upload_image(request):
     else:
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
+
+#모델 추가 학습
+from imutils import paths
+import shutil  # 폴더 삭제에 사용됩니다.
+import face_recognition
+#import argparse
+import pickle
+import cv2
+import os
+
+def train_model_again(request):
+    # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
+    with open("../SilverTech/function/encodings.pickle", "rb") as f: 
+        data = pickle.load(f)
+    knownEncodings = data["encodings"]
+    knownNames = data["names"]
+
+    # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
+    newImagePaths = list(paths.list_images(request))
+
+    # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
+    for (i, imagePath) in enumerate(newImagePaths):
+        print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
+        name = imagePath.split(os.path.sep)[-2]
+
+        image = cv2.imread(imagePath)
+        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+        boxes = face_recognition.face_locations(rgb, model="hog")
+        encodings = face_recognition.face_encodings(rgb, boxes)
+
+        for encoding in encodings:
+            knownEncodings.append(encoding)
+            knownNames.append(name)
+
+    # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
+    print("[INFO] serializing encodings...")
+    data = {"encodings": knownEncodings, "names": knownNames}
+    with open("encodings.pickle", "wb") as f:  #myapp1 바깥 쪽에 생김. 이거 위치 나중에 잡아주겠습니다. 
+        f.write(pickle.dumps(data))
+    f.close()
+    
+
+    # 폴더가 존재하는지 확인
+    if os.path.exists(request):
+        # 폴더 삭제
+        shutil.rmtree(request)
+        print(f"{request} 폴더가 성공적으로 삭제되었습니다.")
+    else:
+        print(f"{request} 폴더를 찾을 수 없습니다.")
+
+
+
 
 
