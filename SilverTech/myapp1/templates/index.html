@@ -66,18 +66,42 @@
         </div>
     </div>
 
+    <div id="letStartPopup" class="let-start-popup"> <!--갑자기 화면 시작하면 이상할 것 같아서 추가함. 아직 display none 상태-->
+        <p id="startMent" class="start-ment">반갑습니다! 바로 그림 문제를 풀러 가봅시다!
+            <br>화면이 바뀌면, 제한시간 동안 그림을 말로 설명해보세요!</p>
+    </div>
+
     <!-- 로딩중 팝업 -->
     <div id="analysisPopup" class="analysis-popup">
         <div class="analysis-content">
             <p>결과를 분석하는 중입니다.<br>잠시만 기다려주세요!<br></p>
-            <div class="show-accuracy" style="font-size: 35px;">
-                <p><!--정확도 출력--></p>
-            </div>
-            <div class="show-correct" style="font-size: 35px;">
-                <p><!--맞힌 단어 출력--></p>
-            </div>
         </div>
     </div>
+
+    
+    <!--칭찬 격려 멘트-->
+    <div id="complimentPopup" class="compliment-popup">
+        <div id="compliMent" class="compli-ment"style="font-size: 40px;">
+            <p></p>
+        </div>
+        <div id="helpMent" class="help-ment" style="font-size: 30px;">
+            <p></p>
+        </div>
+    </div>
+ 
+
+    <!--로딩중 팝업 - 정확도 및 맞힌 단어 출력-->
+    <div id="scorePopup" class="score-popup">
+        <div class="show-accuracy" style="font-size: 35px;">
+            <p><!--정확도 출력--></p>
+        </div>
+        <div class="show-correct" style="font-size: 35px;">
+            <p><!--맞힌 단어 출력--></p>
+            <p>맞힌 단어를 바탕으로 그림을 만들고 있어요!<br>어떤 그림이 나올지 상상해볼까요?</p>
+        </div>
+    </div>
+
+
 
     <!-- 비교 후 다른 그림 -->
     <div id="messageContainer" class="message-container">
@@ -172,9 +196,19 @@
                     console.log("맞힌 개수:", data['len_true_word']);
                     console.log("정답 단어:", data['true_word']);
 
-                    document.querySelector('.show-accuracy').innerHTML = `좋아요!<br>맞힌 개수는 ${data['len_true_word']} 개,`;
-                    document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!<br>이제 맞힌 단어를 통해 그림을 만들어드릴게요.<br>기다리시는 동안 그림이 어떻게 그려질지 예상해보세요!`;
-
+                    hidePopup("analysisPopup"); //분석중 팝업 사라짐
+                    
+                    showComplimentBox(data); //정확도계산을 바탕으로 한 칭찬 멘트 팝업 
+                    setTimeout(() => {
+                        hidePopup("complimentPopup"); //5초뒤 사라짐
+                        showPopup("scorePopup"); //5초 뒤 점수 팝업 생성됨                        
+                    }, 7000);
+                    
+                    //점수 팝업 내용
+                    document.querySelector('.show-accuracy').innerHTML = `<br>맞힌 개수는 ${data['len_true_word']} 개,`;
+                    //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
+                    //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
+                    
                     return fetch('http://127.0.0.1:8000/func/make-pic/', {
                         method: 'POST',
                         headers: {
@@ -185,16 +219,66 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data['image_url']) {
+                    if (data['image_url']) { //이미지 url 생성되면 generatedimage popup 작동.
                         showGeneratedImage(data['image_url']);
-                        //hidePopup("analysisPopup"); //이미지 생성시 분석창 숨김.
                     }
                 })
                 .catch(error => console.error('Error:', error));
         }
 
-        function showGeneratedImage(url) {
-            hidePopup("analysisPopup");
+        function showComplimentBox(data) { //칭찬멘트 함수
+            const compliMent = document.getElementById("compliMent");
+            const helpMent = document.getElementById("helpMent");
+        
+            const complimentsHigh = [
+                '백점 만점에 백점!',
+                '와우~! 짝짝짝! 너무너무 잘했어요!',
+                '정확해요~!',
+                '대단해요! 정말 잘했어요!',
+                '최고에요! 계속 이렇게 해볼까요?'
+            ];
+        
+            const complimentsMediumHigh = [
+                '너무 잘했어요!',
+                '정말 멋진걸요?',
+                '굉장해요!',
+                '멋지게 해내고 있어요!'
+            ];
+        
+            const complimentsMedium = [
+                '좋아요!',
+                '지금도 충분히 멋져요!',
+                '잘하고 있어요!',
+                '조금만 더 힘내요!',
+                '계속 노력해봐요!'
+            ];
+        
+            const complimentsLow = [
+                '이제 그림에서 어떤 단어를 맞췄는지 확인해볼까요?',
+                '도전 정신이 멋져요!',
+                '연습하면 더 좋아질 거에요!',
+                '한번 더 해보면 더 잘할 수 있어요!'
+            ];
+        
+            showPopup("complimentPopup");
+            if (data['accuracy'] >= 0.8) {
+                const randomIndex = Math.floor(Math.random() * complimentsHigh.length);
+                compliMent.innerHTML = complimentsHigh[randomIndex];
+            } else if (data['accuracy'] >= 0.5) {
+                const randomIndex = Math.floor(Math.random() * complimentsMediumHigh.length);
+                compliMent.innerHTML = complimentsMediumHigh[randomIndex];
+            } else if (data['accuracy'] >= 0.2) {
+                const randomIndex = Math.floor(Math.random() * complimentsMedium.length);
+                compliMent.innerHTML = complimentsMedium[randomIndex];
+            } else {
+                const randomIndex = Math.floor(Math.random() * complimentsLow.length);
+                compliMent.innerHTML = complimentsLow[randomIndex];
+                helpMent.innerHTML = `혹시 문제가 생기거나 도움이 필요하다면, '도움말' 버튼을 통해 해결할 수 있어요!`;
+            }
+        }
+
+        function showGeneratedImage(url) { //이미지생성 시 팝업 띄워주는 함수, 다음 단계로 넘어가시겠어요 팝업도 같이 구현.
+            hidePopup("scorePopup");
             const generatedImageContainer = document.getElementById('generatedImageContainer');
             const generatedImage = document.getElementById('generatedImage');
             generatedImage.src = url;

@@ -20,10 +20,10 @@
     </div>
   </div>
 
-  <div id="MentBox" class="camera-ment-box">
-    <p id="cameraMent" class="camera-ment">화면에 얼굴을 보여주세요.</p>
-  </div>
-
+    <!--카메라 멘트, 화면 안내. -->
+    <div id="MentBox" class="camera-ment-box">
+      <p id="cameraMent" class="camera-ment">처음 오셨으니, 화면에 얼굴을 보여주세요.</p>
+    </div>  
 
   <script>
 
@@ -180,17 +180,41 @@
 <script>
   // DOM이 완전히 로드된 후 실행
   document.addEventListener("DOMContentLoaded", function () {
-    // 3초 후에 실행될 함수 설정
+    // 30초 후에 실행될 함수 설정
     setTimeout(function () {
       // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
       window.location.href = document.getElementById('redirectLink').href;
-    }, 7000); // 
+    }, 30000); // 
     });
+
+    //30초 동안 멘트 보여줌
+    const mentArray = [
+        "처음 오셨으니, 화면에 얼굴을 보여주세요.",
+        "이번 한번만 보여주시면, 앞으로는 계속 기억할게요!",
+        "고개를 왼쪽으로 돌려보세요.",
+        "고개를 오른쪽으로 돌려보세요.",
+        "고개를 위쪽으로 살짝만 올려주세요.",
+        "이번에는 고개를 아래로 살짝 내려볼까요?"
+    ];
+
+    let currentMentIndex = 0;
+    const cameraMent = document.getElementById("cameraMent");
+
+    function changeMent() {
+        cameraMent.classList.add("hidden");
+        setTimeout(() => {
+            currentMentIndex = (currentMentIndex + 1) % mentArray.length;
+            cameraMent.innerText = mentArray[currentMentIndex];
+            cameraMent.classList.remove("hidden");
+        }, 1000);
+    }
+
+    setInterval(changeMent, 5000);
+
   </script>
   
   <a id="redirectLink" href="{% url 'index' %}" style="display:none;">이동</a>
   
-
 </html>
 
 

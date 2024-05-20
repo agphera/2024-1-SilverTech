@@ -17,6 +17,30 @@ body, html {
     font-family: "Gowun Dodum", sans-serif;
 }
 
+.camera-ment-box {
+    display: flex;
+    position: fixed;
+    bottom: 20px;
+    width: 100%;
+    text-align: center;
+    color: white;
+    font-size: 50px;
+    justify-content: center;
+    align-items: center;
+}
+
+.camera-ment {
+    text-align: center;
+    color: white;
+    font-size: 24px;
+    transition: opacity 1s ease-in-out;
+    opacity: 1;
+}
+
+.camera-ment.hidden {
+    opacity: 0;
+}
+
 .camera-box {
     text-align: center;
 }
@@ -34,21 +58,3 @@ body, html {
     margin: 10px;
 }
 
-.camera-ment-box {
-    display: flex;
-    position: fixed;
-    bottom: 20px;
-    width: 100%;
-    text-align: center;
-    color: white;
-    font-size: 50px;
-    justify-content: center;
-    align-items: center;
-}
-
-#cameraMent {
-    text-align: center;
-    color: white;
-    font-size: 50px;
-    transition: opacity 1s ease-in-out;
-}

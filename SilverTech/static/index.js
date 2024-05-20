@@ -11,7 +11,6 @@ document.addEventListener("DOMContentLoaded", function() {
     /*시간 설정*/
     let duration = 15000; // 프로그레스바 15초
     //let hideDuration = 30000; // navbar+progressbar 사라지는 시간 30초(변수만 설정, 아직 미구현)
-    let popupDuration = 15000; // 분석중입니다 팝업시간 15초
   
     /*프로그레스바 감소*/
     function updateProgressBar() {
@@ -22,6 +21,13 @@ document.addEventListener("DOMContentLoaded", function() {
         hideElements(); //프로그레스바 0 -> 요소사라짐
       }
     }  
+
+
+    showPopup("letStartPopup");
+    setTimeout(() => {
+      hidePopup("letStartPopup"); //5초뒤 사라짐                   
+    }, 5000);
+
     let progressInterval = setInterval(updateProgressBar, 100);  
 
   
