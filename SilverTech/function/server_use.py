@@ -11,7 +11,7 @@ def level_choose(data):
     pass
 
 
-def scoring_points(data):
+def scoring_points(data, thema):
     #1 한국어 문장 입력
     INPUT_TEXT = data
     THEMA = thema

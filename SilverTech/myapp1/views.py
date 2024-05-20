@@ -6,7 +6,7 @@ from django.views.decorators.csrf import csrf_exempt
 import os
 import json
 from function.server_use import scoring_points, make_picture
-from .models import User, UserProceeding, BasePictures
+from .models import User, UserProceeding, BasePictures, BasePictureThemes
 
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
@@ -34,8 +34,14 @@ def proxy_to_naver_stt(request):
         data = response.json()
         print('초기 데이터:',data)
 
+        theme = request.session.get('picture_title')
+        print('theme:',theme)
+        
+        # 임시 코드
+        theme = 'park1'
+
         if "text" in data:            
-            accuracy, true_word, whole_prompt = scoring_points(data['text']) 
+            accuracy, true_word, whole_prompt = scoring_points(data['text'], theme) 
             data['accuracy'] = accuracy
             data['len_true_word'] = len(true_word)
             data['p'] = list(whole_prompt)

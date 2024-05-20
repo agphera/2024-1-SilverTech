@@ -88,6 +88,8 @@ def login_to_training(request):
             request.session['level'] = level
             request.session['picture_url'] = base_picture.url
             request.session['picture_order'] = base_picture.order
+            request.session['picture_title'] = base_picture.title
+
             print(request)
             # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
             return redirect('../picture-training/')  
@@ -140,14 +142,24 @@ def load_next_base_picture(request):
         level_changed = check_change_level(request, user_accuracy, user_proceeding)
         
         if level_changed:
-            response = fetch_altered_level_base_picture(request, user_accuracy, user_proceeding)
+            base_picture = fetch_altered_level_base_picture(request, user_accuracy, user_proceeding)
         else:
-            response = fetch_same_level_base_picture(request, user_proceeding)
+            base_picture = fetch_same_level_base_picture(request, user_proceeding)
+        
+        request.session['level'] = user_proceeding.level
+        request.session['picture_url'] = base_picture.url
+        request.session['picture_order'] = base_picture.order
+        request.session['picture_title'] = base_picture.title
         
         # 변경된 진행 정보와 정확도 정보 저장
         user_proceeding.save()
         user_accuracy.save()
-        return response
+        
+        return JsonResponse({
+            'level': user_proceeding.level,
+            'order': user_proceeding.last_order,
+            'url': base_picture.url
+        }, status=200)
 
     except (UserAccuracy.DoesNotExist, UserProceeding.DoesNotExist, BasePictures.DoesNotExist) as e:
         return JsonResponse({'error': str(e)}, status=404)
@@ -193,9 +205,9 @@ def fetch_same_level_base_picture(request, user_proceeding):
 
 
     # 선택된 그림을 데이터베이스에서 가져옴
-    base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
+    picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
     # 그림의 URL과 순서를 JSON 형태로 반환
-    return JsonResponse({'url': base_picture.url, 'order': base_picture.order, 'level': user_proceeding.level}, status=200)
+    return picture
 
 
 
@@ -222,19 +234,12 @@ def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
     # 새 레벨과 last_order에 기반하여 이미지 URL 가져오기
     picture_level = user_proceeding.level if user_proceeding.level <= 2 else user_proceeding.level - 2
     picture = BasePictures.objects.filter(level=picture_level, order=user_proceeding.last_order).first()
-    if picture:
-        image_url = picture.url
-        # seen_pictures에 현재 last_order를 추가하고 저장
-        user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
-        user_proceeding.save()
-    else:
-        image_url = None  # 해당 레벨과 순서에 맞는 그림이 없는 경우
 
-    return JsonResponse({
-        'level': user_proceeding.level,
-        'order': user_proceeding.last_order,
-        'url': image_url
-    }, status=200)
+    # seen_pictures에 현재 last_order를 추가하고 저장
+    user_proceeding.seen_pictures.append(user_proceeding.last_order)  # seen_pictures에 추가
+    user_proceeding.save()
+
+    return picture
 
 
 
