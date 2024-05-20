@@ -33,7 +33,6 @@ class UserProceeding(models.Model):
         db_table = 'UserProceeding'
 
 
-
 class AuthGroup(models.Model):
     name = models.CharField(unique=True, max_length=150)
 

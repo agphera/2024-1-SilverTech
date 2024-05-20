@@ -10,8 +10,12 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
-from pathlib import Path
+import pymysql
+pymysql.install_as_MySQLdb()
 
+from pathlib import Path
+import os
+import json
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,19 +39,21 @@ ALLOWED_HOSTS = []
 INSTALLED_APPS = [
     'corsheaders',
     'myapp1',  # 이 줄을 추가하세요.
+    'user_level',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'drf_yasg', # Swaager
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',#1번째줄 필수
     'corsheaders.middleware.CorsMiddleware',#2번째줄
     'django.middleware.common.CommonMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',#3번쨰줄
+    'django.contrib.sessions.middleware.SessionMiddleware',#3번째줄
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -78,12 +84,26 @@ WSGI_APPLICATION = 'SilverTech.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
+# API 키 작성된 메모장 주소
+keys_file_path = os.path.join('../API', 'api_keys.txt')
+
+# 파일에서 API 키를 로드하는 함수
+with open(keys_file_path, 'r', encoding='utf-8') as file:
+    keys = json.load(file)
+
+
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'oss',
+        'USER': 'root',
+        'PASSWORD': f"{keys['mysql_pw']}",
+        'HOST': '35.194.147.127',
+        'PORT': '3306',
+        
     }
 }
+
 
 
 # Password validation
@@ -133,3 +153,16 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #모든 도메인에서의 요청을 허용하려면 CORS_ALLOW_ALL_ORIGINS 설정을 True
 CORS_ALLOW_ALL_ORIGINS = True
+
+
+
+import os
+
+# Django 프로젝트의 기본 디렉토리 설정
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# MEDIA_ROOT 설정을 상대 경로로 지정, 저장 경로를 정해드립니다. 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
+
+# MEDIA_URL 설정
+MEDIA_URL = '/Media/'
