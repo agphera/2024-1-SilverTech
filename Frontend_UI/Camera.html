@@ -86,7 +86,7 @@ document.addEventListener("DOMContentLoaded", function () {
       link.click(); // 링크 클릭을 통해 이미지 다운로드
       document.body.removeChild(link); // 사용 후 링크 삭제
     }
-    document.getElementById("captureBtn").addEventListener('click', captureAndUpload);
+    document.getElementById("captureBtn").addEventListener('click',  startCaptureAndUpload);
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       alert("Media Device not supported");
@@ -165,10 +165,10 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     function uploadImages(formData) {
-      // formData를 사용하여 사진을 서버로 전송
-      fetch('http://127.0.0.1:8000/api/upload/', { // 업로드 URL을 적절히 수정해야 합니다.
+      //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
+      fetch('http://127.0.0.1:8000/image/', {
         method: 'POST',
-        body: formData,
+        body: formData
       })
         .then(response => response.json())
         .then(result => {

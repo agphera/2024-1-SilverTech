@@ -122,7 +122,7 @@ from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import JsonResponse
 @csrf_exempt
-def upload_image(request):
+def upload_image1(request):
     path = None
     full_path = None
 
@@ -170,6 +170,46 @@ def upload_image(request):
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+@csrf_exempt
+def upload_image(request):
+    path = None
+    full_path = None
+
+    if request.method == 'POST':
+        images = request.FILES.getlist('photo')
+        if images:
+            # 세션에서 폴더 카운터를 가져옵니다.
+            folder_counter = request.session.get('folder_counter', 1)
+            
+            # 기본 폴더 이름 설정
+            base_folder_name = 'User_images'
+            
+            # 실제 저장될 폴더 이름 설정
+            folder_name = f"{base_folder_name}_{folder_counter}"
+            
+            # 이미지 저장
+            for i, image in enumerate(images):
+                file_name = os.path.join(folder_name, f"image_{i+1}.jpg")
+                path = default_storage.save(file_name, ContentFile(image.read()))
+                full_path = os.path.join(settings.MEDIA_ROOT, path)
+                print(f"Image {i+1} uploaded successfully to {full_path}")
+            
+            # 세션에 폴더 카운터 업데이트
+            request.session['folder_counter'] = folder_counter + 1
+            
+            # 모델 재학습
+            train_model_again(os.path.join(settings.MEDIA_ROOT, folder_name))
+
+            return JsonResponse({'message': 'Images uploaded successfully!'})
+        else:
+            print("No images provided")
+            return JsonResponse({'error': 'No images provided'}, status=400)
+    else:
+        print("Invalid request")
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+
+
+
 #모델 추가 학습
 from imutils import paths
 import shutil  # 폴더 삭제에 사용됩니다.
@@ -178,6 +218,8 @@ import face_recognition
 import pickle
 import cv2
 import os
+import time
+
 
 def train_model_again(request):
     # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
@@ -194,15 +236,24 @@ def train_model_again(request):
         print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
         name = imagePath.split(os.path.sep)[-2]
 
+        # Load the image
         image = cv2.imread(imagePath)
-        rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
+        if image is None:
+            raise FileNotFoundError(f"Image not found or cannot be read: {imagePath}")
+    
+        # Convert the image from BGR to RGB
+        try:
+            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        except cv2.error as e:
+            raise ValueError(f"Error converting image color: {e}")
+    
         boxes = face_recognition.face_locations(rgb, model="hog")
         encodings = face_recognition.face_encodings(rgb, boxes)
 
         for encoding in encodings:
             knownEncodings.append(encoding)
             knownNames.append(name)
+        time.sleep(0.1)
 
     # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
     print("[INFO] serializing encodings...")
