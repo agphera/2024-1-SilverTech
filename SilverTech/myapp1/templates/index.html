@@ -68,7 +68,7 @@
 
     <div id="letStartPopup" class="let-start-popup"> <!--갑자기 화면 시작하면 이상할 것 같아서 추가함. 아직 display none 상태-->
         <p id="startMent" class="start-ment">반갑습니다! 바로 그림 문제를 풀러 가봅시다!
-            <br>화면이 바뀌면, 제한시간 동안 그림을 말로 설명해보세요!</p>
+            <br>화면이 바뀌면, 제한시간 동안 그림을 말로 설명해주세요!</p>
     </div>
 
     <!-- 로딩중 팝업 -->
@@ -111,10 +111,64 @@
     <div id="nextStepPopup" class="next-step-popup">
         <div class="next-step-content">
             <p>다른 그림으로 넘어가시겠어요?</p>
-            <button id="yesButton" class="button is-light">네, 이번엔 다른 그림을 보고싶어요.</button>
+            <button id="yesButton" class="button is-light">네. 이번엔 다른 그림을 보고싶어요.</button>
             <button id="noButton" class="button is-light">아니오. 같은 그림으로 또 해볼래요.</button>
         </div>
     </div>
+
+
+    <!--도움말 버튼-->
+    <div id="helpPopup" class="help-popup">
+        <p>안녕하세요. '도움말' 버튼을 눌러주셔서 감사합니다. 
+            <br>어떤 궁금증이 있으신가요? 버튼을 눌러주세요.</p>
+        <button id="one" class="help button is-light">화면을 넘기고 싶어요.</button>
+        <button id="two" class="help button is-light">그림 문제는 어떻게 푸나요?</button>
+        <button id="three" class="help button is-light">문제가 너무 어려워요.</button>
+        <button id="four" class="help button is-light">더 새로운 그림을 보고 싶어요.</button>
+        <button id="back" class="help button is-light">궁금증이 없어요. 이전으로 돌아갈래요.</button>
+    </div>
+
+    <!--도움말 닫기 버튼 팝업-->
+    <div id="backPopup" class="back-popup">
+        <p>'그림으로 말하는 인지훈련' 활동을 통해서 인지 훈련을 통해 치매를 예방하는데에 도움이 되기를 바랍니다.
+            <br>이 내용은 도움말 버튼을 클릭하시면 언제든지 확인하실 수 있답니다!</p>
+    </div>
+
+    <!--도움말 one-->
+    <div id="onePopup" class="one-popup">
+        <p>대부분의 화면은 건드리지 않아도 시간이 지나면 자동으로 넘어갑니다!
+           <br>혹은, 페이지에 아래와 같이 '흰색 버튼'이 있다면, 
+           <br>버튼을 눌러 화면을 넘길 수 있답니다!
+           <br>아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+        <button id="bbackOne" class="button is-light">돌아가기</button>
+    </div>
+    <!--도움말 two-->
+    <div id="twoPopup" class="two-popup">
+        <p>그림 문제를 풀기 위해서 화면에 제시된 그림을 잘 보고,
+            <br>초록색 줄이 줄어들기 전에 그림에 대한 설명을 해주시면 됩니다!
+            <br>그럼 프로그램이 '말소리'를 인식해, 표현해주신 그림을 그려드릴게요!
+            <br>아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+        <button id="bbackTwo" class="button is-light">돌아가기</button>
+    </div>
+
+    <!--도움말 three-->
+    <div id="threePopup" class="three-popup">
+            <p>'그림으로 말하는 인지 훈련'은 가장 쉬운 그림부터 제공드리고 있어요.
+                <br>문제가 어려워져서 맞추지 못하신 경우, 더 쉬운 그림들을 보여드리고 있어요.
+                <br>그럼에도 불구하고 그림이 너무 어렵게 느껴진다면,<br>다른 훈련이나 치료가 필요할 수 있어요.
+                <br>치료와 관련해 궁금하신 점이 있다면 근처 병원에 상담을 요청해보세요.
+                <br>아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+            <button id="bbackThree" class="button is-light">돌아가기</button>
+    </div>
+
+    <!--도움말 four-->
+    <div id="fourPopup" class="four-popup">
+            <p>그림 문제를 잘 풀 수록 더 새로운 그림을 볼 수 있어요!
+                <br>그림을 자세히 살펴보고, 잘 맞춘다면<br>자연스럽게 또다른 그림을 볼 수 있답니다.
+                <br>이 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+            <button id="bbackFour" class="button is-light">돌아가기</button>
+    </div>
+
 
     <!-- 종료 3초전 팝업 -->
     <div id="exitPopup" class="modal">

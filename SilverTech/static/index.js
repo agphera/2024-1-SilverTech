@@ -49,15 +49,52 @@ document.addEventListener("DOMContentLoaded", function() {
       container.style.transform = 'translateY(0)'; //navbar+progress bar 다시 보여주기
       container.style.opacity = 1;
     }
-  
-  
-  //  var byebye = ["벌써 가시나요? 다음에 또 봐요.", "안녕히가세요!", "다음에 또 오실거죠? 기다리고 있을게요."];
-  //    var randomByebye = byebye[Math.floor(Math.random() * byebye.length)]; // 랜덤인사
-  //    document.getElementById('random-byebye').textContent = randomByebye; 
-    
+
   });
   
-  
+
+  //도움말 버튼 전체 동작 관리
+  document.getElementById("helpButton").addEventListener("click", function() {
+    showPopup("helpPopup");
+  });
+
+  document.getElementById("one").addEventListener("click", function() {
+    showPopup("onePopup");
+  });
+
+  document.getElementById("two").addEventListener("click", function() {
+      showPopup("twoPopup");
+  });
+
+  document.getElementById("three").addEventListener("click", function() {
+      showPopup("threePopup");
+  });
+
+  document.getElementById("four").addEventListener("click", function() {
+      showPopup("fourPopup");
+  });
+
+  document.getElementById("back").addEventListener("click", function() {
+      hidePopup("helpPopup");
+  });
+
+  document.getElementById("bbackOne").addEventListener("click", function() {
+      hidePopup("onePopup");
+  });
+
+  document.getElementById("bbackTwo").addEventListener("click", function() {
+      hidePopup("twoPopup");
+  });
+
+  document.getElementById("bbackThree").addEventListener("click", function() {
+      hidePopup("threePopup");
+  });
+
+  document.getElementById("bbackFour").addEventListener("click", function() {
+      hidePopup("fourPopup");
+  });
+//도움말 버튼 완료
+
   
   //모든 학습파일
   function visible(current, total){
