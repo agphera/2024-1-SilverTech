@@ -170,6 +170,7 @@ def upload_image1(request):
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
+<<<<<<< Updated upstream
 @csrf_exempt
 def upload_image(request):
     path = None
@@ -207,6 +208,210 @@ def upload_image(request):
     else:
         print("Invalid request")
         return JsonResponse({'error': 'Invalid request'}, status=400)
+=======
+
+@csrf_exempt  # CSRF 토큰을 확인하지 않도록 설정
+def upload_image2(request):
+    if request.method == 'POST':
+        image_counter = request.session.get('image_counter', 0)
+        folder_counter = request.session.get('folder_counter', 1)
+        base_folder_name = 'User_images'
+        images = request.FILES.getlist('photo')  # 여러 이미지 파일을 받아옵니다.
+        
+        for image in images:
+            image_counter += 1
+            
+            folder_name = f"{base_folder_name}_{folder_counter}"
+            file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+            
+            path = default_storage.save(file_name, ContentFile(image.read()))
+            full_path = os.path.join(settings.MEDIA_ROOT, path)
+            
+            print(f"Image {image_counter} uploaded successfully to {full_path}")
+            
+            request.session['image_counter'] = image_counter
+            request.session['folder_counter'] = folder_counter
+            
+            # 100장 단위로 폴더 카운터를 업데이트하고 모델을 리트레이닝
+            if image_counter >= 10:
+                request.session['image_counter'] = 0  # 이미지 카운터 리셋
+                request.session['folder_counter'] = folder_counter + 1  # 폴더 카운터 증가
+    
+                # 모델 트레이닝 함수 호출
+                train_model_again(os.path.join(settings.MEDIA_ROOT, folder_name))
+    
+        return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'path': full_path})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+@csrf_exempt  # CSRF 토큰을 확인하지 않도록 설정
+def upload_image3(request):
+    if request.method == 'POST':
+        folder_counter = request.session.get('folder_counter', 1)
+        base_folder_name = 'User_images'
+
+        # 새로운 폴더 생성
+        folder_name = f"{base_folder_name}_{folder_counter}"
+        path = default_storage.save(file_name, ContentFile(image.read()))
+        full_path = os.path.join(settings.MEDIA_ROOT, path)
+        
+        # 새로운 폴더 경로를 생성하고 디렉토리를 만듭니다.
+        directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+        if not os.path.exists(directory_path):
+            os.makedirs(directory_path)
+        
+        images = request.FILES.getlist('photo')  # 여러 이미지 파일을 받아옵니다.
+        
+        image_counter = 0
+        for image in images:
+            image_counter += 1
+            
+            file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+            
+            path = default_storage.save(file_name, ContentFile(image.read()))
+            full_path = os.path.join(settings.MEDIA_ROOT, path)
+            
+            print(f"Image {image_counter} uploaded successfully to {full_path}")
+
+        # 세션에서 폴더 카운터를 증가시켜 다음 요청에 새로운 폴더를 생성하도록 합니다.
+        request.session['folder_counter'] = folder_counter + 1
+    
+        # 모델 트레이닝 함수 호출
+        train_model_again(directory_path)
+    
+        return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'path': full_path})
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+@csrf_exempt  # CSRF 토큰을 확인하지 않도록 설정
+def upload_image4(request):
+    if request.method == 'POST':
+        try:
+            folder_counter = request.session.get('folder_counter', 1)
+            base_folder_name = 'User_images'
+    
+            # 새로운 폴더 생성
+            folder_name = f"{base_folder_name}_{folder_counter}"
+            
+            # 새로운 폴더 경로를 생성하고 디렉토리를 만듭니다.
+            directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+            if not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+    
+            images = request.FILES.getlist('photo')  # 여러 이미지 파일을 받아옵니다.
+    
+            image_counter = 0
+            full_paths = []
+            for image in images:
+                image_counter += 1
+                
+                file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+                
+                path = default_storage.save(file_name, ContentFile(image.read()))
+                full_path = os.path.join(settings.MEDIA_ROOT, path)
+                
+                print(f"Image {image_counter} uploaded successfully to {full_path}")
+                full_paths.append(full_path)
+    
+            # 세션에서 폴더 카운터를 증가시켜 다음 요청에 새로운 폴더를 생성하도록 합니다.
+            request.session['folder_counter'] = folder_counter + 1
+        
+            # 모델 트레이닝 함수 호출
+            train_model_again(directory_path)
+        
+            return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'paths': full_paths})
+        except Exception as e:
+            # 오류 메시지를 출력하고 JSON 응답으로 반환
+            print(f"An error occurred: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+@csrf_exempt  # CSRF 토큰을 확인하지 않도록 설정
+def upload_image5(request):
+    if request.method == 'POST':
+        try:
+            
+            images = request.FILES.getlist('photo[]')  # 여러 이미지 파일을 받아옵니다.
+            
+            folder_counter = request.session.get('folder_counter', 1)
+            base_folder_name = 'User_images'
+    
+            # 새로운 폴더 생성
+            folder_name = f"{base_folder_name}_{folder_counter}"
+            
+            # 새로운 폴더 경로를 생성하고 디렉토리를 만듭니다.
+            directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+            if not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+    
+            image_counter = 0
+            full_paths = []
+            for image in images:
+                image_counter += 1
+                
+                file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+                
+                # 이미지 저장            
+                path = default_storage.save(file_name, ContentFile(image.read()))
+                full_path = os.path.join(settings.MEDIA_ROOT, path)
+                
+                print(f"Image {image_counter} uploaded successfully to {full_path}")
+                full_paths.append(full_path)
+    
+            # 세션에서 폴더 카운터를 증가시켜 다음 요청에 새로운 폴더를 생성하도록 합니다.
+            request.session['folder_counter'] = folder_counter + 1
+
+            # 모델 트레이닝 함수 호출
+            print(directory_path)
+            train_model_again(directory_path)
+        
+            return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'paths': full_paths})
+        except Exception as e:
+            # 오류 메시지를 출력하고 JSON 응답으로 반환
+            print(f"An error occurred: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+@csrf_exempt
+def upload_image(request):
+    if request.method == 'POST':
+        try:
+            images = request.FILES.getlist('photo')
+
+            folder_counter = request.session.get('folder_counter', 1)
+            base_folder_name = 'User_images'
+            folder_name = f"{base_folder_name}_{folder_counter}"
+            directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+            
+            if not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+            
+            image_counter = 0
+            full_paths = []
+            for image in images:
+                image_counter += 1
+
+                file_name = os.path.join(folder_name, f"image_{image_counter}.jpg")
+
+                path = default_storage.save(file_name, ContentFile(image.read()))
+                full_path = os.path.join(settings.MEDIA_ROOT, path)
+                print(f"Image {image_counter} uploaded successfully to {full_path}")
+                full_paths.append(full_path)
+            
+            request.session['folder_counter'] = folder_counter + 1
+            train_model_again(directory_path)
+
+            return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'paths': full_paths})
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+
+>>>>>>> Stashed changes
 
 
 
@@ -221,7 +426,7 @@ import os
 import time
 
 
-def train_model_again(request):
+def train_model_again1(request):
     # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
     with open("../SilverTech/function/encodings.pickle", "rb") as f: 
         data = pickle.load(f)
@@ -272,6 +477,49 @@ def train_model_again(request):
         print(f"{request} 폴더를 찾을 수 없습니다.")
 
 
+def train_model_again(folder_path):
+    try:
+        # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
+        with open("../SilverTech/function/encodings.pickle", "rb") as f:
+            data = pickle.load(f)
+        knownEncodings = data["encodings"]
+        knownNames = data["names"]
+        
 
+        # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
+        newImagePaths = list(paths.list_images(folder_path))
+
+        # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
+        print(newImagePaths)
+        for (i, imagePath) in enumerate(newImagePaths):
+            print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
+            name = imagePath.split(os.path.sep)[-2]
+
+            image = cv2.imread(imagePath)
+            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+
+            boxes = face_recognition.face_locations(rgb, model="hog")
+            encodings = face_recognition.face_encodings(rgb, boxes)
+
+            for encoding in encodings:
+                knownEncodings.append(encoding)
+                knownNames.append(name)
+
+        # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
+        print("[INFO] serializing encodings...")
+        data = {"encodings": knownEncodings, "names": knownNames}
+        with open("../SilverTech/function/encodings.pickle", "wb") as f:  # 필요한 위치에 저장
+            f.write(pickle.dumps(data))
+
+        # 폴더가 존재하는지 확인
+        if os.path.exists(folder_path):
+            # 폴더 삭제
+            shutil.rmtree(folder_path)
+            print(f"{folder_path} 폴더가 성공적으로 삭제되었습니다.")
+        else:
+            print(f"{folder_path} 폴더를 찾을 수 없습니다.")
+
+    except Exception as e:
+        print(f"An error occurred: {e}")
 
 

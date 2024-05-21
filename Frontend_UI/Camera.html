@@ -86,7 +86,11 @@ document.addEventListener("DOMContentLoaded", function () {
       link.click(); // 링크 클릭을 통해 이미지 다운로드
       document.body.removeChild(link); // 사용 후 링크 삭제
     }
+<<<<<<< Updated upstream:Frontend_UI/Camera.html
     document.getElementById("captureBtn").addEventListener('click',  startCaptureAndUpload);
+=======
+    document.getElementById("captureBtn").addEventListener('click', startCaptureAndUpload);
+>>>>>>> Stashed changes:SilverTech/myapp1/templates/Camera.html
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
       alert("Media Device not supported");
@@ -138,7 +142,7 @@ document.addEventListener("DOMContentLoaded", function () {
       }, captureInterval);
     }
 
-    //한번에 100장 보내기 
+    //한번에 10장 보내기 
     function startCaptureAndUpload() {
       var canvas = document.createElement('canvas');
       canvas.width = 640; // 적절한 크기로 설정
@@ -147,26 +151,32 @@ document.addEventListener("DOMContentLoaded", function () {
       var video = document.getElementById('cameraview');
       var formData = new FormData();
       var captureCount = 0;
-
+    
       // 0.3초 간격으로 사진 캡처
       var captureInterval = setInterval(() => {
-        if (captureCount >= 100) {
-          clearInterval(captureInterval); // 100장 캡처 후 중단
+        if (captureCount >= 10) {
+          clearInterval(captureInterval); // 10장 캡처 후 중단
           uploadImages(formData); // 서버로 이미지 업로드
           return;
         }
-
+    
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
         canvas.toBlob(blob => {
-          formData.append(`photo_${captureCount}`, blob, `capture_${captureCount}.jpg`);
+          formData.append('photo', blob, `capture_${captureCount}.jpg`);
           captureCount++;
         }, 'image/jpeg');
       }, 300);
     }
 
+    
     function uploadImages(formData) {
+<<<<<<< Updated upstream:Frontend_UI/Camera.html
       //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
       fetch('http://127.0.0.1:8000/image/', {
+=======
+      // formData를 사용하여 사진을 서버로 전송
+      fetch('http://127.0.0.1:8000/image/', { // 업로드 URL을 적절히 수정해야 합니다.
+>>>>>>> Stashed changes:SilverTech/myapp1/templates/Camera.html
         method: 'POST',
         body: formData
       })
