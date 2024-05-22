@@ -3,39 +3,29 @@
 
 <head>
   <title>Camera Capture and Upload Example</title>
-  
+  {% load static %}
+  <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}">
+  <link rel="stylesheet" href="{% static 'Camera.css' %}" type="text/css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+  <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
 </head>
 
-<script>
-
-// DOM이 완전히 로드된 후 실행
-document.addEventListener("DOMContentLoaded", function () {
-  // 3초 후에 실행될 함수 설정
-  setTimeout(function () {
-    // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
-    window.location.href = document.getElementById('redirectLink').href;
-  }, 3000); // 3000밀리초 = 3초
-});
-</script>
-
 <body>
-  <p><video id="cameraview" width="720" height="480"></video></p>
-  <div style="text-align: center;">
-    <button id="openBtn">카메라 켜기</button>
-    <button id="closeBtn">카메라 끄기</button>
-
-    <!-- Django의 URL 태그를 사용하여 동적으로 URL 생성 -->
-    <!-- id 속성을 추가하여 JavaScript에서 해당 요소를 찾을 수 있도록 함
-    <a id="redirectLink" href="{% url 'second_page' %}" style="display:none;">이동</a> -->
-    
-
-
-
-
+  <div class="camera-box">
+    <p><video id="cameraview" width="720" height="480"></video></p>
+    <div class="camera-buttons">
+        <button id="openBtn" class="button is-primary">카메라 켜기</button>
+        <button id="closeBtn" class="button is-danger">카메라 끄기</button>
+        <button id="captureBtn" class="button is-link">Capture</button>
+    </div>
   </div>
-  <button id="captureBtn">Capture</button>
-  <script>
 
+    <!--카메라 멘트, 화면 안내. -->
+    <div id="MentBox" class="camera-ment-box">
+      <p id="cameraMent" class="camera-ment">처음 오셨으니, 화면에 얼굴을 보여주세요.</p>
+    </div>  
+
+  <script>
 
     var streamVideo;
 
@@ -188,6 +178,44 @@ document.addEventListener("DOMContentLoaded", function () {
   </script>
 </body>
 
+<script>
+  // DOM이 완전히 로드된 후 실행
+  document.addEventListener("DOMContentLoaded", function () {
+    // 30초 후에 실행될 함수 설정
+    setTimeout(function () {
+      // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
+      window.location.href = document.getElementById('redirectLink').href;
+    }, 30000); // 
+    });
+
+    //30초 동안 멘트 보여줌
+    const mentArray = [
+        "처음 오셨으니, 화면에 얼굴을 보여주세요.",
+        "이번 한번만 보여주시면, 앞으로는 계속 기억할게요!",
+        "고개를 왼쪽으로 돌려보세요.",
+        "고개를 오른쪽으로 돌려보세요.",
+        "고개를 위쪽으로 살짝만 올려주세요.",
+        "이번에는 고개를 아래로 살짝 내려볼까요?"
+    ];
+
+    let currentMentIndex = 0;
+    const cameraMent = document.getElementById("cameraMent");
+
+    function changeMent() {
+        cameraMent.classList.add("hidden");
+        setTimeout(() => {
+            currentMentIndex = (currentMentIndex + 1) % mentArray.length;
+            cameraMent.innerText = mentArray[currentMentIndex];
+            cameraMent.classList.remove("hidden");
+        }, 1000);
+    }
+
+    setInterval(changeMent, 5000);
+
+  </script>
+  
+  <a id="redirectLink" href="{% url 'index' %}" style="display:none;">이동</a>
+  
 </html>
 
 
@@ -265,4 +293,3 @@ document.addEventListener("DOMContentLoaded", function () {
 </script>
 
 </html>
-—>
