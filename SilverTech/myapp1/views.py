@@ -20,7 +20,7 @@ NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
 NAVER_API_KEY = f"{keys['naver_api_keys']}"
 
 @csrf_exempt
-def proxy_to_naver_stt(request):
+def proxy_to_naver_stt1(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
@@ -34,8 +34,8 @@ def proxy_to_naver_stt(request):
         data = response.json()
         print('초기 데이터:',data)
 
-        theme = request.session.get('picture_title')
-        print('theme:',theme)
+#        theme = request.session.get('picture_title')
+#        print('theme:',theme)
         
         # 임시 코드
         theme = 'park1'
@@ -46,6 +46,7 @@ def proxy_to_naver_stt(request):
             data['len_true_word'] = len(true_word)
             data['p'] = list(whole_prompt)
 
+        print(data)
         # accuracy가 일정 값 이상이면 정답 처리 -> 다음 그림을 보여줘야 하는데...
 
         response_to_client = JsonResponse(data, safe=False)
@@ -57,7 +58,7 @@ def proxy_to_naver_stt(request):
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
     
-    from django.http import JsonResponse
+from django.http import JsonResponse
 from django.http import HttpResponseServerError
 import requests
 
@@ -65,7 +66,7 @@ import requests
 error_counter = {'count': 0}
 
 @csrf_exempt
-def proxy_to_naver_stt1(request):
+def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
@@ -81,7 +82,13 @@ def proxy_to_naver_stt1(request):
             data = response.json()
 
             if "text" in data:
-                accuracy, true_word, whole_prompt = scoring_points(data['text'])
+        #        theme = request.session.get('picture_title')
+        #        print('theme:',theme)
+                
+                # 임시 코드
+                theme = 'park1'
+
+                accuracy, true_word, whole_prompt = scoring_points(data['text'], theme)
                 data['accuracy'] = accuracy
                 data['len_true_word'] = len(true_word)
                 data['p'] = list(whole_prompt)
