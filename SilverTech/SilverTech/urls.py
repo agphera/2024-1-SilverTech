@@ -27,5 +27,5 @@ urlpatterns = [
     path('second_page', second_page, name = 'second_page'),
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
     path('func/make-pic/', make_pic_karlo, name='make_pic_karlo'),
-    path('image/', upload_image, name='upload_image')    
+    path('image/', upload_image, name='upload_image')
 ]

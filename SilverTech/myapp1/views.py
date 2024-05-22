@@ -19,7 +19,7 @@ NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
 NAVER_API_KEY = f"{keys['naver_api_keys']}"
 
 @csrf_exempt
-def proxy_to_naver_stt(request):
+def proxy_to_naver_stt1(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         print('잘 들어옴')
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
@@ -48,6 +48,52 @@ def proxy_to_naver_stt(request):
         return response_to_client
     else:
         return JsonResponse({'error': 'Invalid request'}, status=400)
+    
+    from django.http import JsonResponse
+from django.http import HttpResponseServerError
+import requests
+
+# 전역 변수로 오류 횟수 카운팅
+error_counter = {'count': 0}
+
+@csrf_exempt
+def proxy_to_naver_stt(request):
+    if request.method == 'POST' and request.FILES.get('audioFile'):
+        naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
+        headers = {
+            "Content-Type": "application/octet-stream",
+            "X-NCP-APIGW-API-KEY-ID": NAVER_API_KEY_ID,
+            "X-NCP-APIGW-API-KEY": NAVER_API_KEY,
+        }
+
+        audio_file = request.FILES['audioFile'].read()
+        try_count = 0
+        while try_count < 3:
+            response = requests.post(naver_api_url, headers=headers, data=audio_file)
+            data = response.json()
+
+            if "text" in data:
+                accuracy, true_word, whole_prompt = scoring_points(data['text'])
+                data['accuracy'] = accuracy
+                data['len_true_word'] = len(true_word)
+                data['p'] = list(whole_prompt)
+                response_to_client = JsonResponse(data, safe=False)
+                response_to_client["Access-Control-Allow-Origin"] = "*"
+                response_to_client["Access-Control-Allow-Methods"] = "GET, POST, OPTIONS"
+                response_to_client["Access-Control-Allow-Headers"] = "Content-Type"
+                error_counter['count'] = 0  # 입력이 잘되거나 오류가 없을 시 카운트 초기화
+                return response_to_client
+
+            error_counter['count'] += 1
+            if error_counter['count'] == 3:  # 오류가 3번 발생하면 종료
+                return HttpResponseServerError("Error count exceeded. Please try again.")
+
+            try_count += 1
+
+        return JsonResponse({'error': 'Failed to convert audio to text after 3 attempts'}, status=500)
+    else:
+        return JsonResponse({'error': 'Invalid request'}, status=400)
+
 
 @csrf_exempt
 def make_pic_karlo(request):
