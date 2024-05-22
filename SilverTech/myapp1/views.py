@@ -20,7 +20,7 @@ NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
 NAVER_API_KEY = f"{keys['naver_api_keys']}"
 
 @csrf_exempt
-def proxy_to_naver_stt1(request):
+def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
@@ -65,7 +65,7 @@ import requests
 error_counter = {'count': 0}
 
 @csrf_exempt
-def proxy_to_naver_stt(request):
+def proxy_to_naver_stt1(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
