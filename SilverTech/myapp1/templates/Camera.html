@@ -1,217 +1,198 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <title>Camera Capture and Upload Example</title>
-    {% load static %}
-    <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}" />
-    <link rel="stylesheet" href="{% static 'Camera.css' %}" type="text/css" />
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
-    />
-    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
-  </head>
 
-  <body>
-    <div class="camera-box">
-      <p><video id="cameraview" width="720" height="480"></video></p>
-      <div class="camera-buttons">
-        <button id="openBtn" class="button is-primary">카메라 켜기</button>
-        <button id="closeBtn" class="button is-danger">카메라 끄기</button>
-        <button id="captureBtn" class="button is-link">Capture</button>
-      </div>
-    </div>
+<head>
+  <title>Camera Capture and Upload Example</title>
+  
+</head>
 
-    <!--카메라 멘트, 화면 안내. -->
-    <div id="MentBox" class="camera-ment-box">
-      <p id="cameraMent" class="camera-ment">
-        처음 오셨으니, 화면에 얼굴을 보여주세요.
-      </p>
-    </div>
+<script>
 
-    <script>
-      var streamVideo;
+// DOM이 완전히 로드된 후 실행
+document.addEventListener("DOMContentLoaded", function () {
+  // 3초 후에 실행될 함수 설정
+  setTimeout(function () {
+    // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
+    window.location.href = document.getElementById('redirectLink').href;
+  }, 3000); // 3000밀리초 = 3초
+});
+</script>
 
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Media Device not supported");
-      } else {
-        document.getElementById("openBtn").addEventListener("click", open);
-        document.getElementById("closeBtn").addEventListener("click", close);
-        document.addEventListener("DOMContentLoaded", open); // 웹 페이지가 로드될 때 open 함수를 자동으로 호출합니다.
-      }
+<body>
+  <p><video id="cameraview" width="720" height="480"></video></p>
+  <div style="text-align: center;">
+    <button id="openBtn">카메라 켜기</button>
+    <button id="closeBtn">카메라 끄기</button>
 
-      function open() {
-        close();
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-          streamVideo = stream;
-          var cameraView = document.getElementById("cameraview");
-          cameraView.srcObject = stream;
-          cameraView.play();
-          cameraView.onloadedmetadata = function (e) {
-            //capture(); // 카메라가 준비되면 사진을 찍습니다.
-          };
-        });
-      }
+    <!-- Django의 URL 태그를 사용하여 동적으로 URL 생성 -->
+    <!-- id 속성을 추가하여 JavaScript에서 해당 요소를 찾을 수 있도록 함
+    <a id="redirectLink" href="{% url 'second_page' %}" style="display:none;">이동</a> -->
+    
 
-      function close() {
-        if (streamVideo) {
-          var tracks = streamVideo.getTracks();
-          tracks.forEach((track) => track.stop());
-          streamVideo = null;
-        }
-      }
 
-      function capture() {
-        var canvas = document.createElement("canvas"); // 캔버스 요소 생성
-        canvas.width = 640; // 캔버스 너비 설정
-        canvas.height = 480; // 캔버스 높이 설정
-        var context = canvas.getContext("2d");
-        var cameraView = document.getElementById("cameraview");
 
-        context.drawImage(cameraView, 0, 0, canvas.width, canvas.height); // 현재 카메라의 이미지를 캔버스에 그립니다.
-        var imageUrl = canvas.toDataURL("image/png"); // 캔버스의 내용을 이미지 URL로 변환
 
-        var link = document.createElement("a"); // 다운로드 링크 생성
-        link.href = imageUrl;
-        link.download = "capture.png"; // 다운로드될 파일 이름 설정
-        document.body.appendChild(link); // 링크를 문서에 추가
-        link.click(); // 링크 클릭을 통해 이미지 다운로드
-        document.body.removeChild(link); // 사용 후 링크 삭제
-      }
-      document
-        .getElementById("captureBtn")
-        .addEventListener("click", startCaptureAndUpload);
-
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        alert("Media Device not supported");
-      } else {
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-          streamVideo = stream;
-          var cameraView = document.getElementById("cameraview");
-          cameraView.srcObject = stream;
-        });
-      }
-      //0.3초마다 서버 호출
-      function captureAndUpload() {
-        var captureInterval = 500; // 0.5초 간격
-        var totalDuration = 5000; // 10초
-        var captureCount = totalDuration / captureInterval; // 총 캡처할 사진 수
-        var count = 0;
-
-        var intervalId = setInterval(function () {
-          var canvas = document.createElement("canvas");
-          canvas.width = 640; // 적절한 크기로 설정
-          canvas.height = 480; // 적절한 크기로 설정
-          var context = canvas.getContext("2d");
-          var video = document.getElementById("cameraview");
-
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-          canvas.toBlob((blob) => {
-            var formData = new FormData();
-            formData.append("photo", blob, "capture.jpg");
-
-            //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
-            fetch("http://127.0.0.1:8000/image/", {
-              method: "POST",
-              body: formData,
-            })
-              .then((response) => response.json())
-              .then((result) => {
-                console.log("Success:", result);
-              })
-              .catch((error) => {
-                console.error("Error:", error);
-              });
-          }, "image/jpeg");
-
-          if (++count >= captureCount) {
-            clearInterval(intervalId);
-            console.log("Capture complete");
-          }
-        }, captureInterval);
-      }
-
-      //한번에 10장 보내기
-      function startCaptureAndUpload() {
-        var canvas = document.createElement("canvas");
-        canvas.width = 640; // 적절한 크기로 설정
-        canvas.height = 480; // 적절한 크기로 설정
-        var context = canvas.getContext("2d");
-        var video = document.getElementById("cameraview");
-        var formData = new FormData();
-        var captureCount = 0;
-
-        // 0.3초 간격으로 사진 캡처
-        var captureInterval = setInterval(() => {
-          if (captureCount >= 10) {
-            clearInterval(captureInterval); // 10장 캡처 후 중단
-            uploadImages(formData); // 서버로 이미지 업로드
-            return;
-          }
-
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          canvas.toBlob((blob) => {
-            formData.append("photo", blob, `capture_${captureCount}.jpg`);
-            captureCount++;
-          }, "image/jpeg");
-        }, 300);
-      }
-
-      function uploadImages(formData) {
-        //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
-        fetch("http://127.0.0.1:8000/image/", {
-          method: "POST",
-          body: formData,
-        })
-          .then((response) => response.json())
-          .then((result) => {
-            console.log("Success:", result);
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
-      }
-    </script>
-  </body>
-
+  </div>
+  <button id="captureBtn">Capture</button>
   <script>
-    // DOM이 완전히 로드된 후 실행
-    document.addEventListener("DOMContentLoaded", function () {
-      // 30초 후에 실행될 함수 설정
-      setTimeout(function () {
-        // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
-        window.location.href = document.getElementById("redirectLink").href;
-      }, 30000); //
-    });
 
-    //30초 동안 멘트 보여줌
-    const mentArray = [
-      "처음 오셨으니, 화면에 얼굴을 보여주세요.",
-      "이번 한번만 보여주시면, 앞으로는 계속 기억할게요!",
-      "고개를 왼쪽으로 돌려보세요.",
-      "고개를 오른쪽으로 돌려보세요.",
-      "고개를 위쪽으로 살짝만 올려주세요.",
-      "이번에는 고개를 아래로 살짝 내려볼까요?",
-    ];
 
-    let currentMentIndex = 0;
-    const cameraMent = document.getElementById("cameraMent");
+    var streamVideo;
 
-    function changeMent() {
-      cameraMent.classList.add("hidden");
-      setTimeout(() => {
-        currentMentIndex = (currentMentIndex + 1) % mentArray.length;
-        cameraMent.innerText = mentArray[currentMentIndex];
-        cameraMent.classList.remove("hidden");
-      }, 1000);
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Media Device not supported");
+    } else {
+      document.getElementById("openBtn").addEventListener('click', open);
+      document.getElementById("closeBtn").addEventListener('click', close);
+      document.addEventListener('DOMContentLoaded', open); // 웹 페이지가 로드될 때 open 함수를 자동으로 호출합니다.
     }
 
-    setInterval(changeMent, 5000);
-  </script>
+    function open() {
+      close();
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        streamVideo = stream;
+        var cameraView = document.getElementById("cameraview");
+        cameraView.srcObject = stream;
+        cameraView.play();
+        cameraView.onloadedmetadata = function (e) {
+          //capture(); // 카메라가 준비되면 사진을 찍습니다.
+        };
+      });
+    }
 
-  <a id="redirectLink" href="{% url 'index' %}" style="display: none">이동</a>
+    function close() {
+      if (streamVideo) {
+        var tracks = streamVideo.getTracks();
+        tracks.forEach(track => track.stop());
+        streamVideo = null;
+      }
+      
+    }
+
+    function capture() {
+      var canvas = document.createElement('canvas'); // 캔버스 요소 생성
+      canvas.width = 640; // 캔버스 너비 설정
+      canvas.height = 480; // 캔버스 높이 설정
+      var context = canvas.getContext('2d');
+      var cameraView = document.getElementById("cameraview");
+
+      context.drawImage(cameraView, 0, 0, canvas.width, canvas.height); // 현재 카메라의 이미지를 캔버스에 그립니다.
+      var imageUrl = canvas.toDataURL('image/png'); // 캔버스의 내용을 이미지 URL로 변환
+
+      var link = document.createElement('a'); // 다운로드 링크 생성
+      link.href = imageUrl;
+      link.download = "capture.png"; // 다운로드될 파일 이름 설정
+      document.body.appendChild(link); // 링크를 문서에 추가
+      link.click(); // 링크 클릭을 통해 이미지 다운로드
+      document.body.removeChild(link); // 사용 후 링크 삭제
+    }
+    document.getElementById("captureBtn").addEventListener('click',  startCaptureAndUpload);
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Media Device not supported");
+    } else {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        streamVideo = stream;
+        var cameraView = document.getElementById("cameraview");
+        cameraView.srcObject = stream;
+      });
+    }
+    //0.3초마다 서버 호출 
+    function captureAndUpload() {
+      var captureInterval = 500; // 0.5초 간격
+      var totalDuration = 5000; // 10초
+      var captureCount = totalDuration / captureInterval; // 총 캡처할 사진 수
+      var count = 0;
+
+      var intervalId = setInterval(function () {
+        var canvas = document.createElement('canvas');
+        canvas.width = 640; // 적절한 크기로 설정
+        canvas.height = 480; // 적절한 크기로 설정
+        var context = canvas.getContext('2d');
+        var video = document.getElementById('cameraview');
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        canvas.toBlob(blob => {
+          var formData = new FormData();
+          formData.append('photo', blob, 'capture.jpg');
+
+          //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
+          fetch('http://127.0.0.1:8000/image/', {
+            method: 'POST',
+            body: formData
+          })
+            .then(response => response.json())
+            .then(result => {
+              console.log('Success:', result);
+            })
+            .catch(error => {
+              console.error('Error:', error);
+            });
+        }, 'image/jpeg');
+
+        if (++count >= captureCount) {
+          clearInterval(intervalId);
+          console.log('Capture complete');
+        }
+      }, captureInterval);
+    }
+
+    //한번에 10장 보내기 
+    function startCaptureAndUpload() {
+      var canvas = document.createElement('canvas');
+      canvas.width = 640; // 적절한 크기로 설정
+      canvas.height = 480; // 적절한 크기로 설정
+      var context = canvas.getContext('2d');
+      var video = document.getElementById('cameraview');
+      var formData = new FormData();
+      var captureCount = 0;
+    
+      // 0.3초 간격으로 사진 캡처
+      var captureInterval = setInterval(() => {
+        if (captureCount >= 10) {
+          clearInterval(captureInterval); // 10장 캡처 후 중단
+          uploadImages(formData); // 서버로 이미지 업로드
+          return;
+        }
+    
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        canvas.toBlob(blob => {
+          formData.append('photo', blob, `capture_${captureCount}.jpg`);
+          captureCount++;
+        }, 'image/jpeg');
+      }, 300);
+    }
+
+    
+    function uploadImages(formData) {
+      //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
+      fetch('http://127.0.0.1:8000/image/', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(result => {
+          console.log('Success:', result);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+    }
+
+
+
+
+
+
+  </script>
+</body>
+
 </html>
+
+
+
+
 
 <!--
 <!DOCTYPE html>
@@ -284,4 +265,4 @@
 </script>
 
 </html>
--->
+—>
