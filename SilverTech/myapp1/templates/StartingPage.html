@@ -63,12 +63,13 @@
 
         //'전에 온 적 있어요' -> 바로 인사 -> 그 후 
         document.getElementById('NotFirstTimeButton').addEventListener('click', function() {
-            window.location.href = document.getElementById('redirectLink').href
+            window.location.href = document.getElementById('redirectIndex').href
         });
     
     });
 </script>
 
 <a id="redirectLink" href="{% url 'Camera' %}" style="display:none;">이동</a>
+<a id="redirectIndex" href="{% url 'index' %}" style="display:none;">이동</a>
 
 </html>
