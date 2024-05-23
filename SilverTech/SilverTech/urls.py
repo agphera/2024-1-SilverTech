@@ -18,14 +18,44 @@ Including another URLconf
 
 
 from django.urls import path
-from myapp1.views import index, second_page ,send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
-from myapp1.views import proxy_to_naver_stt, make_pic_karlo
-from myapp1.views import upload_image
+from rest_framework import permissions
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from myapp1.views import index, Camera, StartingPage, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
+from django.contrib import admin
+from django.urls import include, path
+from myapp1.views import index, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
+from myapp1.views import proxy_to_naver_stt, make_pic_karlo, load_base_picture,upload_image
+
+schema_view = get_schema_view( # Swagger
+    openapi.Info(
+        title="OSS API",  # 원하는 제목 작성
+        default_version='v1',  # 애플리케이션의 버전
+        description="Test description",  # 설명
+        terms_of_service="https://www.google.com/policies/terms/",
+        contact=openapi.Contact(email="contact@snippets.local"),
+        license=openapi.License(name="BSD License"),
+    ),
+    public=True,
+    permission_classes=(permissions.AllowAny,),
+#    authentication_classes=[]  # settings.py의 REST_FRAMEWORK > DEFAULT_AUTHENTICTION_CLASSES 가 적용되어 있다면 추가해줄 것
+)
+
 
 urlpatterns = [
-    path('', index, name='index'),  # 직접 임포트된 'index' 뷰를 사용합니다.
-    path('second_page', second_page, name = 'second_page'),
+    path('swagger<format>/', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
+    
+    path('', StartingPage, name='StartingPage'),  # 직접 임포트된 'index' 뷰를 사용합니다.
+    path('Camera',Camera,name='Camera'), 
+
+    path('index',index, name='index'), #
+
+    #path('',index, name='index'),
+    #path('StartingPage',StartingPage,name='StartingPage'),
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
     path('func/make-pic/', make_pic_karlo, name='make_pic_karlo'),
-    path('image/', upload_image, name='upload_image')
+    path('picture-load/', include('user_level.urls')),
+    path('image/', upload_image, name='upload_image') 
 ]

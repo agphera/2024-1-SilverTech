@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <title>난이도 정보로 그림 제공</title>
+    <script>
+      // DOM이 로드된 후 초기 이미지를 로드하는 함수 실행
+      window.onload = function () {
+        updatePageState();
+      };
+
+      function updatePageState() {
+        // Django 템플릿에서 초기 상태를 가져와 DOM 업데이트
+        const name = "{{ name }}";
+        const level = "{{ level }}";
+        const url = "{{ url }}";
+        const order = "{{ order }}";
+
+        document.getElementById("current-user-name").innerText =
+          "당신의 이름: " + name;
+        document.getElementById("current-level").innerText =
+          "당신의 난이도: " + level;
+        document.getElementById("current-image-url").innerText =
+          "그림 URL: " + url;
+        document.getElementById("current-image-order").innerText =
+          "그림 순서: " + order;
+
+        if (url) {
+          loadImage(url);
+        }
+      }
+
+      // accuracy 값 전송
+      function sendAccuracy() {
+        // 입력한 Accuracy로 정확도 설정
+        const accuracyInput = document.getElementById("accuracy-input");
+        let accuracy = parseFloat(accuracyInput.value);
+        // 입력이 없으면 0.0으로 설정
+        if (isNaN(accuracy)) accuracy = 0.0;
+
+        const data = { accuracy: accuracy };
+
+        return fetch(
+          "http://127.0.0.1:8000/picture-load/adjust-level-with-accuracy",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": getCookie("csrftoken"),
+            },
+            body: JSON.stringify(data),
+          }
+        )
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Success:", data);
+            //alert("Response: " + JSON.stringify(data));
+            return data;
+          })
+          .catch((error) => {
+            console.error("Error:", error);
+          });
+      }
+
+      // 그림 순차 출력 ** 프론트 **
+      function fetchImage() {
+        const accuracyInput = document.getElementById("accuracy-input");
+        let accuracy = parseFloat(accuracyInput.value);
+        // 입력이 없으면 0.0으로 설정
+        if (isNaN(accuracy)) accuracy = 0.0;
+
+        const data = { accuracy: accuracy };
+
+        // 레벨이 변경되었을 경우, 변경된 레벨에 해당하는 그림을 직접 가져옴
+        fetch("http://127.0.0.1:8000/picture-load/fetch-picture/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": getCookie("csrftoken"),
+          },
+          body: JSON.stringify(data),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.error) {
+              alert("Error: " + data.error);
+            } else {
+              // 새로운 레벨을 세션 또는 클라이언트 측 변수에 저장
+              // sessionStorage.setItem("currentLevel", data.new_level);
+              document.getElementById("current-level").innerText =
+                "당신의 난이도: " + data.level; // 새로운 난이도 표시
+              if (data.url) {
+                loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
+                loadInfo(data.url, data.order); // 변경된 레벨에 맞는 이미지 정보를 로드
+              }
+            }
+          })
+          .catch((error) => console.error("Error:", error));
+      }
+
+      // 이미지를 로드하고 화면에 표시하는 함수
+      function loadImage(imageUrl) {
+        const imageDisplayDiv = document.getElementById("image-display");
+        imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
+
+        const image = new Image();
+        image.src = imageUrl;
+        image.style.width = "100%";
+        image.style.height = "100%";
+
+        imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
+      }
+
+      // 이미지 정보(URL 및 순서) 화면에 표기
+      function loadInfo(url, order) {
+        document.getElementById("current-image-url").innerText =
+          "그림 URL: " + url;
+        document.getElementById("current-image-order").innerText =
+          "그림 순서: " + order;
+      }
+
+      // 쿠키
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.startsWith(name + "=")) {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+    </script>
+  </head>
+  <body>
+    <h1>Information</h1>
+    <p id="current-user-name">당신의 이름: {{ name }}</p>
+    <p id="current-level">당신의 난이도: {{ level }}</p>
+    <p id="current-image-url">그림 URL: {{ url }}</p>
+    <p id="current-image-order">그림 순서: {{ order }}</p>
+
+    <button onclick="fetchImage()">답변</button>
+    <div>
+      Accuracy: <input type="text" id="accuracy-input" placeholder="0.0" />
+    </div>
+
+    <div id="image-display" style="width: 600px; height: 600px">
+      <!-- 이미지를 띄울 공간 -->
+    </div>
+  </body>
+</html>

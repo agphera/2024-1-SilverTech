@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1" charset="utf-8">
+    <title>그림 인지 훈련</title>
+    {% load static %}
+    <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}">
+    <link rel="stylesheet" href="{% static 'index.css' %}" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <script src="{% static 'index.js' %}" type="module"></script>
+    <script src="{% static 'popup.js' %}" type="module"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+</head>
+
+<body>
+    <!-- 네비게이션 바 + 프로그레스 바 -->
+    <div class="navbar-progress-container">
+        <nav class="navbar" role="navigation" aria-label="main navigation">
+            <div class="navbar-brand">
+                <a class="navbar-item" href="index.html">
+                    <img src="{% static 'Main_source/Starting_icon.PNG' %}" width="30" height="50">
+                </a>
+                <a role="button" id="burger" onclick="burgerOn()" class="navbar-burger" aria-label="menu"
+                   aria-expanded="false" data-target="navbarBasicExample">
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                </a>
+            </div>
+            <div id="nav-links" class="navbar-menu is-centered">
+                <div class="navbar-end">
+                    <div class="navbar-item">
+                        <div class="buttons">
+                            <a id="helpButton" class="Help button"><strong>도움말</strong></a>
+                            <a id="goOutButton" class="GoOut button"><strong>나가기</strong></a>
+                            <a class="Mode button"><strong>개발자모드</strong></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </nav>
+        <progress max="100" value="100"></progress>
+    </div>
+
+    <!-- 메인 화면 -->
+    <div class="columns">
+        <div class="column is-half image-container">
+            <img src="{% static 'Main_source/park1-base-picture.png'%}" alt="Base Image">
+        </div>
+        <div class="column is-half right-container">
+            <div class="textboard">
+                <p>그림을<br>설명해주세요!</p>
+            </div>
+            <div class="speak-icon-container">
+                <img src="{% static 'Main_source/speaking_icon.png'%}" alt="speak icon" class="speak-icon">
+            </div>
+            <div class="voice-recording">
+                <button id="startBtn">녹음 시작</button>
+                <button id="stopBtn">녹음 중지</button>
+                <audio id="audioPlayback" controls></audio>
+            </div>
+            <div class="generated-image-container" id="generatedImageContainer">
+                <img id="generatedImage" alt="Generated Image"/>
+            </div>
+        </div>
+    </div>
+
+    <div id="letStartPopup" class="let-start-popup"> <!--갑자기 화면 시작하면 이상할 것 같아서 추가함. 아직 display none 상태-->
+        <p id="startMent" class="start-ment">반갑습니다! 바로 그림 문제를 풀러 가봅시다!
+            <br>화면이 바뀌면, 제한시간 동안 그림을 말로 설명해주세요!</p>
+    </div>
+
+    <!-- 로딩중 팝업 -->
+    <div id="analysisPopup" class="analysis-popup">
+        <div class="analysis-content">
+            <p>결과를 분석하는 중입니다.<br>잠시만 기다려주세요!<br></p>
+        </div>
+    </div>
+
+    
+    <!--칭찬 격려 멘트-->
+    <div id="complimentPopup" class="compliment-popup">
+        <div id="compliMent" class="compli-ment"style="font-size: 40px;">
+            <p></p>
+        </div>
+        <div id="helpMent" class="help-ment" style="font-size: 30px;">
+            <p></p>
+        </div>
+    </div>
+ 
+
+    <!--로딩중 팝업 - 정확도 및 맞힌 단어 출력-->
+    <div id="scorePopup" class="score-popup">
+        <div class="show-accuracy" style="font-size: 35px;">
+            <p><!--정확도 출력--></p>
+        </div>
+        <div class="show-correct" style="font-size: 35px;">
+            <p><!--맞힌 단어 출력--></p>
+            <p>맞힌 단어를 바탕으로 그림을 만들고 있어요!<br>어떤 그림이 나올지 상상해볼까요?</p>
+        </div>
+    </div>
+
+
+
+    <!-- 비교 후 다른 그림 -->
+    <div id="messageContainer" class="message-container">
+        <p>어떤가요? 비슷한 것 같나요?</p>
+    </div>
+
+    <div id="nextStepPopup" class="next-step-popup">
+        <div class="next-step-content">
+            <p>다른 그림으로 넘어가시겠어요?</p>
+            <button id="yesButton" class="button is-light">네. 이번엔 다른 그림을 보고싶어요.</button>
+            <button id="noButton" class="button is-light">아니오. 같은 그림으로 또 해볼래요.</button>
+        </div>
+    </div>
+
+
+    <!--도움말 버튼-->
+    <div id="helpPopup" class="help-popup">
+        <p>안녕하세요. '도움말' 버튼을 눌러주셔서 감사합니다. 
+            <br>어떤 궁금증이 있으신가요? 버튼을 눌러주세요.</p>
+        <button id="one" class="help button is-light">화면을 넘기고 싶어요.</button>
+        <button id="two" class="help button is-light">그림 문제는 어떻게 푸나요?</button>
+        <button id="three" class="help button is-light">문제가 너무 어려워요.</button>
+        <button id="four" class="help button is-light">더 새로운 그림을 보고 싶어요.</button>
+        <button id="back" class="help button is-light">궁금증이 없어요. 이전으로 돌아갈래요.</button>
+    </div>
+
+    <!--도움말 닫기 버튼 팝업-->
+    <div id="backPopup" class="back-popup">
+        <p>'그림으로 말하는 인지훈련' 활동을 통해서 인지 훈련을 통해 치매를 예방하는데에 도움이 되기를 바랍니다.
+            <br>이 내용은 도움말 버튼을 클릭하시면 언제든지 확인하실 수 있답니다!</p>
+    </div>
+
+    <!--도움말 one-->
+    <div id="onePopup" class="one-popup">
+        <p>대부분의 화면은 건드리지 않아도 시간이 지나면 자동으로 넘어갑니다!
+           <br>혹은, 페이지에 아래와 같이 '흰색 버튼'이 있다면, 
+           <br>버튼을 눌러 화면을 넘길 수 있답니다!
+           <br>아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+        <button id="bbackOne" class="button is-light">돌아가기</button>
+    </div>
+    <!--도움말 two-->
+    <div id="twoPopup" class="two-popup">
+        <p>그림 문제를 풀기 위해서 화면에 제시된 그림을 잘 보고,
+            <br>초록색 줄이 줄어들기 전에 그림에 대한 설명을 해주시면 됩니다!
+            <br>그럼 프로그램이 '말소리'를 인식해, 표현해주신 그림을 그려드릴게요!
+            <br>아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+        <button id="bbackTwo" class="button is-light">돌아가기</button>
+    </div>
+
+    <!--도움말 three-->
+    <div id="threePopup" class="three-popup">
+            <p>'그림으로 말하는 인지 훈련'은 가장 쉬운 그림부터 제공드리고 있어요.
+                <br>문제가 어려워져서 맞추지 못하신 경우, 더 쉬운 그림들을 보여드리고 있어요.
+                <br>그럼에도 불구하고 그림이 너무 어렵게 느껴진다면,<br>다른 훈련이나 치료가 필요할 수 있어요.
+                <br>치료와 관련해 궁금하신 점이 있다면 근처 병원에 상담을 요청해보세요.
+                <br>아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+            <button id="bbackThree" class="button is-light">돌아가기</button>
+    </div>
+
+    <!--도움말 four-->
+    <div id="fourPopup" class="four-popup">
+            <p>그림 문제를 잘 풀 수록 더 새로운 그림을 볼 수 있어요!
+                <br>그림을 자세히 살펴보고, 잘 맞춘다면<br>자연스럽게 또다른 그림을 볼 수 있답니다.
+                <br>이 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!</p>
+            <button id="bbackFour" class="button is-light">돌아가기</button>
+    </div>
+
+
+    <!-- 종료 3초전 팝업 -->
+    <div id="exitPopup" class="modal">
+        <div class="modal-content">
+            <p class="modal-text">프로그램을 종료합니다.<br>다음에 또 봐요!</p>
+        </div>
+    </div>
+</body>
+
+    <script>
+        document.getElementById("goOutButton").addEventListener('click', function() {
+            exitPopup.style.display = "flex";
+            showPopup("exitPopup");
+        });
+
+        let mediaRecorder;
+        let audioChunks = [];
+
+        document.getElementById("startBtn").addEventListener("click", function () {
+            console.log("녹음하기");
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.start();
+
+                    let audioChunks = [];
+
+                    mediaRecorder.addEventListener("dataavailable", event => {
+                        audioChunks.push(event.data);
+                    });
+
+                    setTimeout(() => {
+                        mediaRecorder.stop();
+                        stream.getTracks().forEach(track => track.stop());
+                    }, 14000);
+
+                    mediaRecorder.addEventListener("stop", () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        audioChunks = [];
+                        sendAudioToNaverSTT(audioBlob);
+                    });
+
+                })
+                .catch(error => {
+                    console.error("Cannot access audio stream from microphone.", error);
+                });
+        });
+
+        document.getElementById("stopBtn").addEventListener("click", function () {
+            mediaRecorder.stop();
+        });
+
+        function sendAudioToNaverSTT(blob) {
+            console.log("보내기");
+
+            const clientId = ''; // 네이버 클라우드 플랫폼에서 발급받은 Client ID
+            const clientSecret = ''; // 네이버 클라우드 플랫폼에서 발급받은 Client Secret
+            const url = "https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor";
+            console.log("세팅");
+
+            const headers = new Headers({
+                "Content-Type": "application/octet-stream",
+                "X-NCP-APIGW-API-KEY-ID": clientId,
+                "X-NCP-APIGW-API-KEY": clientSecret
+            });
+
+            let formData = new FormData();
+            formData.append('audioFile', blob);
+
+            fetch('http://127.0.0.1:8000/api/naver-stt/', {
+                method: 'POST',
+                body: formData,
+            })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("전체 데이터:", data);
+                    console.log("STT 결과:", data['text']);
+                    console.log("정확도:", data['accuracy']);
+                    console.log("맞힌 개수:", data['len_true_word']);
+                    console.log("정답 단어:", data['true_word']);
+
+                    hidePopup("analysisPopup"); //분석중 팝업 사라짐
+                    
+                    showComplimentBox(data); //정확도계산을 바탕으로 한 칭찬 멘트 팝업 
+                    setTimeout(() => {
+                        hidePopup("complimentPopup"); //5초뒤 사라짐
+                        showPopup("scorePopup"); //5초 뒤 점수 팝업 생성됨                        
+                    }, 7000);
+                    
+                    //점수 팝업 내용
+                    document.querySelector('.show-accuracy').innerHTML = `<br>맞힌 개수는 ${data['len_true_word']} 개,`;
+                    //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
+                    //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
+                    
+                    return fetch('http://127.0.0.1:8000/func/make-pic/', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ text: data['p'] })
+                    });
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data['image_url']) { //이미지 url 생성되면 generatedimage popup 작동.
+                        showGeneratedImage(data['image_url']);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        function showComplimentBox(data) { //칭찬멘트 함수
+            const compliMent = document.getElementById("compliMent");
+            const helpMent = document.getElementById("helpMent");
+        
+            const complimentsHigh = [
+                '백점 만점에 백점!',
+                '와우~! 짝짝짝! 너무너무 잘했어요!',
+                '정확해요~!',
+                '대단해요! 정말 잘했어요!',
+                '최고에요! 계속 이렇게 해볼까요?'
+            ];
+        
+            const complimentsMediumHigh = [
+                '너무 잘했어요!',
+                '정말 멋진걸요?',
+                '굉장해요!',
+                '멋지게 해내고 있어요!'
+            ];
+        
+            const complimentsMedium = [
+                '좋아요!',
+                '지금도 충분히 멋져요!',
+                '잘하고 있어요!',
+                '조금만 더 힘내요!',
+                '계속 노력해봐요!'
+            ];
+        
+            const complimentsLow = [
+                '이제 그림에서 어떤 단어를 맞췄는지 확인해볼까요?',
+                '도전 정신이 멋져요!',
+                '연습하면 더 좋아질 거에요!',
+                '한번 더 해보면 더 잘할 수 있어요!'
+            ];
+        
+            showPopup("complimentPopup");
+            if (data['accuracy'] >= 0.8) {
+                const randomIndex = Math.floor(Math.random() * complimentsHigh.length);
+                compliMent.innerHTML = complimentsHigh[randomIndex];
+            } else if (data['accuracy'] >= 0.5) {
+                const randomIndex = Math.floor(Math.random() * complimentsMediumHigh.length);
+                compliMent.innerHTML = complimentsMediumHigh[randomIndex];
+            } else if (data['accuracy'] >= 0.2) {
+                const randomIndex = Math.floor(Math.random() * complimentsMedium.length);
+                compliMent.innerHTML = complimentsMedium[randomIndex];
+            } else {
+                const randomIndex = Math.floor(Math.random() * complimentsLow.length);
+                compliMent.innerHTML = complimentsLow[randomIndex];
+                helpMent.innerHTML = `혹시 문제가 생기거나 도움이 필요하다면, '도움말' 버튼을 통해 해결할 수 있어요!`;
+            }
+        }
+
+        function showGeneratedImage(url) { //이미지생성 시 팝업 띄워주는 함수, 다음 단계로 넘어가시겠어요 팝업도 같이 구현.
+            hidePopup("scorePopup");
+            const generatedImageContainer = document.getElementById('generatedImageContainer');
+            const generatedImage = document.getElementById('generatedImage');
+            generatedImage.src = url;
+            generatedImageContainer.classList.add('visible');
+            
+            setTimeout(() => {
+                generatedImageContainer.classList.remove('visible');
+                showPopup("nextStepPopup");
+            }, 10000);
+            
+            
+        }
+
+        function showPopup(popupId) {
+            const popup = document.getElementById(popupId);
+            popup.style.display = "flex";
+            setTimeout(() => { popup.style.opacity = 1; }, 10);
+        }
+
+        function hidePopup(popupId) {
+            const popup = document.getElementById(popupId);
+            popup.style.opacity = 0;
+            setTimeout(() => { popup.style.display = "none"; }, 500);
+        }
+    </script>
+</html>
