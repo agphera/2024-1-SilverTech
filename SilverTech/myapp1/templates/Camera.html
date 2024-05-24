@@ -11,6 +11,15 @@
 </head>
 
 <body>
+
+  <!-- 백엔드url로 회원가입 정보 전달-->
+  <!--<form id="userDataForm" action="http://127.0.0.1:8000/picture-load/picture-training/" method="post" style="display: none;">
+    {% csrf_token %}
+    <input type="hidden" id="username" name="name" value="">
+    <input type="submit" value="Submit">
+  </form>-->
+
+
   <div class="camera-box">
     <p><video id="cameraview" width="720" height="480"></video></p>
     <div class="camera-buttons">
@@ -27,6 +36,14 @@
 
   <script>
 
+    //folder_counter 변수를 사용하여 사용자 데이터를 submit
+    /*function submitUserData() {
+      var folderCounter = '{{ request.session.folder_counter }}';  // folder_counter 변수 들고오기
+      document.getElementById('username').value = "User_" + folderCounter;
+      document.getElementById('userDataForm').submit();  // html에서의 form을 submit
+    }*/
+
+    //여기부터는 카메라
     var streamVideo;
 
     if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
