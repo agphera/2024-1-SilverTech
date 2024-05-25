@@ -31,7 +31,7 @@ SECRET_KEY = 'django-insecure-h%5y$b-*$3m%@q3jaed^jw^ob2$y$76=r+-qm@)qsxf6_y#sru
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org']
 
 
 # Application definition
