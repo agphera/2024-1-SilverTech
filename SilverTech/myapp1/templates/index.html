@@ -178,10 +178,12 @@
 </body>
 
     <script>
+    
+    var globalAccuracy = 0; // """정확도""" 전역 변수 설정
+    
         // 이미지를 로드하고 화면에 표시하는 함수
         window.onload=function(){
             const url = "{{ url }}";
-            
             console.log(url)
             if (url) {
                 loadImage(url);
@@ -191,15 +193,68 @@
         function loadImage(imageUrl) {
             const imageDisplayDiv = document.getElementById("base-image");
             imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
-
             const image = new Image();
             image.src = imageUrl;
-            //image.style.width = "100%";
-            //image.style.height = "100%";
-
             imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
         }
 
+        //다른 그림을 보시겠어요? 팝업 창의 예, 아니오 버튼 사용
+        document.getElementById("yesButton").addEventListener("click", function() {
+            hidePopup("nextStepPopup");
+            generatedImageContainer.classList.remove('visible');
+            fetchImage();
+        });
+
+        //다른 그림으로 넘어가시겠어요? 
+        function fetchImage() {
+            //const accuracyInput = document.getElementById("accuracy-input");
+            //let accuracy = parseFloat(accuracyInput.value);
+            //여기서 accuracy 가져옴
+
+            let accuracy=globalAccuracy;
+            const data = { accuracy: accuracy };
+            
+            // 레벨이 변경되었을 경우, 변경된 레벨에 해당하는 그림을 직접 가져옴
+            fetch("../fetch-picture/", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken"),
+              },
+              body: JSON.stringify(data),
+            })
+              .then((response) => response.json())
+              .then((data) => {
+                if (data.error) {
+                  alert("Error: " + data.error);
+                } else {
+                  // 새로운 레벨을 세션 또는 클라이언트 측 변수에 저장
+                  // sessionStorage.setItem("currentLevel", data.new_level);
+                  if (data.url) {
+                    loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
+                  }
+                }
+              })
+              .catch((error) => console.error("Error:", error));
+        }
+
+        // 쿠키
+        function getCookie(name) {
+            let cookieValue = null;
+            if (document.cookie && document.cookie !== "") {
+            const cookies = document.cookie.split(";");
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim();
+                if (cookie.startsWith(name + "=")) {
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+                break;
+                }
+            }
+            }
+            return cookieValue;
+        }
 
         document.getElementById("goOutButton").addEventListener('click', function() {
             exitPopup.style.display = "flex";
@@ -260,7 +315,7 @@
             let formData = new FormData();
             formData.append('audioFile', blob);
 
-            fetch('../api/naver-stt/', {
+            fetch('../../api/naver-stt/', {
                 method: 'POST',
                 body: formData,
             })
@@ -271,6 +326,8 @@
                     console.log("정확도:", data['accuracy']);
                     console.log("맞힌 개수:", data['len_true_word']);
                     console.log("정답 단어:", data['true_word']);
+
+                    globalAccuracy=data['accuracy'];
 
                     hidePopup("analysisPopup"); //분석중 팝업 사라짐
                     
@@ -285,7 +342,7 @@
                     //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
                     //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
                     
-                    return fetch('../func/make-pic/', {
+                    return fetch('../../func/make-pic/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'
@@ -361,7 +418,6 @@
             generatedImageContainer.classList.add('visible');
             
             setTimeout(() => {
-                generatedImageContainer.classList.remove('visible');
                 showPopup("nextStepPopup");
             }, 10000);
             
