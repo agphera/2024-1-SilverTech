@@ -270,6 +270,7 @@ def upload_image(request):
             base_folder_name = 'User_images'
             folder_name = f"{base_folder_name}_{folder_counter}"
             directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+        
             
             if not os.path.exists(directory_path):
                 os.makedirs(directory_path)
