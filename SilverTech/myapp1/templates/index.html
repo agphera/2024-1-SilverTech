@@ -54,7 +54,7 @@
             <div class="speak-icon-container">
                 <img src="{% static 'Main_source/speaking_icon.png'%}" alt="speak icon" class="speak-icon">
             </div>
-            <div class="voice-recording">
+            <div class="voice-recording" style="display:none;">
                 <button id="startBtn">녹음 시작</button>
                 <button id="stopBtn">녹음 중지</button>
                 <audio id="audioPlayback" controls></audio>
@@ -179,6 +179,75 @@
 
     <script>
     
+        document.addEventListener("DOMContentLoaded", function() {
+
+            let progressBar = document.querySelector('progress');
+              /*시간 설정*/
+            let duration = 15000; // 프로그레스바 15초
+              //let hideDuration = 30000; // navbar+progressbar 사라지는 시간 30초(변수만 설정, 아직 미구현)
+            
+              // 프로그레스 바가 진행되면서 자동으로 녹음을 시작하는 함수
+              function progress_and_record() {
+                progressBar.value = 100; // 프로그레스 바를 최대치로 설정
+                let decrementAmount = progressBar.max / (duration / 100);
+          
+                let progressInterval = setInterval(() => {
+                    progressBar.value -= decrementAmount;
+                    if (progressBar.value <= 0) {
+                        clearInterval(progressInterval);
+                        //if (mediaRecorder && mediaRecorder.state === "recording") {
+                        //    mediaRecorder.stop(); // 녹음 중지
+                        //}
+                    }
+                }, 100);
+          
+                startRecording(); // 녹음 시작 함수 호출
+              }
+          
+              // 녹음을 시작하는 함수
+              function startRecording() {
+                navigator.mediaDevices.getUserMedia({ audio: true })
+                    .then(stream => {
+                        mediaRecorder = new MediaRecorder(stream);
+                        mediaRecorder.start();
+                        let audioChunks = [];
+          
+                        mediaRecorder.ondataavailable = event => {
+                            audioChunks.push(event.data);
+                        };
+
+                        setTimeout(() => {
+                            mediaRecorder.stop();
+                            stream.getTracks().forEach(track => track.stop());
+                            showPopup("analysisPopup");
+                        }, 14000);
+          
+                        mediaRecorder.onstop = () => {
+                            const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                            sendAudioToNaverSTT(audioBlob); // 녹음이 끝난 후 STT 서비스로 전송
+                        };
+                    })
+                    .catch(error => console.error("Microphone access error.", error));
+              }
+          
+          
+              // "다른 그림을 보시겠어요?" 팝업의 '예', '아니오' 버튼 이벤트 처리
+                document.getElementById("yesButton").addEventListener("click", function() {
+                  hidePopup("nextStepPopup");
+                  fetchImage();
+                  progress_and_record(); // 새로운 녹음 및 프로그레스 바 시작
+                });
+          
+                document.getElementById("noButton").addEventListener("click", function() {
+                  hidePopup("nextStepPopup");
+                  progress_and_record(); // 같은 이미지로 녹음 및 프로그레스 바 다시 시작
+                });
+          
+                // 초기에 프로그레스 바와 녹음 시작
+                progress_and_record();
+          
+          });    
+
     var globalAccuracy = 0; // """정확도""" 전역 변수 설정
     
         // 이미지를 로드하고 화면에 표시하는 함수
@@ -261,42 +330,6 @@
             showPopup("exitPopup");
         });
 
-        let mediaRecorder;
-        let audioChunks = [];
-
-        document.getElementById("startBtn").addEventListener("click", function () {
-            console.log("녹음하기");
-            navigator.mediaDevices.getUserMedia({ audio: true })
-                .then(stream => {
-                    mediaRecorder = new MediaRecorder(stream);
-                    mediaRecorder.start();
-
-                    let audioChunks = [];
-
-                    mediaRecorder.addEventListener("dataavailable", event => {
-                        audioChunks.push(event.data);
-                    });
-
-                    setTimeout(() => {
-                        mediaRecorder.stop();
-                        stream.getTracks().forEach(track => track.stop());
-                    }, 14000);
-
-                    mediaRecorder.addEventListener("stop", () => {
-                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
-                        audioChunks = [];
-                        sendAudioToNaverSTT(audioBlob);
-                    });
-
-                })
-                .catch(error => {
-                    console.error("Cannot access audio stream from microphone.", error);
-                });
-        });
-
-        document.getElementById("stopBtn").addEventListener("click", function () {
-            mediaRecorder.stop();
-        });
 
         function sendAudioToNaverSTT(blob) {
             console.log("보내기");
