@@ -6,7 +6,7 @@
 </head>
 <body>
     <h2>기본 그림 불러오기</h2>
-    <form action="http://127.0.0.1:8000/picture-load/picture-training/" method="post">
+    <form action="picture-training/" method="post">
         {% csrf_token %}  <!-- CSRF 토큰 추가 -->
         <label for="name">이름:</label>
         <input type="text" id="name" name="name" required>

@@ -40,7 +40,7 @@
         const data = { accuracy: accuracy };
 
         // 레벨이 변경되었을 경우, 변경된 레벨에 해당하는 그림을 직접 가져옴
-        fetch("http://127.0.0.1:8000/picture-load/fetch-picture/", {
+        fetch("../fetch-picture/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

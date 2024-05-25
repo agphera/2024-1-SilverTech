@@ -238,7 +238,7 @@
             let formData = new FormData();
             formData.append('audioFile', blob);
 
-            fetch('http://127.0.0.1:8000/api/naver-stt/', {
+            fetch('../api/naver-stt/', {
                 method: 'POST',
                 body: formData,
             })
@@ -263,7 +263,7 @@
                     //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
                     //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
                     
-                    return fetch('http://127.0.0.1:8000/func/make-pic/', {
+                    return fetch('../func/make-pic/', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json'

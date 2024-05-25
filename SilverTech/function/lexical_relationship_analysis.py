@@ -117,7 +117,7 @@ def user_base_similarity(THEMA, results):
         
         print(true_word, translate_word)
 
-        accuracy = len(true_word)/len_label_keyword
+    accuracy = len(true_word)/len_label_keyword
 
     return true_word, translate_word, accuracy, whole_prompt_word
 
