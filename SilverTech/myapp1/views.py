@@ -8,6 +8,28 @@ import json
 from function.server_use import scoring_points, make_picture
 from .models import User, UserProceeding, BasePictures, BasePictureThemes
 
+# 필요한 패키지를 임포트합니다
+from imutils.video import VideoStream
+from imutils.video import FPS
+import imutils
+import time
+from django.http import JsonResponse
+
+#모델 추가 학습
+from imutils import paths
+import shutil  # 폴더 삭제에 사용됩니다.
+import face_recognition
+import pickle
+import cv2
+from user_level.views import login_to_training # app1의 함수를 가져옴
+
+#웹 캠 이용해서 사진 저장 
+import os
+from django.conf import settings
+from django.core.files.storage import default_storage
+from django.core.files.base import ContentFile
+from django.http import JsonResponse
+
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
 
@@ -229,12 +251,7 @@ def send_audio_to_naver_stt(request):
         return JsonResponse({'error': 'Invalid request'}, status=400)
 
 
-#웹 캠 이용해서 사진 저장 
-import os
-from django.conf import settings
-from django.core.files.storage import default_storage
-from django.core.files.base import ContentFile
-from django.http import JsonResponse
+folder_counter = 0
 
 # 웹에서 받아온 이미지 저장
 # 입력: 이미지 데이터
@@ -242,6 +259,7 @@ from django.http import JsonResponse
 # 출력물: 새로운 회원의 숫자 정보
 @csrf_exempt
 def upload_image(request):
+    global folder_counter
     path = None
     full_path = None
 
@@ -249,10 +267,10 @@ def upload_image(request):
         try:
             images = request.FILES.getlist('photo')
 
-            folder_counter = request.session.get('folder_counter', 1)
             base_folder_name = 'User_images'
             folder_name = f"{base_folder_name}_{folder_counter}"
             directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+        
             
             if not os.path.exists(directory_path):
                 os.makedirs(directory_path)
@@ -269,11 +287,11 @@ def upload_image(request):
                 print(f"Image {image_counter} uploaded successfully to {full_path}")
                 full_paths.append(full_path)
             
-            request.session['folder_counter'] = folder_counter + 1
-            train_model_again(directory_path)
+            request.session['user_name'] = str(folder_counter)
+            folder_counter = folder_counter + 1
             #del request.session['folder_counter']
+            return train_model_again(request, directory_path)
 
-            return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'paths': full_paths})
         except Exception as e:
             print(f"An error occurred: {e}")
             return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
@@ -281,18 +299,13 @@ def upload_image(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
-#모델 추가 학습
-from imutils import paths
-import shutil  # 폴더 삭제에 사용됩니다.
-import face_recognition
-import pickle
-import cv2
+
 
 # 얼굴 인식 인공지능 모델 학습 및 입력으로 받아온 이미지 폴더 경로에 해당하는 폴더 삭제
 # 입력: 이미지 데이터 불러올 주소
 # 반환: 없음
 # 출력물: 새롭게 학습된 모델 파일(./static/encodings.pickle)
-def train_model_again(request):
+def train_model_again(request, directory_path):
     # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
     with open("./static/encodings.pickle", "rb") as f: 
         data = pickle.load(f)
@@ -300,7 +313,7 @@ def train_model_again(request):
     knownNames = data["names"]
 
     # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
-    newImagePaths = list(paths.list_images(request))
+    newImagePaths = list(paths.list_images(directory_path))
 
     # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
     for (i, imagePath) in enumerate(newImagePaths):
@@ -322,30 +335,29 @@ def train_model_again(request):
     data = {"encodings": knownEncodings, "names": knownNames}
     with open("./static/encodings.pickle", "wb") as f:  #myapp1 바깥 쪽에 생김. 이거 위치 나중에 잡아주겠습니다. 
         f.write(pickle.dumps(data))
-    f.close()
     
 
     # 폴더가 존재하는지 확인
-    if os.path.exists(request):
+    if os.path.exists(directory_path):
         # 폴더 삭제
-        shutil.rmtree(request)
-        print(f"{request} 폴더가 성공적으로 삭제되었습니다.")
+        shutil.rmtree(directory_path)
+        print(f"{directory_path} 폴더가 성공적으로 삭제되었습니다.")
     else:
-        print(f"{request} 폴더를 찾을 수 없습니다.")
+        print(f"{directory_path} 폴더를 찾을 수 없습니다.")
+
+    return login_to_training(request)
 
 
-# 필요한 패키지를 임포트합니다
-from imutils.video import VideoStream
-from imutils.video import FPS
-import imutils
+
 
 # 얼굴 인식 인공지능을 이용한 사람 구분 시스템
 # 입력: 없음
 # 반환: 없음
 # 출력: 회원의 숫자 데이터
-def login_capture():
+@csrf_exempt 
+def login_capture(request):
     # 'currentname'을 초기화하여 새로운 사람이 식별될 때만 트리거되도록 합니다.
-    currentname = "unknown"
+    currentname = "Unknown"
     # train_model.py에서 생성된 encodings.pickle 파일 모델로부터 얼굴을 식별합니다.
     encodingsP = "./static/encodings.pickle"
 
@@ -394,11 +406,17 @@ def login_capture():
 
                 # 데이터셋에 있는 누군가가 식별되면 화면에 그들의 이름을 출력합니다.
                 if currentname != name:
-                    currentname = name
                     
                     print(currentname.replace('User_images_', '')) #이거 들고가면 됨!!! -> 숫자로 넘어가게하기 
+                    
+                    request.session['user_name'] = currentname.replace('User_images_', '')
+                    
                     vs.stop() # 비디오 스트림을 종료합니다.
                     fps.stop() # FPS 카운터를 종료합니다.
                     cv2.destroyAllWindows() # 모든 OpenCV 창을 닫습니다.
-                    exit() # 프로그램을 종료합니다.
+                    #exit() # 프로그램을 종료합니다.
+                    
+                    return login_to_training(request)
+                    
+    return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
