@@ -34,12 +34,9 @@ def proxy_to_naver_stt1(request):
         data = response.json()
         print('초기 데이터:',data)
 
-#        theme = request.session.get('picture_title')
-#        print('theme:',theme)
+        theme = request.session.get('theme')
+        print('theme:',theme)
         
-        # 임시 코드
-        theme = 'park1'
-
         if "text" in data:            
             accuracy, true_word, whole_prompt = scoring_points(data['text'], theme) 
             data['accuracy'] = accuracy
@@ -82,11 +79,10 @@ def proxy_to_naver_stt(request):
             data = response.json()
 
             if "text" in data:
-        #        theme = request.session.get('picture_title')
-        #        print('theme:',theme)
-                
-                # 임시 코드
-                theme = 'park1'
+                print('초기 데이터:',data)
+
+                theme = request.session.get('theme')
+                print('theme:',theme)
 
                 accuracy, true_word, whole_prompt = scoring_points(data['text'], theme)
                 data['accuracy'] = accuracy

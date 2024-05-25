@@ -45,8 +45,7 @@
 
     <!-- 메인 화면 -->
     <div class="columns">
-        <div class="column is-half image-container">
-            <img src="{% static 'Main_source/park1-base-picture.png'%}" alt="Base Image">
+        <div id="base-image" class="column is-half image-container"> <!--여기 수정-->
         </div>
         <div class="column is-half right-container">
             <div class="textboard">
@@ -179,6 +178,29 @@
 </body>
 
     <script>
+        // 이미지를 로드하고 화면에 표시하는 함수
+        window.onload=function(){
+            const url = "{{ url }}";
+            
+            console.log(url)
+            if (url) {
+                loadImage(url);
+            }
+        }
+
+        function loadImage(imageUrl) {
+            const imageDisplayDiv = document.getElementById("base-image");
+            imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
+
+            const image = new Image();
+            image.src = imageUrl;
+            //image.style.width = "100%";
+            //image.style.height = "100%";
+
+            imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
+        }
+
+
         document.getElementById("goOutButton").addEventListener('click', function() {
             exitPopup.style.display = "flex";
             showPopup("exitPopup");

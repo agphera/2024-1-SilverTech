@@ -93,7 +93,7 @@ def user_base_similarity(THEMA, results):
         # 멀티 스레드를 사용하여 모든 base_keyword에 대해 병렬로 유사성 검사
         with ThreadPoolExecutor() as executor:
             # 각 스레드가 요청하는 시간 사이에 0.5s의 간격을 준다.
-            future_to_base_keyword = {executor.submit(check_similarity_multithreading, user_keyword, base_keyword, index * 0.2): 
+            future_to_base_keyword = {executor.submit(check_similarity_multithreading, user_keyword, base_keyword, index * 0.2): \
                                         base_keyword for index, base_keyword in enumerate(label_keyword)}
             similarity_results = []
             
@@ -117,7 +117,7 @@ def user_base_similarity(THEMA, results):
         
         print(true_word, translate_word)
 
-        accuracy = len(true_word)/len_label_keyword
+    accuracy = len(true_word)/len_label_keyword
 
     return true_word, translate_word, accuracy, whole_prompt_word
 

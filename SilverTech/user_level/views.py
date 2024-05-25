@@ -82,13 +82,13 @@ def login_to_training(request):
             picture_level = level if level <= 2 else level - 2
             
             base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
-            
+
             # 세션에 필요한 정보 저장
             request.session['user_name'] = name
             request.session['level'] = level
             request.session['picture_url'] = base_picture.url
             request.session['picture_order'] = base_picture.order
-            request.session['picture_title'] = base_picture.title
+            request.session['theme'] = base_picture.title
 
             print(request)
             # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
@@ -105,7 +105,7 @@ def login_to_training(request):
             'url': request.session.get('picture_url', None),
             'order': request.session.get('picture_order', 0),
         }
-        return render(request, 'level-image.html', context)
+        return render(request, 'index.html', context)
 
 @swagger_auto_schema(
     method='post',  # 요청 메소드

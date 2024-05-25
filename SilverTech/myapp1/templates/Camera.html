@@ -13,11 +13,11 @@
 <body>
 
   <!-- 백엔드url로 회원가입 정보 전달-->
-  <!--<form id="userDataForm" action="http://127.0.0.1:8000/picture-load/picture-training/" method="post" style="display: none;">
+  <form id="userDataForm" action="../picture-load/picture-training/" method="post" style="display: none;">
     {% csrf_token %}
     <input type="hidden" id="username" name="name" value="">
     <input type="submit" value="Submit">
-  </form>-->
+  </form>
 
 
   <div class="camera-box">
@@ -37,11 +37,11 @@
   <script>
 
     //folder_counter 변수를 사용하여 사용자 데이터를 submit
-    /*function submitUserData() {
+    function submitUserData() {
       var folderCounter = '{{ request.session.folder_counter }}';  // folder_counter 변수 들고오기
       document.getElementById('username').value = "User_" + folderCounter;
       document.getElementById('userDataForm').submit();  // html에서의 form을 submit
-    }*/
+    }
 
     //여기부터는 카메라
     var streamVideo;
@@ -201,8 +201,8 @@
     // 30초 후에 실행될 함수 설정
     setTimeout(function () {
       // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
-      window.location.href = document.getElementById('redirectLink').href;
-    }, 30000); // 
+      submitUserData();
+    }, 4000); // 
     });
 
     //30초 동안 멘트 보여줌
