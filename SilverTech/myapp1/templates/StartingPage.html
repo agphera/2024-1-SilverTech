@@ -14,6 +14,12 @@
 </head>
 
 <body class="hero is-fullheight-with-navbar has-background-green">
+    <!-- 백엔드url로 회원가입 정보 전달-->
+    {% comment %} <form id="userDataForm" action="../picture-load/picture-training/" method="post" style="display: none;">
+        {% csrf_token %}
+        <input type="hidden" id="username" name="name" value="">
+        <input type="submit" value="Submit">
+    </form> {% endcomment %}
         <div class="hero-body">
             <div class="container">
                 <div class="columns is-vcentered">
@@ -49,11 +55,17 @@
         <p id="login" class="login">이제, 그림인지 훈련을 시작합니다!</p>
     </div>
 
-    
+    <form id="hiddenForm" action="login_capture/" method="post" style="display: none;"></form>
 </body>
 
 
 <script>
+    {% comment %} function submitUserData() {
+        var folderCounter = '{{ request.session.User_name }}';  // folder_counter 변수 들고오기
+        document.getElementById('username').value = "User_" + folderCounter;
+        document.getElementById('userDataForm').submit();  // html에서의 form을 submit
+    } {% endcomment %}
+
      // DOM이 완전히 로드된 후 실행
     document.addEventListener("DOMContentLoaded", function () {
         // '처음이에요' 버튼에 이벤트 리스너 추가
@@ -63,13 +75,12 @@
 
         //'전에 온 적 있어요' -> 바로 인사 -> 그 후 
         document.getElementById('NotFirstTimeButton').addEventListener('click', function() {
-            window.location.href = document.getElementById('redirectIndex').href
+            document.getElementById('hiddenForm').submit();
         });
-    
+
     });
 </script>
 
 <a id="redirectLink" href="{% url 'Camera' %}" style="display:none;">이동</a>
-<a id="redirectIndex" href="{% url 'index' %}" style="display:none;">이동</a>
 
 </html>

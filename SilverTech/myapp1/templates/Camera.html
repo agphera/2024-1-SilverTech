@@ -12,12 +12,12 @@
 
 <body>
 
-  <!-- 백엔드url로 회원가입 정보 전달-->
+  {% comment %} <!-- 백엔드url로 회원가입 정보 전달-->
   <form id="userDataForm" action="../picture-load/picture-training/" method="post" style="display: none;">
     {% csrf_token %}
     <input type="hidden" id="username" name="name" value="">
     <input type="submit" value="Submit">
-  </form>
+  </form> {% endcomment %}
 
 
   <div class="camera-box">
@@ -34,14 +34,19 @@
       <p id="cameraMent" class="camera-ment">처음 오셨으니, 화면에 얼굴을 보여주세요.</p>
     </div>  
 
+
+    <form id="uploadForm" action="../image/" method="post" enctype="multipart/form-data" style="display: none;">
+        <!-- 파일 입력 필드는 JavaScript를 통해 처리됩니다. -->
+    </form>
+
   <script>
 
-    //folder_counter 변수를 사용하여 사용자 데이터를 submit
+    {% comment %} //folder_counter 변수를 사용하여 사용자 데이터를 submit
     function submitUserData() {
       var folderCounter = '{{ request.session.folder_counter }}';  // folder_counter 변수 들고오기
       document.getElementById('username').value = "User_" + folderCounter;
       document.getElementById('userDataForm').submit();  // html에서의 form을 submit
-    }
+    } {% endcomment %}
 
     //여기부터는 카메라
     var streamVideo;
@@ -104,46 +109,6 @@
         cameraView.srcObject = stream;
       });
     }
-    //0.3초마다 서버 호출 
-    function captureAndUpload() {
-      var captureInterval = 500; // 0.5초 간격
-      var totalDuration = 5000; // 10초
-      var captureCount = totalDuration / captureInterval; // 총 캡처할 사진 수
-      var count = 0;
-
-      var intervalId = setInterval(function () {
-        var canvas = document.createElement('canvas');
-        canvas.width = 640; // 적절한 크기로 설정
-        canvas.height = 480; // 적절한 크기로 설정
-        var context = canvas.getContext('2d');
-        var video = document.getElementById('cameraview');
-
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-        canvas.toBlob(blob => {
-          var formData = new FormData();
-          formData.append('photo', blob, 'capture.jpg');
-
-          //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
-          fetch('../image/', {
-            method: 'POST',
-            body: formData
-          })
-            .then(response => response.json())
-            .then(result => {
-              console.log('Success:', result);
-            })
-            .catch(error => {
-              console.error('Error:', error);
-            });
-        }, 'image/jpeg');
-
-        if (++count >= captureCount) {
-          clearInterval(intervalId);
-          console.log('Capture complete');
-        }
-      }, captureInterval);
-    }
 
     //한번에 10장 보내기 
     function startCaptureAndUpload() {
@@ -173,19 +138,27 @@
 
     
     function uploadImages(formData) {
-      //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
-      fetch('../image/', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => response.json())
-        .then(result => {
-          console.log('Success:', result);
-        })
-        .catch(error => {
-          console.error('Error:', error);
-        });
+        // 숨겨진 form 요소를 찾습니다.
+        var form = document.getElementById('uploadForm');
+        
+        // form의 action을 설정합니다(옵션).
+        form.action = '../image/';
+        
+        // FormData 객체에서 키와 값을 추출하여 form에 추가합니다.
+        for (var key of formData.keys()) {
+            var value = formData.get(key);
+            // input 요소를 생성하고, 해당 값을 설정합니다.
+            var input = document.createElement("input");
+            input.type = "hidden";
+            input.name = key;
+            input.value = value; // 파일 객체인 경우 이 방식은 작동하지 않을 수 있습니다.
+            form.appendChild(input);
+        }
+
+        // form을 제출합니다.
+        form.submit();
     }
+
 
 
 
@@ -196,14 +169,14 @@
 </body>
 
 <script>
-  // DOM이 완전히 로드된 후 실행
-  document.addEventListener("DOMContentLoaded", function () {
+    {% comment %} // DOM이 완전히 로드된 후 실행
+    document.addEventListener("DOMContentLoaded", function () {
     // 30초 후에 실행될 함수 설정
     setTimeout(function () {
       // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
       submitUserData();
     }, 4000); // 
-    });
+    }); {% endcomment %}
 
     //30초 동안 멘트 보여줌
     const mentArray = [
@@ -233,80 +206,4 @@
   
   <a id="redirectLink" href="{% url 'index' %}" style="display:none;">이동</a>
   
-</html>
-
-
-
-
-
-<!--
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
-
-<body>
-  <p><video id="cameraview" width="720" height="480"></video></p>
-  <div style="text-align: center;">
-    <button id="openBtn">카메라 켜기</button>
-    <button id="closeBtn">카메라 끄기</button>
-
-  </div>
-</body>
-<script>
-  var streamVideo;
-
-  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Media Device not supported");
-  } else {
-      document.getElementById("openBtn").addEventListener('click', open);
-      document.getElementById("closeBtn").addEventListener('click', close);
-      document.addEventListener('DOMContentLoaded', open); // 웹 페이지가 로드될 때 open 함수를 자동으로 호출합니다.
-  }
-  
-  function open() {
-      close();
-      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-          streamVideo = stream;
-          var cameraView = document.getElementById("cameraview");
-          cameraView.srcObject = stream;
-          cameraView.play();
-          cameraView.onloadedmetadata = function(e) {
-              capture(); // 카메라가 준비되면 사진을 찍습니다.
-          };
-      });
-  }
-  
-  function close() {
-      if (streamVideo) {
-          var tracks = streamVideo.getTracks();
-          tracks.forEach(track => track.stop());
-          streamVideo = null;
-      }
-  }
-  
-  function capture() {
-      var canvas = document.createElement('canvas'); // 캔버스 요소 생성
-      canvas.width = 640; // 캔버스 너비 설정
-      canvas.height = 480; // 캔버스 높이 설정
-      var context = canvas.getContext('2d');
-      var cameraView = document.getElementById("cameraview");
-      
-      context.drawImage(cameraView, 0, 0, canvas.width, canvas.height); // 현재 카메라의 이미지를 캔버스에 그립니다.
-      var imageUrl = canvas.toDataURL('image/png'); // 캔버스의 내용을 이미지 URL로 변환
-      
-      var link = document.createElement('a'); // 다운로드 링크 생성
-      link.href = imageUrl;
-      link.download = "capture.png"; // 다운로드될 파일 이름 설정
-      document.body.appendChild(link); // 링크를 문서에 추가
-      link.click(); // 링크 클릭을 통해 이미지 다운로드
-      document.body.removeChild(link); // 사용 후 링크 삭제
-  }
-  
-
-</script>
-
 </html>

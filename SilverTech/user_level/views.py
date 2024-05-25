@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from django.http import HttpRequest, HttpResponse
 
 
 picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에서 list over되어 5, 3 추가함
@@ -35,7 +36,7 @@ def fetch_user_info(request, user_name):
 
     request.session['user_name'] = user_name
     request.session['user_id'] = user.user_id
-
+    print('fetch_user_info:', user_name)
     return user_proceeding, None
 
 # 초기 동작 함수
@@ -68,10 +69,11 @@ def fetch_user_info(request, user_name):
         404: openapi.Response(description='요청한 훈련 사이트를 찾을 수 없습니다.'),
     },
 )
-@api_view(["GET", "POST"])
-def login_to_training(request):
+@api_view(["GET", "POST"]) 
+def login_to_training(request: HttpRequest):
     if request.method == "POST":
-        name = request.POST.get('name')
+        name = request.session.get('user_name')
+        print('login_to_training name:',name)
         
         user_proceeding, error_response = fetch_user_info(request, name)
         if error_response:
@@ -84,7 +86,6 @@ def login_to_training(request):
             base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
 
             # 세션에 필요한 정보 저장
-            request.session['user_name'] = name
             request.session['level'] = level
             request.session['picture_url'] = base_picture.url
             request.session['picture_order'] = base_picture.order
@@ -92,7 +93,7 @@ def login_to_training(request):
 
             print(request)
             # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
-            return redirect('../picture-training/')  
+            return redirect('../picture-load/picture-training/')  
         except BasePictures.DoesNotExist:
             return JsonResponse({'error': 'Base picture not found'}, status=404)
         except Exception as e:
@@ -105,6 +106,7 @@ def login_to_training(request):
             'url': request.session.get('picture_url', None),
             'order': request.session.get('picture_order', 0),
         }
+        print(context)
         return render(request, 'index.html', context)
 
 @swagger_auto_schema(
