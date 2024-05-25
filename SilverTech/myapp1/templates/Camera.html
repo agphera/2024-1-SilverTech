@@ -39,13 +39,7 @@
 
     <script>
 
-    //{% comment %} //folder_counter 변수를 사용하여 사용자 데이터를 submit
-    //function submitUserData() {
-    //  var folderCounter = '{{ request.session.folder_counter }}';  // folder_counter 변수 들고오기
-    //  document.getElementById('username').value = "User_" + folderCounter;
-    //  document.getElementById('userDataForm').submit();  // html에서의 form을 submit
-    //} {% endcomment %} 
-
+      
     //여기부터는 카메라
     var streamVideo;
 
@@ -120,7 +114,7 @@
 
       // 0.3초 간격으로 사진을 캡처하는 타이머 설정
       var captureInterval = setInterval(() => {
-        if (captureCount >= 10) { // 사진 10장 캡처 완료 조건
+        if (captureCount >= 100) { // 사진 10장 캡처 완료 조건
           clearInterval(captureInterval); // 캡처 타이머 중단
           uploadImages(formData); // 저장된 사진 데이터를 서버로 업로드
           return; // 함수 종료
@@ -138,8 +132,8 @@
     }
 
 
-    
-    function uploadImages1(formData) {
+    //이미지 데이터 전송이 안됨 
+    function uploadImages(formData) {
         // 숨겨진 form 요소를 찾습니다.
         var form = document.getElementById('uploadForm');
 
@@ -157,12 +151,25 @@
             form.appendChild(input);
         }
 
+        fetch('../image/', {
+          method: 'POST',
+          body: formData
+        })
+          .then(response => response.json())
+          .then(result => {
+            console.log('Success:', result);
+          })
+          .catch(error => {
+            console.error('Error:', error);
+          });
+
+
         // form을 제출합니다.
         form.submit();
     }
 
-  // 이미지 데이터를 서버로 전송하는 함수
-  function uploadImages(formData) {
+  // 이미지 데이터를 서버로 전송하는 함수, 눈속임용 URL 안바뀜 
+  function uploadImages2(formData) { 
     // AJAX 요청을 생성합니다.
     var xhr = new XMLHttpRequest();
     xhr.open('POST', '../image/', true); // 업로드 URL 설정
@@ -180,12 +187,51 @@
         }
     };
 
-  // FormData 객체를 서버로 전송합니다.
-  xhr.send(formData);
+    // FormData 객체를 서버로 전송합니다.
+    xhr.send(formData);
+  }
+
+  function uploadImages3(formData) {
+    // 숨겨진 form 요소를 찾습니다.
+    var form = document.getElementById('uploadForm');
+    
+    // Action URL 설정
+    form.action = '../image/';
+
+    // 기존 폼의 input 요소 제거
+    while (form.firstChild) {
+        form.removeChild(form.firstChild);
+    }
+
+    // FormData 객체에서 키와 값을 추출하여 form에 추가합니다.
+    for (var key of formData.keys()) {
+        var value = formData.get(key);
+        // input 요소를 생성하고, 해당 값을 설정합니다.
+        if (key === 'photo') { 
+            // 파일 타입의 input은 FormData 객체로 직접 전달하는 것이 좋습니다.
+            continue;
+        }
+        var input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = value;
+        form.appendChild(input);
+    }
+
+    // input type="file" 요소를 동적으로 추가합니다.
+    for (var pair of formData.entries()) {
+        if (pair[1] instanceof Blob) {
+            var fileInput = document.createElement("input");
+            fileInput.type = "file";
+            fileInput.name = pair[0];
+            fileInput.files = formData.getAll(pair[0]);
+            form.appendChild(fileInput);
+        }
+    }
+
+    // form을 제출합니다.
+    form.submit();
 }
-
-
-
 
 
 

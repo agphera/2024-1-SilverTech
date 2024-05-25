@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Camera Capture and Upload Example</title>
+    {% load static %}
+    <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}" />
+    <link rel="stylesheet" href="{% static 'Camera.css' %}" type="text/css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+    <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  </head>
+
+  <body>
+
+
+    <div class="camera-box">
+      <p>
+        <video id="cameraview" width="720" height="480"></video>
+      </p>
+      <div class="camera-buttons">
+        <button id="openBtn" class="button is-primary">카메라 켜기</button>
+        <button id="closeBtn" class="button is-danger">카메라 끄기</button>
+        <button id="captureBtn" class="button is-link">Capture</button>
+      </div>
+    </div>
+
+    <!-- 카메라 멘트, 화면 안내. -->
+    <div id="MentBox" class="camera-ment-box">
+      <p id="cameraMent" class="camera-ment">처음 오셨으니, 화면에 얼굴을 보여주세요.</p>
+    </div>
+
+    <form id="uploadForm" action="../image/" method="post" enctype="multipart/form-data" style="display: none;">
+      <!-- 파일 입력 필드는 JavaScript를 통해 처리됩니다. -->
+    </form>
+
+    <script>
+
+    //여기부터는 카메라
+    var streamVideo;
+
+    document.getElementById("captureBtn").addEventListener('click',  loginUpload);
+
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert("Media Device not supported");
+    } else {
+      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        streamVideo = stream;
+        var cameraView = document.getElementById("cameraview");
+        cameraView.srcObject = stream;
+      });
+    }
+
+    // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
+    function loginUpload() {
+      var canvas = document.createElement('canvas'); // 캔버스 요소 생성
+      canvas.width = 640; // 캔버스 너비 설정
+      canvas.height = 480; // 캔버스 높이 설정
+      var context = canvas.getContext('2d'); // 2D 그리기 컨텍스트 가져오기
+      var video = document.getElementById('cameraview'); // 비디오 요소 가져오기
+      var formData = new FormData(); // 폼 데이터 객체 생성
+      var captureCount = 0; // 캡처한 사진 수 초기화
+
+      // 0.3초 간격으로 사진을 캡처하는 타이머 설정
+      var captureInterval = setInterval(() => {
+        if (captureCount >= 1) { // 사진 10장 캡처 완료 조건
+          clearInterval(captureInterval); // 캡처 타이머 중단
+          uploadCaptureLogin(formData); // 저장된 사진 데이터를 서버로 업로드
+          return; // 함수 종료
+        }
+
+        // 비디오 요소에서 현재 프레임을 캔버스로 복사
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        // 캔버스의 내용을 Blob 형태로 가져오기 (JPEG 형식)
+        canvas.toBlob(blob => {
+          // 폼 데이터에 Blob 추가, 파일 이름은 캡처 순서에 따라 다름
+          formData.append('photo', blob, `capture_${captureCount}.jpg`);
+          captureCount++; // 캡처한 사진 수 증가
+        }, 'image/jpeg'); // 블롭의 MIME 타입 지정
+      }, 300); // 300ms (0.3초) 간격으로 캡처 수행
+    }
+
+
+    
+    function uploadCaptureLogin(formData) {
+         //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
+      fetch('../login_order/', {
+        method: 'POST',
+        body: formData
+      })
+        .then(response => response.json())
+        .then(result => {
+          console.log('Success:', result);
+        })
+        .catch(error => {
+          console.error('Error:', error);
+        });
+
+        // form을 제출합니다.
+        form.submit();
+    }
+
+
+
+
+
+  </script>
+  </body>
+
+  <script>
+   
+    const mentArray = [
+        "처음 오셨으니, 화면에 얼굴을 보여주세요.",
+        "이번 한번만 보여주시면, 앞으로는 계속 기억할게요!",
+        "고개를 왼쪽으로 돌려보세요.",
+        "고개를 오른쪽으로 돌려보세요.",
+        "고개를 위쪽으로 살짝만 올려주세요.",
+        "이번에는 고개를 아래로 살짝 내려볼까요?"
+    ];
+
+    let currentMentIndex = 0;
+    const cameraMent = document.getElementById("cameraMent");
+
+    function changeMent() {
+        cameraMent.classList.add("hidden");
+        setTimeout(() => {
+            currentMentIndex = (currentMentIndex + 1) % mentArray.length;
+            cameraMent.innerText = mentArray[currentMentIndex];
+            cameraMent.classList.remove("hidden");
+        }, 1000);
+    }
+
+    setInterval(changeMent, 5000);
+
+  </script>
+
+  <a id="redirectLink" href="{% url 'index' %}" style="display:none;">이동</a>
+</html>

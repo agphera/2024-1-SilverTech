@@ -354,7 +354,7 @@ def train_model_again(request, directory_path):
 # 입력: 없음
 # 반환: 없음
 # 출력: 회원의 숫자 데이터
-@csrf_exempt 
+@csrf_exempt
 def login_capture(request):
     # 'currentname'을 초기화하여 새로운 사람이 식별될 때만 트리거되도록 합니다.
     currentname = "Unknown"
@@ -375,48 +375,86 @@ def login_capture(request):
 
     # 비디오 파일 스트림에서 프레임을 반복 처리합니다.
     while True:
-        # 스레드된 비디오 스트림에서 프레임을 캡처하고 크기를 조정합니다(처리 속도 향상을 위해).
-        frame = vs.read()
-        frame = imutils.resize(frame, width=500)
-        # 얼굴 상자를 감지합니다.
-        boxes = face_recognition.face_locations(frame)
-        # 각 얼굴 경계 상자에 대한 얼굴 임베딩을 계산합니다.
-        encodings = face_recognition.face_encodings(frame, boxes)
-        names = []
+        try:
+            # 스레드된 비디오 스트림에서 프레임을 캡처하고 크기를 조정합니다(처리 속도 향상을 위해).
+            frame = vs.read()
+            frame = imutils.resize(frame, width=500)
+            # 얼굴 상자를 감지합니다.
+            boxes = face_recognition.face_locations(frame)
+            # 각 얼굴 경계 상자에 대한 얼굴 임베딩을 계산합니다.
+            encodings = face_recognition.face_encodings(frame, boxes)
+            names = []
 
-        # 얼굴 임베딩을 반복합니다.
-        for encoding in encodings:
-            # 입력 이미지의 각 얼굴을 알려진 인코딩과 비교하여 일치하는지 시도합니다.
-            matches = face_recognition.compare_faces(data["encodings"], encoding)
-            name = "Unknown"
+            # 얼굴 임베딩을 반복합니다.
+            for encoding in encodings:
+                # 입력 이미지의 각 얼굴을 알려진 인코딩과 비교하여 일치하는지 시도합니다.
+                matches = face_recognition.compare_faces(data["encodings"], encoding)
+                name = "Unknown"
 
-            # 일치하는 경우가 있는지 확인합니다.
-            if True in matches:
-                # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
-                matchedIdxs = [i for (i, b) in enumerate(matches) if b]
-                counts = {}
+                # 일치하는 경우가 있는지 확인합니다.
+                if True in matches:
+                    # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
+                    matchedIdxs = [i for (i, b) in enumerate(matches) if b]
+                    counts = {}
 
-                # 일치하는 인덱스를 반복하고 각 인식된 얼굴에 대한 카운트를 유지합니다.
-                for i in matchedIdxs:
-                    name = data["names"][i]
-                    counts[name] = counts.get(name, 0) + 1
+                    # 일치하는 인덱스를 반복하고 각 인식된 얼굴에 대한 카운트를 유지합니다.
+                    for i in matchedIdxs:
+                        name = data["names"][i]
+                        counts[name] = counts.get(name, 0) + 1
 
-                # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
-                name = max(counts, key=counts.get)
+                    # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
+                    name = max(counts, key=counts.get)
 
-                # 데이터셋에 있는 누군가가 식별되면 화면에 그들의 이름을 출력합니다.
-                if currentname != name:
-                    
-                    print(currentname.replace('User_images_', '')) #이거 들고가면 됨!!! -> 숫자로 넘어가게하기 
-                    
-                    request.session['user_name'] = currentname.replace('User_images_', '')
-                    
-                    vs.stop() # 비디오 스트림을 종료합니다.
-                    fps.stop() # FPS 카운터를 종료합니다.
-                    cv2.destroyAllWindows() # 모든 OpenCV 창을 닫습니다.
-                    #exit() # 프로그램을 종료합니다.
-                    
-                    return login_to_training(request)
-                    
+                    # 데이터셋에 있는 누군가가 식별되면 화면에 그들의 이름을 출력합니다.
+                    if currentname != name:
+                        print(currentname.replace('User_images_', '')) #이거 들고가면 됨!!! -> 숫자로 넘어가게하기 
+                        
+                        request.session['user_name'] = currentname.replace('User_images_', '')
+                        
+                        vs.stop() # 비디오 스트림을 종료합니다.
+                        fps.stop() # FPS 카운터를 종료합니다.
+                        cv2.destroyAllWindows() # 모든 OpenCV 창을 닫습니다.
+                        
+                        return login_to_training(request)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            break
+
+    # 루프를 탈출한 경우, 혹은 함수가 정상 종료된 경우 비디오 스트림을 정리합니다.
+    vs.stop()
+    fps.stop()
+    cv2.destroyAllWindows()
+    
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
+
+@csrf_exempt
+def login_order(request):
+    if request.method == 'POST' and 'image' in request.FILES:
+        image_file = request.FILES['image']
+        image = Image.open(image_file)
+        rgb = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
+
+        # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
+        with open("./static/encodings.pickle", "rb") as f: 
+            data = pickle.load(f)
+        knownEncodings = data["encodings"]
+        knownNames = data["names"]
+
+        boxes = face_recognition.face_locations(rgb, model="hog")
+        encodings = face_recognition.face_encodings(rgb, boxes)
+
+        for encoding in encodings:
+            knownEncodings.append(encoding)
+            knownNames.append("unknown")  # You may change this to the actual name
+
+        # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
+        data = {"encodings": knownEncodings, "names": knownNames}
+        with open("./static/encodings.pickle", "wb") as f:
+            f.write(pickle.dumps(data))
+
+        response_data = {'message': 'Model training successful.'}
+        return JsonResponse(response_data)
+    else:
+        response_data = {'error': 'No image found in the request.'}
+        return JsonResponse(response_data, status=400)
