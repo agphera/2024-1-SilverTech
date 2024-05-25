@@ -195,9 +195,9 @@
                     progressBar.value -= decrementAmount;
                     if (progressBar.value <= 0) {
                         clearInterval(progressInterval);
-                        //if (mediaRecorder && mediaRecorder.state === "recording") {
-                        //    mediaRecorder.stop(); // 녹음 중지
-                        //}
+                        if (mediaRecorder && mediaRecorder.state === "recording") {
+                            mediaRecorder.stop(); // 녹음 중지
+                        }
                     }
                 }, 100);
           
@@ -234,12 +234,14 @@
               // "다른 그림을 보시겠어요?" 팝업의 '예', '아니오' 버튼 이벤트 처리
                 document.getElementById("yesButton").addEventListener("click", function() {
                   hidePopup("nextStepPopup");
+                  hidePopup("generatedImageContainer");
                   fetchImage();
                   progress_and_record(); // 새로운 녹음 및 프로그레스 바 시작
                 });
           
                 document.getElementById("noButton").addEventListener("click", function() {
                   hidePopup("nextStepPopup");
+                  hidePopup("generatedImageContainer");
                   progress_and_record(); // 같은 이미지로 녹음 및 프로그레스 바 다시 시작
                 });
           
