@@ -21,10 +21,9 @@ from django.urls import path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from myapp1.views import index, Camera, StartingPage, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
+from myapp1.views import index, Camera, StartingPage, send_audio_to_naver_stt, login_capture  # 'index' 뷰도 임포트합니다.
 from django.contrib import admin
 from django.urls import include, path
-from myapp1.views import index, send_audio_to_naver_stt  # 'index' 뷰도 임포트합니다.
 from myapp1.views import proxy_to_naver_stt, make_pic_karlo, load_base_picture,upload_image
 
 schema_view = get_schema_view( # Swagger
@@ -57,5 +56,6 @@ urlpatterns = [
     path('api/naver-stt/', proxy_to_naver_stt, name='naver_stt_proxy'),
     path('func/make-pic/', make_pic_karlo, name='make_pic_karlo'),
     path('picture-load/', include('user_level.urls')),
-    path('image/', upload_image, name='upload_image') 
+    path('image/', upload_image, name='upload_image'),
+    path('login_capture/', login_capture, name='login_capture')
 ]

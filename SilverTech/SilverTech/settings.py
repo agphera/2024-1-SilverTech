@@ -18,6 +18,14 @@ import os
 import json
 
 
+# API 키 작성된 메모장 주소
+keys_file_path = os.path.join('../API', 'api_keys.txt')
+
+# 파일에서 API 키를 로드하는 함수
+with open(keys_file_path, 'r', encoding='utf-8') as file:
+    keys = json.load(file)
+
+
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -26,13 +34,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-h%5y$b-*$3m%@q3jaed^jw^ob2$y$76=r+-qm@)qsxf6_y#sru'
+SECRET_KEY = keys['django-key']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
-
+ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org']
 
 # Application definition
 
@@ -84,12 +91,6 @@ WSGI_APPLICATION = 'SilverTech.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# API 키 작성된 메모장 주소
-keys_file_path = os.path.join('../API', 'api_keys.txt')
-
-# 파일에서 API 키를 로드하는 함수
-with open(keys_file_path, 'r', encoding='utf-8') as file:
-    keys = json.load(file)
 
 
 DATABASES = {
@@ -97,7 +98,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'oss',
         'USER': 'root',
-        'PASSWORD': f"{keys['mysql_pw']}",
+        'PASSWORD': keys['mysql_pw'],
         'HOST': '35.194.147.127',
         'PORT': '3306',
         

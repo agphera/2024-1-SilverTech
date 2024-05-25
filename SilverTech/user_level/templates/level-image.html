@@ -30,38 +30,6 @@
         }
       }
 
-      // accuracy 값 전송
-      function sendAccuracy() {
-        // 입력한 Accuracy로 정확도 설정
-        const accuracyInput = document.getElementById("accuracy-input");
-        let accuracy = parseFloat(accuracyInput.value);
-        // 입력이 없으면 0.0으로 설정
-        if (isNaN(accuracy)) accuracy = 0.0;
-
-        const data = { accuracy: accuracy };
-
-        return fetch(
-          "http://127.0.0.1:8000/picture-load/adjust-level-with-accuracy",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-              "X-CSRFToken": getCookie("csrftoken"),
-            },
-            body: JSON.stringify(data),
-          }
-        )
-          .then((response) => response.json())
-          .then((data) => {
-            console.log("Success:", data);
-            //alert("Response: " + JSON.stringify(data));
-            return data;
-          })
-          .catch((error) => {
-            console.error("Error:", error);
-          });
-      }
-
       // 그림 순차 출력 ** 프론트 **
       function fetchImage() {
         const accuracyInput = document.getElementById("accuracy-input");
@@ -72,7 +40,7 @@
         const data = { accuracy: accuracy };
 
         // 레벨이 변경되었을 경우, 변경된 레벨에 해당하는 그림을 직접 가져옴
-        fetch("http://127.0.0.1:8000/picture-load/fetch-picture/", {
+        fetch("../fetch-picture/", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

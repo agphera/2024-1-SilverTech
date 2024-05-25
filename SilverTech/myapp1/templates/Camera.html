@@ -125,7 +125,7 @@
           formData.append('photo', blob, 'capture.jpg');
 
           //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
-          fetch('http://127.0.0.1:8000/image/', {
+          fetch('../image/', {
             method: 'POST',
             body: formData
           })
@@ -174,7 +174,7 @@
     
     function uploadImages(formData) {
       //포트 따라 8080 -> 8000 이런 식으로 바꿔서 사용하세요.
-      fetch('http://127.0.0.1:8000/image/', {
+      fetch('../image/', {
         method: 'POST',
         body: formData
       })
@@ -310,4 +310,3 @@
 </script>
 
 </html>
--->

@@ -235,6 +235,11 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import JsonResponse
+
+# 웹에서 받아온 이미지 저장
+# 입력: 이미지 데이터
+# 반환: 없음
+# 출력물: 새로운 회원의 숫자 정보
 @csrf_exempt
 def upload_image(request):
     path = None
@@ -266,6 +271,7 @@ def upload_image(request):
             
             request.session['folder_counter'] = folder_counter + 1
             train_model_again(directory_path)
+            #del request.session['folder_counter']
 
             return JsonResponse({'status': 'success', 'message': 'Images uploaded successfully', 'paths': full_paths})
         except Exception as e:
@@ -275,77 +281,20 @@ def upload_image(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
-
-
-
 #모델 추가 학습
 from imutils import paths
 import shutil  # 폴더 삭제에 사용됩니다.
 import face_recognition
-#import argparse
 import pickle
 import cv2
-import os
-import time
 
-
-def train_model_again(folder_path):
-    try:
-        # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
-        with open("../SilverTech/function/encodings.pickle", "rb") as f:
-            data = pickle.load(f)
-        knownEncodings = data["encodings"]
-        knownNames = data["names"]
-        
-
-        # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
-        newImagePaths = list(paths.list_images(folder_path))
-
-        # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
-        print(newImagePaths)
-        for (i, imagePath) in enumerate(newImagePaths):
-            print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
-            name = imagePath.split(os.path.sep)[-2]
-
-            image = cv2.imread(imagePath)
-            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-            boxes = face_recognition.face_locations(rgb, model="hog")
-            encodings = face_recognition.face_encodings(rgb, boxes)
-
-            for encoding in encodings:
-                knownEncodings.append(encoding)
-                knownNames.append(name)
-
-        # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
-        print("[INFO] serializing encodings...")
-        data = {"encodings": knownEncodings, "names": knownNames}
-        with open("../SilverTech/function/encodings.pickle", "wb") as f:  # 필요한 위치에 저장
-            f.write(pickle.dumps(data))
-
-        # 폴더가 존재하는지 확인
-        if os.path.exists(folder_path):
-            # 폴더 삭제
-            shutil.rmtree(folder_path)
-            print(f"{folder_path} 폴더가 성공적으로 삭제되었습니다.")
-        else:
-            print(f"{folder_path} 폴더를 찾을 수 없습니다.")
-
-    except Exception as e:
-        print(f"An error occurred: {e}")
-
-#모델 추가 학습
-from imutils import paths
-import shutil  # 폴더 삭제에 사용됩니다.
-import face_recognition
-#import argparse
-import pickle
-import cv2
-import os
-
+# 얼굴 인식 인공지능 모델 학습 및 입력으로 받아온 이미지 폴더 경로에 해당하는 폴더 삭제
+# 입력: 이미지 데이터 불러올 주소
+# 반환: 없음
+# 출력물: 새롭게 학습된 모델 파일(./static/encodings.pickle)
 def train_model_again(request):
     # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
-    with open("../SilverTech/function/encodings.pickle", "rb") as f: 
+    with open("./static/encodings.pickle", "rb") as f: 
         data = pickle.load(f)
     knownEncodings = data["encodings"]
     knownNames = data["names"]
@@ -371,7 +320,7 @@ def train_model_again(request):
     # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
     print("[INFO] serializing encodings...")
     data = {"encodings": knownEncodings, "names": knownNames}
-    with open("encodings.pickle", "wb") as f:  #myapp1 바깥 쪽에 생김. 이거 위치 나중에 잡아주겠습니다. 
+    with open("./static/encodings.pickle", "wb") as f:  #myapp1 바깥 쪽에 생김. 이거 위치 나중에 잡아주겠습니다. 
         f.write(pickle.dumps(data))
     f.close()
     
@@ -385,6 +334,71 @@ def train_model_again(request):
         print(f"{request} 폴더를 찾을 수 없습니다.")
 
 
+# 필요한 패키지를 임포트합니다
+from imutils.video import VideoStream
+from imutils.video import FPS
+import imutils
 
+# 얼굴 인식 인공지능을 이용한 사람 구분 시스템
+# 입력: 없음
+# 반환: 없음
+# 출력: 회원의 숫자 데이터
+def login_capture():
+    # 'currentname'을 초기화하여 새로운 사람이 식별될 때만 트리거되도록 합니다.
+    currentname = "unknown"
+    # train_model.py에서 생성된 encodings.pickle 파일 모델로부터 얼굴을 식별합니다.
+    encodingsP = "./static/encodings.pickle"
 
+    # 인코딩과 얼굴 검출을 위한 OpenCV의 Haar cascade를 로드합니다.
+    print("[INFO] loading encodings + face detector...")
+    data = pickle.loads(open(encodingsP, "rb").read())
+
+    # 비디오 스트림을 초기화하고 카메라 센서가 예열될 시간을 줍니다.
+    # MAC의 내장 웹캠을 사용하기 위해 src=0으로 설정합니다.
+    vs = VideoStream(src=0).start()
+    time.sleep(1.0)
+
+    # FPS 카운터를 시작합니다.
+    fps = FPS().start()
+
+    # 비디오 파일 스트림에서 프레임을 반복 처리합니다.
+    while True:
+        # 스레드된 비디오 스트림에서 프레임을 캡처하고 크기를 조정합니다(처리 속도 향상을 위해).
+        frame = vs.read()
+        frame = imutils.resize(frame, width=500)
+        # 얼굴 상자를 감지합니다.
+        boxes = face_recognition.face_locations(frame)
+        # 각 얼굴 경계 상자에 대한 얼굴 임베딩을 계산합니다.
+        encodings = face_recognition.face_encodings(frame, boxes)
+        names = []
+
+        # 얼굴 임베딩을 반복합니다.
+        for encoding in encodings:
+            # 입력 이미지의 각 얼굴을 알려진 인코딩과 비교하여 일치하는지 시도합니다.
+            matches = face_recognition.compare_faces(data["encodings"], encoding)
+            name = "Unknown"
+
+            # 일치하는 경우가 있는지 확인합니다.
+            if True in matches:
+                # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
+                matchedIdxs = [i for (i, b) in enumerate(matches) if b]
+                counts = {}
+
+                # 일치하는 인덱스를 반복하고 각 인식된 얼굴에 대한 카운트를 유지합니다.
+                for i in matchedIdxs:
+                    name = data["names"][i]
+                    counts[name] = counts.get(name, 0) + 1
+
+                # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
+                name = max(counts, key=counts.get)
+
+                # 데이터셋에 있는 누군가가 식별되면 화면에 그들의 이름을 출력합니다.
+                if currentname != name:
+                    currentname = name
+                    
+                    print(currentname.replace('User_images_', '')) #이거 들고가면 됨!!! -> 숫자로 넘어가게하기 
+                    vs.stop() # 비디오 스트림을 종료합니다.
+                    fps.stop() # FPS 카운터를 종료합니다.
+                    cv2.destroyAllWindows() # 모든 OpenCV 창을 닫습니다.
+                    exit() # 프로그램을 종료합니다.
 
