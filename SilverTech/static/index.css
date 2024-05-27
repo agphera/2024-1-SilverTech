@@ -21,15 +21,14 @@ hr {
     height: 100%;
     top: 0;
     left: 0;
-    background-color: rgba(63, 78, 60, 0.9);
+    background-color: rgba(63, 78, 60,1.0);
     color: white;
-    display: flex;
+    display: none;
     justify-content: center;
     align-items: center;
     text-align: center;
     font-size: 40px;
 
-    display: none; /* flex로 바꾸어야함.  */
     transition: opacity 0.5s ease-in-out;
     opacity: 0; /* Start hidden */
 }
@@ -281,7 +280,6 @@ progress::-webkit-progress-value {
     left: 0;
     background-color: rgba(63, 78, 60, 0.9);
     color: white;
-    display: flex;
     justify-content: center;
     align-items: center;
     font-size: 55px;
