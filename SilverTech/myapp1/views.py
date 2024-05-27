@@ -320,7 +320,13 @@ def train_model_again(request, directory_path):
         print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
         name = imagePath.split(os.path.sep)[-2]
 
+        if not os.path.exists(imagePath):
+            print("이미지 파일이 존재하지 않습니다:", imagePath)
+        if not os.access(imagePath, os.R_OK):
+            print("파일에 읽기 권한이 없습니다:", imagePath)
+
         image = cv2.imread(imagePath)
+        print('image:',image)
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         boxes = face_recognition.face_locations(rgb, model="hog")
