@@ -1,65 +1,109 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta name="viewport" content="width=device-width, initial-scale=1" , charset="utf-8">
+  <head>
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1"
+      ,
+      charset="utf-8"
+    />
     <title>그림 인지 훈련</title>
     {% load static %}
-    <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}">
-    <link rel="stylesheet" href="{% static 'StartingPage.css' %}" type="text/css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
+    <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}" />
+    <link
+      rel="stylesheet"
+      href="{% static 'StartingPage.css' %}"
+      type="text/css"
+    />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
     <script src="{% static 'StartingPage.js' %}" type="module"></script>
     <script src="{% static 'popup.js' %}" type="module"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
+  </head>
 
-</head>
-
-<body class="hero is-fullheight-with-navbar has-background-green">
+  <body class="hero is-fullheight-with-navbar has-background-green">
     <!-- 백엔드url로 회원가입 정보 전달-->
-    {% comment %} <form id="userDataForm" action="../picture-load/picture-training/" method="post" style="display: none;">
-        {% csrf_token %}
-        <input type="hidden" id="username" name="name" value="">
-        <input type="submit" value="Submit">
-    </form> {% endcomment %}
-        <div class="hero-body">
-            <div class="container">
-                <div class="columns is-vcentered">
-                    <div class="column is-half has-text-centered">
-                        <figure class="image is-inline-block">
-                            <img src="{% static 'Main_source/Starting_icon.PNG' %}" alt="Starting_icon">
-                        </figure>
-                    </div>
-                    <div class="column is-half">
-                        <p class="title is-1 has-text-white">그림으로 말하는<br>인지 훈련</p>
-                    </div>
-                </div>
-            </div>
+    {% comment %}
+    <form
+      id="userDataForm"
+      action="../picture-load/picture-training/"
+      method="post"
+      style="display: none"
+    >
+      {% csrf_token %}
+      <input type="hidden" id="username" name="name" value="" />
+      <input type="submit" value="Submit" />
+    </form>
+    {% endcomment %}
+    <div class="hero-body">
+      <div class="container">
+        <div class="columns is-vcentered">
+          <div class="column is-half has-text-centered">
+            <figure class="image is-inline-block">
+              <img
+                src="{% static 'Main_source/Starting_icon.PNG' %}"
+                alt="Starting_icon"
+              />
+            </figure>
+          </div>
+          <div class="column is-half">
+            <p class="title is-1 has-text-white">
+              그림으로 말하는<br />인지 훈련
+            </p>
+          </div>
         </div>
-
+      </div>
+    </div>
 
     <!-- Greeting Popup -->
-    <div id="GreetingPopup" class="greeting-popup" style="display: none;">
-        <div class="container">
-            <figure class="image smaller-icon"> <!-- 새 클래스 추가 -->
-                <img src="{% static 'Main_source/Starting_icon.PNG' %}" alt="Starting_icon">
-            </figure>
-            <p id="random-greeting" class="content is-1 has-text-white"></p>
-            <p id="greeting" class="content is-1 has-text-white">그림 인지 훈련 프로그램에 어서오세요!<br>혹시 처음오셨나요?</p>
-            <div class="buttons-box">
-                <button id='FirstTimeButton' class="button is-light"> 네, 처음이에요. </button>
-                <button id='NotFirstTimeButton' class="button is-light">아니요, 전에 온 적 있어요.</button>
-            </div>
+    <div id="GreetingPopup" class="greeting-popup" style="display: none">
+      <div class="container">
+        <figure class="image smaller-icon">
+          <!-- 새 클래스 추가 -->
+          <img
+            src="{% static 'Main_source/Starting_icon.PNG' %}"
+            alt="Starting_icon"
+          />
+        </figure>
+        <p id="random-greeting" class="content is-1 has-text-white"></p>
+        <p id="greeting" class="content is-1 has-text-white">
+          그림 인지 훈련 프로그램에 어서오세요!<br />혹시 처음오셨나요?
+        </p>
+        <div class="buttons-box">
+          <button
+            id="FirstTimeButton"
+            class="button is-light"
+            onclick="playAudio('test-audio')"
+          >
+            네, 처음이에요.
+          </button>
+          <button
+            id="NotFirstTimeButton"
+            class="button is-light"
+            onclick="playAudio('test-audio')"
+          >
+            아니요, 전에 온 적 있어요.
+          </button>
         </div>
+      </div>
     </div>
 
-    <div id="logPopup" class="log-popup" style="display:none;">
-        <p id="login" class="login">이제, 그림인지 훈련을 시작합니다!</p>
+    <div id="logPopup" class="log-popup" style="display: none">
+      <p id="login" class="login">이제, 그림인지 훈련을 시작합니다!</p>
     </div>
 
-    <form id="hiddenForm" action="login_capture/" method="post" style="display: none;"></form>
-</body>
+    <form
+      id="hiddenForm"
+      action="login_capture/"
+      method="post"
+      style="display: none"
+    ></form>
+  </body>
 
-
-<script>
+  <script>
     {% comment %} function submitUserData() {
         var folderCounter = '{{ request.session.User_name }}';  // folder_counter 변수 들고오기
         document.getElementById('username').value = "User_" + folderCounter;
@@ -73,14 +117,18 @@
             window.location.href = document.getElementById('redirectLink').href
         });
 
-        //'전에 온 적 있어요' -> 바로 인사 -> 그 후 
+        //'전에 온 적 있어요' -> 바로 인사 -> 그 후
         document.getElementById('NotFirstTimeButton').addEventListener('click', function() {
             document.getElementById('hiddenForm').submit();
         });
 
     });
-</script>
 
-<a id="redirectLink" href="{% url 'Camera' %}" style="display:none;">이동</a>
+    function playAudio(audioId) {
+        var audio = document.getElementById(audioId);
+        audio.play();
+      }
+  </script>
 
+  <a id="redirectLink" href="{% url 'Camera' %}" style="display: none">이동</a>
 </html>

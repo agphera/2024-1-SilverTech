@@ -49,18 +49,23 @@
           <div class="navbar-end">
             <div class="navbar-item">
               <div class="buttons">
-                <a id="helpButton" class="Help button"
+                <a
+                  id="helpButton"
+                  class="Help button"
+                  onclick="playAudio('test-audio')"
                   ><strong>도움말</strong></a
                 >
-                <a id="goOutButton" class="GoOut button"
+                <a
+                  id="goOutButton"
+                  class="GoOut button"
+                  onclick="playAudio('test-audio')"
                   ><strong>나가기</strong></a
                 >
-                <button onclick="playAudio()">도움말 소리 재생</button>
                 <a class="Mode button"><strong>개발자모드</strong></a>
               </div>
               <audio
-                id="helpButton-audio"
-                src="{% static 'audio_ui/areyoufirst.mp3' %}"
+                id="test-audio"
+                src="{% static 'audio_ui/test.mp3' %}"
                 type="audio/mp3"
               ></audio>
             </div>
@@ -241,7 +246,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       let progressBar = document.querySelector("progress");
       /*시간 설정*/
-      let duration = 15000; // 프로그레스바 15초
+      let duration = 14000; // 프로그레스바 14초
       //let hideDuration = 30000; // navbar+progressbar 사라지는 시간 30초(변수만 설정, 아직 미구현)
 
       // 프로그레스 바가 진행되면서 자동으로 녹음을 시작하는 함수
@@ -393,7 +398,7 @@
         showPopup("exitPopup");
       });
 
-    function sendAudioToNaverSTT(blob) {
+    function sendAudioToNaverSTT(blob) { //핵심 동작
       console.log("보내기");
 
       const clientId = ""; // 네이버 클라우드 플랫폼에서 발급받은 Client ID
@@ -435,7 +440,7 @@
           //점수 팝업 내용
           document.querySelector(
             ".show-accuracy"
-          ).innerHTML = `<br>맞힌 개수는 ${data["len_true_word"]} 개,`;
+          ).innerHTML = `맞힌 단어 개수는 ${data["len_true_word"]} 개 입니다!`;
           //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
           //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
 
@@ -463,33 +468,32 @@
       const helpMent = document.getElementById("helpMent");
 
       const complimentsHigh = [
-        "백점 만점에 백점!",
+        "오~ 백점 만점에 백점!",
         "와우~! 짝짝짝! 너무너무 잘했어요!",
-        "정확해요~!",
+        "이럴수가, 정확해요~!",
         "대단해요! 정말 잘했어요!",
         "최고에요! 계속 이렇게 해볼까요?",
       ];
 
       const complimentsMediumHigh = [
         "너무 잘했어요!",
-        "정말 멋진걸요?",
-        "굉장해요!",
-        "멋지게 해내고 있어요!",
+        "와우~ 정말 멋진걸요?",
+        "우와, 정말 굉장해요!",
+        "멋지게 해내고 있어요!"
       ];
 
       const complimentsMedium = [
         "좋아요!",
         "지금도 충분히 멋져요!",
-        "잘하고 있어요!",
-        "조금만 더 힘내요!",
-        "계속 노력해봐요!",
+        "지금도 잘 하고 있어요. 조금만 더 힘내요!",
+        "좋은데요? 우리 계속 노력해봐요!"
       ];
 
       const complimentsLow = [
         "이제 그림에서 어떤 단어를 맞췄는지 확인해볼까요?",
         "도전 정신이 멋져요!",
         "연습하면 더 좋아질 거에요!",
-        "한번 더 해보면 더 잘할 수 있어요!",
+        "한번 더 해보면 더 잘할 수 있어요!"
       ];
 
       showPopup("complimentPopup");
@@ -544,13 +548,8 @@
       }, 500);
     }
 
-    function playAudio() {
-      var audio = document.getElementByID("helpButton-audio");
-      audio.play();
-    }
-
-    function playAudio() {
-      var audio = document.getElementById("helpButton-audio");
+    function playAudio(audioId) {
+      var audio = document.getElementById(audioId);
       audio.play();
     }
   </script>
