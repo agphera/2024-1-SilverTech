@@ -24,7 +24,7 @@ from drf_yasg import openapi
 from myapp1.views import index, Camera, StartingPage, send_audio_to_naver_stt, login_capture, login_order # 'index' 뷰도 임포트합니다.
 from django.contrib import admin
 from django.urls import include, path
-from myapp1.views import proxy_to_naver_stt, make_pic_karlo, load_base_picture,upload_image
+from myapp1.views import proxy_to_naver_stt, make_pic_karlo, load_base_picture,upload_image, fetch_user_info
 
 schema_view = get_schema_view( # Swagger
     openapi.Info(
@@ -59,4 +59,4 @@ urlpatterns = [
     path('image/', upload_image, name='upload_image'),
     path('login_capture/', login_capture, name='login_capture'),
     path('login_order/', login_order, name='login_order')
-]
+    ]
