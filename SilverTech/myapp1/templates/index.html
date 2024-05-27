@@ -270,9 +270,12 @@
   <script>
     document.addEventListener("DOMContentLoaded", function () {
       showPopup("letStartPopup");//시작하자마자 띄워주기
-      setTimeout(() => {
-        hidePopup("letStartPopup");
-        // letStartPopup이 숨겨진 후 프로그레스바와 녹음 시작
+      setTimeout(() => { 
+        hidePopup("letStartPopup"); 
+        // letStartPopup이 숨겨짐
+        //첫 시작 안내 멘트 오디오 파일로 추가할거면 이 주석 라인 위쪽으로 작성하면 될 듯
+        
+        //여기부터는 반복 동작이라 코드 추가 시 동작 부분 주의해주세요
         progress_and_record();
       }, 6000);
 
