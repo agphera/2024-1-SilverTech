@@ -74,6 +74,14 @@
         </p>
         <div class="buttons-box">
           <button
+            id="HiddenPlayButton"
+            class="button is-light"
+            style="display: none"
+            onclick="playAudio('test-audio')"
+          >
+            숨겨진 버튼
+          </button>
+          <button
             id="FirstTimeButton"
             class="button is-light"
             onclick="playAudio('test-audio')"
@@ -114,6 +122,11 @@
         document.getElementById('username').value = "User_" + folderCounter;
         document.getElementById('userDataForm').submit();  // html에서의 form을 submit
     } {% endcomment %}
+
+    document.addEventListener("DOMContentLoaded", function () {
+      // 페이지가 로드될 때 숨겨진 버튼을 클릭하여 오디오 재생
+      document.getElementById('HiddenPlayButton').click();
+        });
 
     document.addEventListener("DOMContentLoaded", function () {
         // '처음이에요' 버튼에 이벤트 리스너 추가
