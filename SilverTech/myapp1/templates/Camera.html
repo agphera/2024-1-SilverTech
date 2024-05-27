@@ -128,7 +128,7 @@
           formData.append('photo', blob, `capture_${captureCount}.jpg`);
           captureCount++; // 캡처한 사진 수 증가
         }, 'image/jpeg'); // 블롭의 MIME 타입 지정
-      }, 300); // 300ms (0.3초) 간격으로 캡처 수행
+      }, 200); // 200ms (0.2초) 간격으로 캡처 수행
     }
 
 
