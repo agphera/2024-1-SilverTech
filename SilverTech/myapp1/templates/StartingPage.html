@@ -80,6 +80,11 @@
           >
             네, 처음이에요.
           </button>
+          <audio
+            id="test-audio"
+            src="{% static 'audio_ui/test.mp3' %}"
+            type="audio/mp3 "
+          ></audio>
           <button
             id="NotFirstTimeButton"
             class="button is-light"
@@ -110,24 +115,20 @@
         document.getElementById('userDataForm').submit();  // html에서의 form을 submit
     } {% endcomment %}
 
-     // DOM이 완전히 로드된 후 실행
     document.addEventListener("DOMContentLoaded", function () {
         // '처음이에요' 버튼에 이벤트 리스너 추가
         document.getElementById('FirstTimeButton').addEventListener('click', function() {
-            window.location.href = document.getElementById('redirectLink').href
+          playAudio('test-audio').then(function() {
+            window.location.href = document.getElementById('redirectLink').href;
+          });
         });
 
         //'전에 온 적 있어요' -> 바로 인사 -> 그 후
         document.getElementById('NotFirstTimeButton').addEventListener('click', function() {
             startCaptureAndUpload()
             document.getElementById('hiddenForm').submit();
-        });        
+        });
     });
-
-    function playAudio(audioId) {
-        var audio = document.getElementById(audioId);
-        audio.play();
-      }
 
           // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
     function startCaptureAndUpload() {
@@ -159,7 +160,7 @@
     }
 
 
-    //이미지 데이터 전송이 안됨 
+    //이미지 데이터 전송이 안됨
     function uploadImages(formData) {
         // 숨겨진 form 요소를 찾습니다.
         var form = document.getElementById('uploadForm');
@@ -188,10 +189,21 @@
           });
     }
 
-
-
+    function playAudio(audioId) {
+      return new Promise((resolve) => {
+        var audio = document.getElementById(audioId);
+        audio.play();
+        audio.onended = resolve; // 재생이 끝났을 때 Promise를 해결
+    });
+    }
   </script>
-  <form id="uploadForm" action="../image/" method="post" enctype="multipart/form-data" style="display: none;">
+  <form
+    id="uploadForm"
+    action="../image/"
+    method="post"
+    enctype="multipart/form-data"
+    style="display: none"
+  >
     <!-- 파일 입력 필드는 JavaScript를 통해 처리됩니다. -->
   </form>
   <a id="redirectLink" href="{% url 'Camera' %}" style="display: none">이동</a>
