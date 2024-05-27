@@ -440,6 +440,32 @@ def login_capture(request):
 
 @csrf_exempt
 def login_order(request):
+    if request.method == 'POST':
+        try:
+            images = request.FILES.getlist('photo')
+
+            
+            folder_name = f"Login"
+            directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
+        
+            if not os.path.exists(directory_path):
+                os.makedirs(directory_path)
+ 
+            for image in images:
+                file_name = os.path.join(folder_name, f"image.jpg")
+
+                path = default_storage.save(file_name, ContentFile(image.read()))
+                full_path = os.path.join(settings.MEDIA_ROOT, path)
+                print(f"Image uploaded successfully to {full_path}")
+                
+            return JsonResponse({'status': '^*^', 'message': 'Good~'}, status=200)
+        except Exception as e:
+            print(f"An error occurred: {e}")
+            return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
+
+
+
+
     if request.method == 'POST' and 'image' in request.FILES:
         image_file = request.FILES['image']
         image = Image.open(image_file)
