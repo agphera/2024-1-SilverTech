@@ -114,7 +114,7 @@
 
       // 0.3초 간격으로 사진을 캡처하는 타이머 설정
       var captureInterval = setInterval(() => {
-        if (captureCount >= 100) { // 사진 10장 캡처 완료 조건
+        if (captureCount >= 30) { // **!! 잠깐 30장 캡처 완료로 변경
           clearInterval(captureInterval); // 캡처 타이머 중단
           uploadImages(formData); // 저장된 사진 데이터를 서버로 업로드
           return; // 함수 종료

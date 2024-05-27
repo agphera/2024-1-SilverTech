@@ -151,8 +151,8 @@ def load_next_base_picture(request):
         request.session['level'] = user_proceeding.level
         request.session['picture_url'] = base_picture.url
         request.session['picture_order'] = base_picture.order
-        request.session['picture_title'] = base_picture.title
-        
+        request.session['theme'] = base_picture.title
+
         # 변경된 진행 정보와 정확도 정보 저장
         user_proceeding.save()
         user_accuracy.save()

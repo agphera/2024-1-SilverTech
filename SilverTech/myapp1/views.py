@@ -138,8 +138,10 @@ def make_pic_karlo(request):
         body_unicode = request.body.decode('utf-8')
         body_data = json.loads(body_unicode)
 
+        theme = request.session.get('theme')
+
         whole_prompt = body_data.get('text', '')
-        image_response = make_picture(whole_prompt)
+        image_response = make_picture(whole_prompt, theme)
         data = {'image_url': image_response['images'][0]['image']}
         
         print(data)
@@ -450,7 +452,7 @@ def login_order(request):
         
             if not os.path.exists(directory_path):
                 os.makedirs(directory_path)
- 
+
             for image in images:
                 file_name = os.path.join(folder_name, f"image.jpg")
 
@@ -462,14 +464,6 @@ def login_order(request):
         except Exception as e:
             print(f"An error occurred: {e}")
             return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
-
-
-
-    if request.method == 'POST' and 'image' in request.FILES:
-        image_file = request.FILES['image']
-        image = Image.open(image_file)
-        rgb = cv2.cvtColor(np.array(image), cv2.COLOR_BGR2RGB)
 
         # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
         with open("./static/encodings.pickle", "rb") as f: 

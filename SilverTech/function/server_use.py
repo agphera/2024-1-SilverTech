@@ -52,8 +52,8 @@ def scoring_points(data, thema):
 
     return accuracy, true_word, whole_prompt_word
 
-def make_picture(whole_prompt_word):
-    THEMA = "park1"
+def make_picture(whole_prompt_word, theme):
+    THEMA = theme
     
     #1 프롬프트 생성
     print(whole_prompt_word)
