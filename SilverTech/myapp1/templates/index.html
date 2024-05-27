@@ -49,18 +49,23 @@
           <div class="navbar-end">
             <div class="navbar-item">
               <div class="buttons">
-                <a id="helpButton" class="Help button"
+                <a
+                  id="helpButton"
+                  class="Help button"
+                  onclick="playAudio('test-audio')"
                   ><strong>도움말</strong></a
                 >
-                <a id="goOutButton" class="GoOut button"
+                <a
+                  id="goOutButton"
+                  class="GoOut button"
+                  onclick="playAudio('test-audio')"
                   ><strong>나가기</strong></a
                 >
-                <button onclick="playAudio()">도움말 소리 재생</button>
                 <a class="Mode button"><strong>개발자모드</strong></a>
               </div>
               <audio
-                id="helpButton-audio"
-                src="{% static 'audio_ui/areyoufirst.mp3' %}"
+                id="test-audio"
+                src="{% static 'audio_ui/test.mp3' %}"
                 type="audio/mp3"
               ></audio>
             </div>
@@ -544,13 +549,8 @@
       }, 500);
     }
 
-    function playAudio() {
-      var audio = document.getElementByID("helpButton-audio");
-      audio.play();
-    }
-
-    function playAudio() {
-      var audio = document.getElementById("helpButton-audio");
+    function playAudio(audioId) {
+      var audio = document.getElementById(audioId);
       audio.play();
     }
   </script>
