@@ -29,6 +29,9 @@ from django.conf import settings
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
 from django.http import JsonResponse
+from PIL import Image
+import numpy as np
+
 
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
@@ -316,7 +319,7 @@ def train_model_again(request, directory_path):
     newImagePaths = list(paths.list_images(directory_path))
 
     # 새로운 이미지 데이터에 대해 루프를 돌면서 처리
-    for (i, imagePath) in enumerate(newImagePaths):
+    for i, imagePath in enumerate(newImagePaths):
         print("[INFO] processing image {}/{}".format(i + 1, len(newImagePaths)))
         name = imagePath.split(os.path.sep)[-2]
 
@@ -325,8 +328,10 @@ def train_model_again(request, directory_path):
         if not os.access(imagePath, os.R_OK):
             print("파일에 읽기 권한이 없습니다:", imagePath)
 
-        image = cv2.imread(imagePath)
-        print('image:',image)
+        print('imagePath:', imagePath)
+        # image = cv2.imread(imagePath)
+        img_array = np.fromfile(imagePath, np.uint8)
+        image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         boxes = face_recognition.face_locations(rgb, model="hog")
@@ -432,7 +437,6 @@ def login_capture(request):
     cv2.destroyAllWindows()
     
     return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
 
 @csrf_exempt
 def login_order(request):
