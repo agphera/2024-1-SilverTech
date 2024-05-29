@@ -109,6 +109,9 @@
         <br />화면이 바뀌면, 바로 문제 풀이 시간이 시작됩니다. <br />제한시간
         동안 그림을 말로 설명해주세요!
       </p>
+      <audio autoplay>
+        <source src="{% static 'audio_ui/test.mp3' %}" type="audio/mp3" />
+      </audio>
     </div>
 
     <!-- 로딩중 팝업 -->
@@ -150,18 +153,10 @@
     <div id="nextStepPopup" class="next-step-popup">
       <div class="next-step-content">
         <p>다른 그림으로 넘어가시겠어요?</p>
-        <button
-          id="yesButton"
-          class="button is-light"
-          onclick="playAudio('test-audio')"
-        >
+        <button id="yesButton" class="button is-light">
           네. 이번엔 다른 그림을 보고싶어요.
         </button>
-        <button
-          id="noButton"
-          class="button is-light"
-          onclick="playAudio('test-audio')"
-        >
+        <button id="noButton" class="button is-light">
           아니오. 같은 그림으로 또 해볼래요.
         </button>
       </div>
@@ -270,85 +265,84 @@
   <script>
     let progressBar = document.querySelector("progress");
     let duration = 14000; // 초기 프로그레스바 및 녹음 시간 설정
-    var globalAccuracy = 0; // 정확도 전역 변수  
+    var globalAccuracy = 0; // 정확도 전역 변수
 
     document.addEventListener("DOMContentLoaded", function () {
-      showPopup("letStartPopup");//시작하자마자 띄워주기
-      setTimeout(() => { 
-        hidePopup("letStartPopup"); 
+      showPopup("letStartPopup"); //시작하자마자 띄워주기
+
+      setTimeout(() => {
+        hidePopup("letStartPopup");
         // letStartPopup이 숨겨짐
         //첫 시작 안내 멘트 오디오 파일로 추가할거면 이 주석 라인 위쪽으로 작성하면 될 듯
-        
 
         //여기부터는 반복 동작이라 코드 추가 시 동작 부분 주의해주세요
         progress_and_record();
       }, 6000);
     });
 
-      // 프로그레스 바가 진행되면서 자동으로 녹음을 시작하는 함수
-      function progress_and_record() {
-        //hidepopup 실행 직후 아래의 모든 동작 시작
+    // 프로그레스 바가 진행되면서 자동으로 녹음을 시작하는 함수
+    function progress_and_record() {
+      //hidepopup 실행 직후 아래의 모든 동작 시작
 
-        progressBar.value = 100; // 프로그레스 바를 최대치로 설정
-        let decrementAmount = progressBar.max / (duration / 100);
+      progressBar.value = 100; // 프로그레스 바를 최대치로 설정
+      let decrementAmount = progressBar.max / (duration / 100);
 
-        let progressInterval = setInterval(() => {
-          progressBar.value -= decrementAmount;
-          if (progressBar.value <= 0) {
-            clearInterval(progressInterval);
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-              mediaRecorder.stop(); // 녹음 중지
-            }
+      let progressInterval = setInterval(() => {
+        progressBar.value -= decrementAmount;
+        if (progressBar.value <= 0) {
+          clearInterval(progressInterval);
+          if (mediaRecorder && mediaRecorder.state === "recording") {
+            mediaRecorder.stop(); // 녹음 중지
           }
-        }, 100);
+        }
+      }, 100);
 
-        startRecording(); // 녹음 시작 함수 호출
-        //즉, 이 함수에서는 프로그레스바가 줄어들기 시작하는 것과 동시에 녹음 시작 함수를 호출함. 
-      }
+      startRecording(); // 녹음 시작 함수 호출
+      //즉, 이 함수에서는 프로그레스바가 줄어들기 시작하는 것과 동시에 녹음 시작 함수를 호출함.
+    }
 
-      // 녹음을 시작하는 함수
-      function startRecording() {
-        navigator.mediaDevices
-          .getUserMedia({ audio: true })
-          .then((stream) => {
-            mediaRecorder = new MediaRecorder(stream);
-            mediaRecorder.start();
-            let audioChunks = [];
+    // 녹음을 시작하는 함수
+    function startRecording() {
+      navigator.mediaDevices
+        .getUserMedia({ audio: true })
+        .then((stream) => {
+          mediaRecorder = new MediaRecorder(stream);
+          mediaRecorder.start();
+          let audioChunks = [];
 
-            mediaRecorder.ondataavailable = (event) => {
-              audioChunks.push(event.data);
-            };
+          mediaRecorder.ondataavailable = (event) => {
+            audioChunks.push(event.data);
+          };
 
-            setTimeout(() => {
-              mediaRecorder.stop();
-              stream.getTracks().forEach((track) => track.stop());
-              showPopup("analysisPopup");
-            }, duration); 
-            //녹음 중지는 프로그레스 바 총 시간과 동일해야 함. 
+          setTimeout(() => {
+            mediaRecorder.stop();
+            stream.getTracks().forEach((track) => track.stop());
+            showPopup("analysisPopup");
+          }, duration);
+          //녹음 중지는 프로그레스 바 총 시간과 동일해야 함.
 
-            mediaRecorder.onstop = () => {
-              const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-              sendAudioToNaverSTT(audioBlob); // 녹음이 끝난 후 STT 서비스로 전송
-            };
-          })
-          .catch((error) => console.error("Microphone access error.", error));
-      }
+          mediaRecorder.onstop = () => {
+            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            sendAudioToNaverSTT(audioBlob); // 녹음이 끝난 후 STT 서비스로 전송
+          };
+        })
+        .catch((error) => console.error("Microphone access error.", error));
+    }
 
-      // "다른 그림을 보시겠어요?" 팝업의 '예', '아니오' 버튼 이벤트 처리
-      document.getElementById("yesButton").addEventListener("click", function () {
-          hidePopup("nextStepPopup");
-          generatedImageContainer.classList.remove("visible");
-          fetchImage(true);
-          // 다른 이미지 가져와서 녹음 및 프로그레스 바 다시 시작
-        });
+    // "다른 그림을 보시겠어요?" 팝업의 '예', '아니오' 버튼 이벤트 처리
+    document.getElementById("yesButton").addEventListener("click", function () {
+      hidePopup("nextStepPopup");
+      generatedImageContainer.classList.remove("visible");
+      fetchImage(true);
+      // 다른 이미지 가져와서 녹음 및 프로그레스 바 다시 시작
+    });
 
-      document.getElementById("noButton").addEventListener("click", function () {
-          hidePopup("nextStepPopup");
-          generatedImageContainer.classList.remove("visible");
-          fetchImage(false); 
-          // 같은 이미지로 녹음 및 프로그레스 바 다시 시작
-        });
-
+    document.getElementById("noButton").addEventListener("click", function () {
+      hidePopup("nextStepPopup");
+      generatedImageContainer.classList.remove("visible");
+      fetchImage(false);
+      // 같은 이미지로 녹음 및 프로그레스 바 다시 시작
+    });
 
     // 이미지를 로드하고 화면에 표시하는 함수
     window.onload = function () {
@@ -369,7 +363,6 @@
 
     //다른 그림으로 넘어가시겠어요?
     function fetchImage(fetchNew) {
- 
       //정확도 전역변수 가져오고, fetchnew 변수-> 새 그림 가져올지에 대한 여부 변수 가져옴.
       const data = { accuracy: globalAccuracy, fetchNew: fetchNew };
 
@@ -392,7 +385,7 @@
               loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
             }
             duration = data.level >= 4 ? 8000 : 14000;
-            //4단계 이상부터는 duration을 8초로 줄인다. 
+            //4단계 이상부터는 duration을 8초로 줄인다.
             //실제로 적용되어야 하는 코드는 위 코드고,
             //코드가 제대로 작동하는걸 보고싶다면 아래 주석 코드를 사용해주세요
             //duration = data.level >=0 ? 8000 : 14000;
@@ -419,12 +412,15 @@
       return cookieValue;
     }
 
-    document.getElementById("goOutButton").addEventListener("click", function () {
+    document
+      .getElementById("goOutButton")
+      .addEventListener("click", function () {
         exitPopup.style.display = "flex";
         showPopup("exitPopup");
       });
 
-    function sendAudioToNaverSTT(blob) { //핵심 동작
+    function sendAudioToNaverSTT(blob) {
+      //핵심 동작
       console.log("보내기");
 
       const clientId = ""; // 네이버 클라우드 플랫폼에서 발급받은 Client ID
@@ -506,21 +502,21 @@
         "너무 잘했어요!",
         "와우~ 정말 멋진걸요?",
         "우와, 정말 굉장해요!",
-        "멋지게 해내고 있어요!"
+        "멋지게 해내고 있어요!",
       ];
 
       const complimentsMedium = [
         "좋아요!",
         "지금도 충분히 멋져요!",
         "지금도 잘 하고 있어요. 조금만 더 힘내요!",
-        "좋은데요? 우리 계속 노력해봐요!"
+        "좋은데요? 우리 계속 노력해봐요!",
       ];
 
       const complimentsLow = [
         "이제 그림에서 어떤 단어를 맞췄는지 확인해볼까요?",
         "도전 정신이 멋져요!",
         "연습하면 더 좋아질 거에요!",
-        "한번 더 해보면 더 잘할 수 있어요!"
+        "한번 더 해보면 더 잘할 수 있어요!",
       ];
 
       showPopup("complimentPopup");
@@ -547,7 +543,9 @@
     function showGeneratedImage(url) {
       //이미지생성 시 팝업 띄워주는 함수, 다음 단계로 넘어가시겠어요 팝업도 같이 구현.
       hidePopup("scorePopup");
-      const generatedImageContainer = document.getElementById("generatedImageContainer");
+      const generatedImageContainer = document.getElementById(
+        "generatedImageContainer"
+      );
       const generatedImage = document.getElementById("generatedImage");
       generatedImage.src = url;
       generatedImageContainer.classList.add("visible");
