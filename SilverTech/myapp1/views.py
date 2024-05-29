@@ -32,6 +32,12 @@ from django.http import JsonResponse
 from PIL import Image
 import numpy as np
 
+#소리 허용 자동 설정
+from django.http import HttpResponse
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import time
 
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
@@ -311,11 +317,20 @@ def upload_image(request):
 # 반환: 없음
 # 출력물: 새롭게 학습된 모델 파일(./static/encodings.pickle)
 def train_model_again(request, directory_path):
-    # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
-    with open("./static/encodings.pickle", "rb") as f: 
-        data = pickle.load(f)
-    knownEncodings = data["encodings"]
-    knownNames = data["names"]
+    encoding_file = "./static/encodings.pickle"
+    
+    # 인코딩 파일 존재 여부 확인 및 초기화
+    if os.path.exists(encoding_file):
+        # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
+        with open(encoding_file, "rb") as f: 
+            data = pickle.load(f)
+        knownEncodings = data["encodings"]
+        knownNames = data["names"]
+    else:
+        # 파일이 없으면 초기화
+        print("[INFO] 인코딩 파일이 없으므로 새로 생성합니다.")
+        knownEncodings = []
+        knownNames = []
 
     # 새로운 이미지 경로 설정 (새로운 학습 데이터 경로)
     newImagePaths = list(paths.list_images(directory_path))
@@ -346,10 +361,9 @@ def train_model_again(request, directory_path):
     # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
     print("[INFO] serializing encodings...")
     data = {"encodings": knownEncodings, "names": knownNames}
-    with open("./static/encodings.pickle", "wb") as f:  #myapp1 바깥 쪽에 생김. 이거 위치 나중에 잡아주겠습니다. 
+    with open(encoding_file, "wb") as f: 
         f.write(pickle.dumps(data))
     
-
     # 폴더가 존재하는지 확인
     if os.path.exists(directory_path):
         # 폴더 삭제
@@ -359,7 +373,6 @@ def train_model_again(request, directory_path):
         print(f"{directory_path} 폴더를 찾을 수 없습니다.")
 
     return login_to_training(request)
-
 
 
 
@@ -488,3 +501,22 @@ def login_order(request):
     else:
         response_data = {'error': 'No image found in the request.'}
         return JsonResponse(response_data, status=400)
+    
+def change_chrome_settings(request):
+    chrome_options = Options()
+    chrome_options.add_experimental_option("prefs", {
+        "profile.default_content_setting_values.media_stream_mic": 1,
+        "profile.default_content_setting_values.media_stream_camera": 1,
+        "profile.default_content_setting_values.geolocation": 1,
+        "profile.default_content_setting_values.notifications": 1,
+        "profile.default_content_setting_values.sound": 1
+    })
+
+    service = Service('')  # chromedriver 경로를 실제 경로로 대체하세요
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    driver.get('chrome://settings/content/sound')
+    time.sleep(5)  # 필요시 조정
+    driver.quit()
+
+    return HttpResponse("Chrome settings have been changed.")
