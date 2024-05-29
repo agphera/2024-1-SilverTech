@@ -81,11 +81,7 @@
           >
             숨겨진 버튼
           </button>
-          <button
-            id="FirstTimeButton"
-            class="button is-light"
-            onclick="playAudio('test-audio')"
-          >
+          <button id="FirstTimeButton" class="button is-light">
             네, 처음이에요.
           </button>
           <audio
@@ -93,11 +89,7 @@
             src="{% static 'audio_ui/test.mp3' %}"
             type="audio/mp3 "
           ></audio>
-          <button
-            id="NotFirstTimeButton"
-            class="button is-light"
-            onclick="playAudio('test-audio')"
-          >
+          <button id="NotFirstTimeButton" class="button is-light">
             아니요, 전에 온 적 있어요.
           </button>
         </div>
@@ -124,16 +116,9 @@
     } {% endcomment %}
 
     document.addEventListener("DOMContentLoaded", function () {
-      // 페이지가 로드될 때 숨겨진 버튼을 클릭하여 오디오 재생
-      document.getElementById('HiddenPlayButton').click();
-        });
-
-    document.addEventListener("DOMContentLoaded", function () {
         // '처음이에요' 버튼에 이벤트 리스너 추가
         document.getElementById('FirstTimeButton').addEventListener('click', function() {
-          playAudio('test-audio').then(function() {
-            window.location.href = document.getElementById('redirectLink').href;
-          });
+          window.location.href = document.getElementById('redirectLink').href;
         });
 
         //'전에 온 적 있어요' -> 바로 인사 -> 그 후
@@ -141,6 +126,14 @@
             startCaptureAndUpload()
             document.getElementById('hiddenForm').submit();
         });
+
+        setTimeout(function() {
+          showPoPup("GreetingPopup");
+        }, 3000);
+
+        var greetings = ["와우~ 반갑습니다!", "우와, 안녕하세요!", "짝짝짝, 환영합니다!", "기다리고 있었어요!"];
+        var randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
+        document.getElementById('random-greeting').textContent = randomGreeting;
     });
 
           // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
@@ -207,7 +200,7 @@
         var audio = document.getElementById(audioId);
         audio.play();
         audio.onended = resolve; // 재생이 끝났을 때 Promise를 해결
-    });
+      });
     }
   </script>
   <form

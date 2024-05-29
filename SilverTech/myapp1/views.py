@@ -32,6 +32,12 @@ from django.http import JsonResponse
 from PIL import Image
 import numpy as np
 
+#소리 허용 자동 설정
+from django.http import HttpResponse
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+import time
 
 # API 키 작성된 메모장 주소
 keys_file_path = os.path.join('../API', 'api_keys.txt')
@@ -488,3 +494,22 @@ def login_order(request):
     else:
         response_data = {'error': 'No image found in the request.'}
         return JsonResponse(response_data, status=400)
+    
+def change_chrome_settings(request):
+    chrome_options = Options()
+    chrome_options.add_experimental_option("prefs", {
+        "profile.default_content_setting_values.media_stream_mic": 1,
+        "profile.default_content_setting_values.media_stream_camera": 1,
+        "profile.default_content_setting_values.geolocation": 1,
+        "profile.default_content_setting_values.notifications": 1,
+        "profile.default_content_setting_values.sound": 1
+    })
+
+    service = Service('')  # chromedriver 경로를 실제 경로로 대체하세요
+    driver = webdriver.Chrome(service=service, options=chrome_options)
+
+    driver.get('chrome://settings/content/sound')
+    time.sleep(5)  # 필요시 조정
+    driver.quit()
+
+    return HttpResponse("Chrome settings have been changed.")
