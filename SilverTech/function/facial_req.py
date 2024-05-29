@@ -12,7 +12,7 @@ import cv2
 # 'currentname'을 초기화하여 새로운 사람이 식별될 때만 트리거되도록 합니다.
 currentname = "unknown"
 # train_model.py에서 생성된 encodings.pickle 파일 모델로부터 얼굴을 식별합니다.
-encodingsP = "../encodings.pickle"
+encodingsP = "../static/encodings.pickle"
 
 # 인코딩과 얼굴 검출을 위한 OpenCV의 Haar cascade를 로드합니다.
 print("[INFO] loading encodings + face detector...")
