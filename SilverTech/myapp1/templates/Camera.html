@@ -5,17 +5,27 @@
     {% load static %}
     <link rel="icon" href="{% static 'Main_source/Starting_icon.PNG' %}" />
     <link rel="stylesheet" href="{% static 'Camera.css' %}" type="text/css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css"
+    />
     <script src="https://code.jquery.com/jquery-3.6.0.js"></script>
   </head>
 
   <body>
-    {% comment %} <!-- 백엔드url로 회원가입 정보 전달 -->
-    <form id="userDataForm" action="../picture-load/picture-training/" method="post" style="display: none;">
+    {% comment %}
+    <!-- 백엔드url로 회원가입 정보 전달 -->
+    <form
+      id="userDataForm"
+      action="../picture-load/picture-training/"
+      method="post"
+      style="display: none"
+    >
       {% csrf_token %}
       <input type="hidden" id="username" name="name" value="" />
       <input type="submit" value="Submit" />
-    </form> {% endcomment %}
+    </form>
+    {% endcomment %}
 
     <div class="camera-box">
       <p>
@@ -28,215 +38,221 @@
       </div>
     </div>
 
+    <audio autoplay>
+      <source src="{% static 'audio_ui/test.mp3' %}" type="audio/mp3" />
+    </audio>
+
     <!-- 카메라 멘트, 화면 안내. -->
     <div id="MentBox" class="camera-ment-box">
-      <p id="cameraMent" class="camera-ment">처음 오셨으니, 화면에 얼굴을 보여주세요.</p>
+      <p id="cameraMent" class="camera-ment">
+        처음 오셨으니, 화면에 얼굴을 보여주세요.
+      </p>
     </div>
 
-    <form id="uploadForm" action="../image/" method="post" enctype="multipart/form-data" style="display: none;">
+    <form
+      id="uploadForm"
+      action="../image/"
+      method="post"
+      enctype="multipart/form-data"
+      style="display: none"
+    >
       <!-- 파일 입력 필드는 JavaScript를 통해 처리됩니다. -->
     </form>
 
     <script>
+      //여기부터는 카메라
+      var streamVideo;
 
-      
-    //여기부터는 카메라
-    var streamVideo;
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Media Device not supported");
-    } else {
-      document.getElementById("openBtn").addEventListener('click', open);
-      document.getElementById("closeBtn").addEventListener('click', close);
-      document.addEventListener('DOMContentLoaded', open); // 웹 페이지가 로드될 때 open 함수를 자동으로 호출합니다.
-    }
-
-    function open() {
-      close();
-      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        streamVideo = stream;
-        var cameraView = document.getElementById("cameraview");
-        cameraView.srcObject = stream;
-        cameraView.play();
-        cameraView.onloadedmetadata = function (e) {
-          //capture(); // 카메라가 준비되면 사진을 찍습니다.
-        };
-      });
-    }
-
-    function close() {
-      if (streamVideo) {
-        var tracks = streamVideo.getTracks();
-        tracks.forEach(track => track.stop());
-        streamVideo = null;
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Media Device not supported");
+      } else {
+        document.getElementById("openBtn").addEventListener("click", open);
+        document.getElementById("closeBtn").addEventListener("click", close);
+        document.addEventListener("DOMContentLoaded", open); // 웹 페이지가 로드될 때 open 함수를 자동으로 호출합니다.
       }
-      
-    }
 
-    function capture() {
-      var canvas = document.createElement('canvas'); // 캔버스 요소 생성
-      canvas.width = 640; // 캔버스 너비 설정
-      canvas.height = 480; // 캔버스 높이 설정
-      var context = canvas.getContext('2d');
-      var cameraView = document.getElementById("cameraview");
+      function open() {
+        close();
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          streamVideo = stream;
+          var cameraView = document.getElementById("cameraview");
+          cameraView.srcObject = stream;
+          cameraView.play();
+          cameraView.onloadedmetadata = function (e) {
+            //capture(); // 카메라가 준비되면 사진을 찍습니다.
+          };
+        });
+      }
 
-      context.drawImage(cameraView, 0, 0, canvas.width, canvas.height); // 현재 카메라의 이미지를 캔버스에 그립니다.
-      var imageUrl = canvas.toDataURL('image/png'); // 캔버스의 내용을 이미지 URL로 변환
-
-      var link = document.createElement('a'); // 다운로드 링크 생성
-      link.href = imageUrl;
-      link.download = "capture.png"; // 다운로드될 파일 이름 설정
-      document.body.appendChild(link); // 링크를 문서에 추가
-      link.click(); // 링크 클릭을 통해 이미지 다운로드
-      document.body.removeChild(link); // 사용 후 링크 삭제
-    }
-    document.getElementById("captureBtn").addEventListener('click',  startCaptureAndUpload);
-
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert("Media Device not supported");
-    } else {
-      navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
-        streamVideo = stream;
-        var cameraView = document.getElementById("cameraview");
-        cameraView.srcObject = stream;
-      });
-    }
-
-    // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
-    function startCaptureAndUpload() {
-      var canvas = document.createElement('canvas'); // 캔버스 요소 생성
-      canvas.width = 640; // 캔버스 너비 설정
-      canvas.height = 480; // 캔버스 높이 설정
-      var context = canvas.getContext('2d'); // 2D 그리기 컨텍스트 가져오기
-      var video = document.getElementById('cameraview'); // 비디오 요소 가져오기
-      var formData = new FormData(); // 폼 데이터 객체 생성
-      var captureCount = 0; // 캡처한 사진 수 초기화
-
-      // 0.3초 간격으로 사진을 캡처하는 타이머 설정
-      var captureInterval = setInterval(() => {
-        if (captureCount >= 30) { // **!! 잠깐 30장 캡처 완료로 변경
-          clearInterval(captureInterval); // 캡처 타이머 중단
-          uploadImages(formData); // 저장된 사진 데이터를 서버로 업로드
-          return; // 함수 종료
+      function close() {
+        if (streamVideo) {
+          var tracks = streamVideo.getTracks();
+          tracks.forEach((track) => track.stop());
+          streamVideo = null;
         }
+      }
 
-        // 비디오 요소에서 현재 프레임을 캔버스로 복사
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        // 캔버스의 내용을 Blob 형태로 가져오기 (JPEG 형식)
-        canvas.toBlob(blob => {
-          // 폼 데이터에 Blob 추가, 파일 이름은 캡처 순서에 따라 다름
-          formData.append('photo', blob, `capture_${captureCount}.jpg`);
-          captureCount++; // 캡처한 사진 수 증가
-        }, 'image/jpeg'); // 블롭의 MIME 타입 지정
-      }, 200); // 200ms (0.2초) 간격으로 캡처 수행
-    }
+      function capture() {
+        var canvas = document.createElement("canvas"); // 캔버스 요소 생성
+        canvas.width = 640; // 캔버스 너비 설정
+        canvas.height = 480; // 캔버스 높이 설정
+        var context = canvas.getContext("2d");
+        var cameraView = document.getElementById("cameraview");
 
+        context.drawImage(cameraView, 0, 0, canvas.width, canvas.height); // 현재 카메라의 이미지를 캔버스에 그립니다.
+        var imageUrl = canvas.toDataURL("image/png"); // 캔버스의 내용을 이미지 URL로 변환
 
-    //이미지 데이터 전송이 안됨 
-    function uploadImages(formData) {
+        var link = document.createElement("a"); // 다운로드 링크 생성
+        link.href = imageUrl;
+        link.download = "capture.png"; // 다운로드될 파일 이름 설정
+        document.body.appendChild(link); // 링크를 문서에 추가
+        link.click(); // 링크 클릭을 통해 이미지 다운로드
+        document.body.removeChild(link); // 사용 후 링크 삭제
+      }
+      document
+        .getElementById("captureBtn")
+        .addEventListener("click", startCaptureAndUpload);
+
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        alert("Media Device not supported");
+      } else {
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          streamVideo = stream;
+          var cameraView = document.getElementById("cameraview");
+          cameraView.srcObject = stream;
+        });
+      }
+
+      // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
+      function startCaptureAndUpload() {
+        var canvas = document.createElement("canvas"); // 캔버스 요소 생성
+        canvas.width = 640; // 캔버스 너비 설정
+        canvas.height = 480; // 캔버스 높이 설정
+        var context = canvas.getContext("2d"); // 2D 그리기 컨텍스트 가져오기
+        var video = document.getElementById("cameraview"); // 비디오 요소 가져오기
+        var formData = new FormData(); // 폼 데이터 객체 생성
+        var captureCount = 0; // 캡처한 사진 수 초기화
+
+        // 0.3초 간격으로 사진을 캡처하는 타이머 설정
+        var captureInterval = setInterval(() => {
+          if (captureCount >= 30) {
+            // **!! 잠깐 30장 캡처 완료로 변경
+            clearInterval(captureInterval); // 캡처 타이머 중단
+            uploadImages(formData); // 저장된 사진 데이터를 서버로 업로드
+            return; // 함수 종료
+          }
+
+          // 비디오 요소에서 현재 프레임을 캔버스로 복사
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          // 캔버스의 내용을 Blob 형태로 가져오기 (JPEG 형식)
+          canvas.toBlob((blob) => {
+            // 폼 데이터에 Blob 추가, 파일 이름은 캡처 순서에 따라 다름
+            formData.append("photo", blob, `capture_${captureCount}.jpg`);
+            captureCount++; // 캡처한 사진 수 증가
+          }, "image/jpeg"); // 블롭의 MIME 타입 지정
+        }, 200); // 200ms (0.2초) 간격으로 캡처 수행
+      }
+
+      //이미지 데이터 전송이 안됨
+      function uploadImages(formData) {
         // 숨겨진 form 요소를 찾습니다.
-        var form = document.getElementById('uploadForm');
+        var form = document.getElementById("uploadForm");
 
         // form의 action을 설정합니다(옵션).
-        form.action = '../image/';
-        
+        form.action = "../image/";
+
         // FormData 객체에서 키와 값을 추출하여 form에 추가합니다.
         for (var key of formData.keys()) {
-            var value = formData.get(key);
-            // input 요소를 생성하고, 해당 값을 설정합니다.
-            var input = document.createElement("input");
-            input.type = "hidden";
-            input.name = key;
-            input.value = value; // 파일 객체인 경우 이 방식은 작동하지 않을 수 있습니다.
-            form.appendChild(input);
+          var value = formData.get(key);
+          // input 요소를 생성하고, 해당 값을 설정합니다.
+          var input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = value; // 파일 객체인 경우 이 방식은 작동하지 않을 수 있습니다.
+          form.appendChild(input);
         }
 
-        fetch('../image/', {
-          method: 'POST',
-          body: formData
+        fetch("../image/", {
+          method: "POST",
+          body: formData,
         })
-          .then(response => response.json())
-          .then(result => {
-            console.log('Success:', result);
+          .then((response) => response.json())
+          .then((result) => {
+            console.log("Success:", result);
           })
-          .catch(error => {
-            console.error('Error:', error);
+          .catch((error) => {
+            console.error("Error:", error);
           });
-
 
         // form을 제출합니다.
         form.submit();
-    }
+      }
 
-  // 이미지 데이터를 서버로 전송하는 함수, 눈속임용 URL 안바뀜 
-  function uploadImages2(formData) { 
-    // AJAX 요청을 생성합니다.
-    var xhr = new XMLHttpRequest();
-    xhr.open('POST', '../image/', true); // 업로드 URL 설정
+      // 이미지 데이터를 서버로 전송하는 함수, 눈속임용 URL 안바뀜
+      function uploadImages2(formData) {
+        // AJAX 요청을 생성합니다.
+        var xhr = new XMLHttpRequest();
+        xhr.open("POST", "../image/", true); // 업로드 URL 설정
 
-    xhr.onreadystatechange = function() {
-        if (xhr.readyState === XMLHttpRequest.DONE) {
+        xhr.onreadystatechange = function () {
+          if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
-                // 서버로부터 받은 HTML을 현재 페이지에 렌더링합니다.
-                document.open();
-                document.write(xhr.responseText);
-                document.close();
+              // 서버로부터 받은 HTML을 현재 페이지에 렌더링합니다.
+              document.open();
+              document.write(xhr.responseText);
+              document.close();
             } else {
-                alert('Upload failed!');
+              alert("Upload failed!");
             }
+          }
+        };
+
+        // FormData 객체를 서버로 전송합니다.
+        xhr.send(formData);
+      }
+
+      function uploadImages3(formData) {
+        // 숨겨진 form 요소를 찾습니다.
+        var form = document.getElementById("uploadForm");
+
+        // Action URL 설정
+        form.action = "../image/";
+
+        // 기존 폼의 input 요소 제거
+        while (form.firstChild) {
+          form.removeChild(form.firstChild);
         }
-    };
 
-    // FormData 객체를 서버로 전송합니다.
-    xhr.send(formData);
-  }
-
-  function uploadImages3(formData) {
-    // 숨겨진 form 요소를 찾습니다.
-    var form = document.getElementById('uploadForm');
-    
-    // Action URL 설정
-    form.action = '../image/';
-
-    // 기존 폼의 input 요소 제거
-    while (form.firstChild) {
-        form.removeChild(form.firstChild);
-    }
-
-    // FormData 객체에서 키와 값을 추출하여 form에 추가합니다.
-    for (var key of formData.keys()) {
-        var value = formData.get(key);
-        // input 요소를 생성하고, 해당 값을 설정합니다.
-        if (key === 'photo') { 
+        // FormData 객체에서 키와 값을 추출하여 form에 추가합니다.
+        for (var key of formData.keys()) {
+          var value = formData.get(key);
+          // input 요소를 생성하고, 해당 값을 설정합니다.
+          if (key === "photo") {
             // 파일 타입의 input은 FormData 객체로 직접 전달하는 것이 좋습니다.
             continue;
+          }
+          var input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = value;
+          form.appendChild(input);
         }
-        var input = document.createElement("input");
-        input.type = "hidden";
-        input.name = key;
-        input.value = value;
-        form.appendChild(input);
-    }
 
-    // input type="file" 요소를 동적으로 추가합니다.
-    for (var pair of formData.entries()) {
-        if (pair[1] instanceof Blob) {
+        // input type="file" 요소를 동적으로 추가합니다.
+        for (var pair of formData.entries()) {
+          if (pair[1] instanceof Blob) {
             var fileInput = document.createElement("input");
             fileInput.type = "file";
             fileInput.name = pair[0];
             fileInput.files = formData.getAll(pair[0]);
             form.appendChild(fileInput);
+          }
         }
-    }
 
-    // form을 제출합니다.
-    form.submit();
-}
-
-
-
-
-  </script>
+        // form을 제출합니다.
+        form.submit();
+      }
+    </script>
   </body>
 
   <script>
@@ -246,7 +262,7 @@
     setTimeout(function () {
       // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
       submitUserData();
-    }, 4000); // 
+    }, 4000); //
     }); {% endcomment %}
 
     //30초 동안 멘트 보여줌
@@ -272,8 +288,7 @@
     }
 
     setInterval(changeMent, 5000);
-
   </script>
 
-  <a id="redirectLink" href="{% url 'index' %}" style="display:none;">이동</a>
+  <a id="redirectLink" href="{% url 'index' %}" style="display: none">이동</a>
 </html>

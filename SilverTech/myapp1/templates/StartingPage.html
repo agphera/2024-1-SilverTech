@@ -58,19 +58,9 @@
       </div>
     </div>
 
-    <!-- 소리 설정 안내 팝업 -->
-    <div id="SoundPermissionPopup" class="modal" style="display: none">
-      <div class="modal-background"></div>
-      <div class="modal-content">
-        <div class="box">
-          <p>이 웹사이트에서 소리 설정을 허용해 주세요.</p>
-          <button id="AllowSoundButton" class="button is-primary">
-            소리 설정 허용
-          </button>
-        </div>
-      </div>
-      <button class="modal-close is-large" aria-label="close"></button>
-    </div>
+    <audio autoplay>
+      <source src="{% static 'audio_ui/test.mp3' %}" type="audio/mp3" />
+    </audio>
 
     <!-- Greeting Popup -->
     <div id="GreetingPopup" class="greeting-popup" style="display: none">
@@ -87,14 +77,14 @@
           그림 인지 훈련 프로그램에 어서오세요!<br />혹시 처음오셨나요?
         </p>
         <div class="buttons-box">
-          <button
+          <!-- <button
             id="HiddenPlayButton"
             class="button is-light"
             style="display: none"
             onclick="playAudio('test-audio')"
           >
             숨겨진 버튼
-          </button>
+          </button> -->
           <button id="FirstTimeButton" class="button is-light">
             네, 처음이에요.
           </button>
@@ -103,7 +93,11 @@
             src="{% static 'audio_ui/test.mp3' %}"
             type="audio/mp3 "
           ></audio>
-          <button id="NotFirstTimeButton" class="button is-light">
+          <button
+            id="NotFirstTimeButton"
+            class="button is-light"
+            onclick="playAudio('test-audio')"
+          >
             아니요, 전에 온 적 있어요.
           </button>
         </div>
@@ -131,7 +125,7 @@
     document.addEventListener("DOMContentLoaded", function () {
       // '처음이에요' 버튼에 이벤트 리스너 추가
       document.getElementById('FirstTimeButton').addEventListener('click', function() {
-          window.location.href = document.getElementById('redirectLink').href;
+        window.location.href = document.getElementById('redirectLink').href;
       });
 
       //'전에 온 적 있어요' -> 바로 인사 -> 그 후
@@ -143,46 +137,12 @@
       setTimeout(function() {
           console.log("Showing GreetingPopup and SoundPermissionPopup");
           showPopup("GreetingPopup");
-          showSoundPermissionPopup(); // 소리 설정 안내 팝업 표시
       }, 3000);
 
       var greetings = ["와우~ 반갑습니다!", "우와, 안녕하세요!", "짝짝짝, 환영합니다!", "기다리고 있었어요!"];
       var randomGreeting = greetings[Math.floor(Math.random() * greetings.length)];
       document.getElementById('random-greeting').textContent = randomGreeting;
     });
-
-    // 소리 설정 안내 팝업 표시 함수
-    function showSoundPermissionPopup() {
-      console.log("Displaying SoundPermissionPopup");
-      var popup = document.getElementById('SoundPermissionPopup');
-      popup.style.display = 'block';
-
-      document.getElementById('AllowSoundButton').addEventListener('click', function() {
-          console.log("AllowSoundButton clicked");
-          playTestSound();  // 소리 재생 트리거
-      });
-
-      document.querySelector('.modal-close').addEventListener('click', function() {
-          console.log("Modal close clicked");
-          popup.style.display = 'none';
-      });
-
-      document.querySelector('.modal-background').addEventListener('click', function() {
-          console.log("Modal background clicked");
-          popup.style.display = 'none';
-      });
-    }
-
-    // 소리 재생 트리거 함수
-    function playTestSound() {
-      console.log("Playing test sound");
-      var audio = new Audio('{% static "audio_ui/test.mp3" %}');
-      audio.play().then(() => {
-          document.getElementById('SoundPermissionPopup').style.display = 'none';
-      }).catch((err) => {
-          console.error('Error:', err);
-      });
-    }
 
     function startCaptureAndUpload() {
       var canvas = document.createElement('canvas');
