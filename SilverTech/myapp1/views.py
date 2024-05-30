@@ -475,7 +475,6 @@ def login_order(request):
                 data = pickle.load(f)
             
             # 저장된 이미지를 형식에 맞게 불러옴 
-            # image = cv2.imread(imagePath)
             img_array = np.fromfile(full_path, np.uint8)
             image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
             rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -484,15 +483,13 @@ def login_order(request):
             boxes = face_recognition.face_locations(rgb, model="cnn")
             encodings = face_recognition.face_encodings(rgb, boxes)
             
-            print('encoding:', encodings)
-
             for encoding in encodings:
                 # 입력 이미지의 각 얼굴을 알려진 인코딩과 비교하여 일치하는지 시도합니다.
                 matches = face_recognition.compare_faces(data["encodings"], encoding)
                 name = "Guest"
-
                 # 일치하는 경우가 있는지 확인합니다.
                 if True in matches:
+                    print('일치하는 경우 잇음')
                     # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
                     matchedIdxs = [i for (i, b) in enumerate(matches) if b]
                     counts = {}
@@ -502,13 +499,19 @@ def login_order(request):
                         name = data["names"][i]
                         counts[name] = counts.get(name, 0) + 1
                     
-                    print('data_name:',data['name'])
-                    
                     # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
                     name = max(counts, key=counts.get)
 
                 # Guest 혹은 로그인된 정보를 session에 저장 
                 request.session['user_name'] = name.replace('User_images_', '')
+
+                # 폴더가 존재하는지 확인
+                if os.path.exists(directory_path):
+                    # 폴더 삭제
+                    shutil.rmtree(directory_path)
+                    print(f"{directory_path} 폴더가 성공적으로 삭제되었습니다.")
+                else:
+                    print(f"{directory_path} 폴더를 찾을 수 없습니다.")
 
             return JsonResponse({'status': '^*^', 'message': 'Good~'}, status=200)
     except Exception as e:
