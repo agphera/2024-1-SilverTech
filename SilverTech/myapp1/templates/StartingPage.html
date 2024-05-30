@@ -155,15 +155,19 @@
 
     // 비동기적 함수로 생성
     async function startCaptureAndUpload() {
-        
         close(); // 기존 스트림 제거
-        // 카메라 실행
-        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
-          streamVideo = stream;
-          var cameraView = document.getElementById("cameraview");
-          cameraView.srcObject = stream;
-          cameraView.play(); 
-        });
+
+      // 카메라 실행
+      streamVideo = await navigator.mediaDevices.getUserMedia({ video: true });
+      var cameraView = document.getElementById('cameraview');
+      cameraView.srcObject = streamVideo;
+      await new Promise(resolve => cameraView.onloadedmetadata = resolve); // 비디오 메타데이터 로드 대기
+
+      // 비디오가 실제로 재생될 때까지 대기
+      await new Promise(resolve => {
+          cameraView.onplaying = resolve;
+          cameraView.play();
+      });
 
       var canvas = document.createElement('canvas');
       canvas.width = 640;
@@ -173,8 +177,8 @@
       var formData = new FormData();
 
       // Capture image from video
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
       await new Promise((resolve, reject) => {
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
           canvas.toBlob(blob => {
               if (blob) {
                   formData.append('photo', blob, 'capture.jpg');
