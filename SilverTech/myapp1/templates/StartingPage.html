@@ -109,7 +109,7 @@
     </div>
 
     <form
-      id="hiddenForm"
+      id="loginForm"
       action="picture-load/picture-training/"
       method="post"
       style="display: none"
@@ -131,7 +131,7 @@
       //'전에 온 적 있어요' -> 바로 인사 -> 그 후
       document.getElementById('NotFirstTimeButton').addEventListener('click', async function() {
           await startCaptureAndUpload();
-          document.getElementById('hiddenForm').submit();
+          document.getElementById('loginForm').submit();
       });
 
       setTimeout(function() {
@@ -194,14 +194,12 @@
     }
 
     async function uploadImages(formData) {
-      var form = document.getElementById('uploadForm');
       for (var key of formData.keys()) {
           var value = formData.get(key);
           var input = document.createElement("input");
           input.type = "hidden";
           input.name = key;
           input.value = value;
-          form.appendChild(input);
       }
 
         try {
@@ -230,15 +228,6 @@
       setTimeout(() => { popup.style.opacity = 1; }, 10);
     }
   </script>
-  <form
-    id="uploadForm"
-    action="../image/"
-    method="post"
-    enctype="multipart/form-data"
-    style="display: none"
-  >
-    <!-- 파일 입력 필드는 JavaScript를 통해 처리됩니다. -->
-  </form>
   <video id="cameraview" style='display: none'></video>
 
   <a id="redirectLink" href="{% url 'Camera' %}" style="display: none">이동</a>

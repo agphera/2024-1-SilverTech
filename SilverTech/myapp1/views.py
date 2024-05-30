@@ -305,7 +305,7 @@ def upload_image(request):
 
         except Exception as e:
             print(f"An error occurred: {e}")
-            return JsonResponse({'status': 'error', 'message': str(e)}, status=500)
+            return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
@@ -372,7 +372,7 @@ def train_model_again(request, directory_path):
     else:
         print(f"{directory_path} 폴더를 찾을 수 없습니다.")
 
-    return login_to_training(request)
+    return JsonResponse({'status': '^*^', 'message': 'Good~'}, status=200)
 
 
 
