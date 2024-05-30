@@ -93,7 +93,7 @@ def login_to_training(request: HttpRequest):
 
             print(request)
             # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
-            return redirect('../picture-load/picture-training/')  
+            return redirect('../picture-training/')  
         except BasePictures.DoesNotExist:
             return JsonResponse({'error': 'Base picture not found'}, status=404)
         except Exception as e:
