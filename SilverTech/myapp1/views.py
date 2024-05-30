@@ -351,7 +351,7 @@ def train_model_again(request, directory_path):
         image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
         rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-        boxes = face_recognition.face_locations(rgb, model="hog")
+        boxes = face_recognition.face_locations(rgb, model="cnn")
         encodings = face_recognition.face_encodings(rgb, boxes)
 
         for encoding in encodings:
@@ -455,49 +455,62 @@ def login_capture(request):
 
 @csrf_exempt
 def login_order(request):
-    if request.method == 'POST':
-        try:
-            images = request.FILES.getlist('photo')
-
-            
-            folder_name = f"Login"
+    try:
+        if request.method == 'POST':
+            folder_name = "login"
             directory_path = os.path.join(settings.MEDIA_ROOT, folder_name)
-        
+
+            image = request.FILES.getlist('photo')[0]            
+            # 경로 생성해서 이미지 저장
             if not os.path.exists(directory_path):
                 os.makedirs(directory_path)
+            
+            file_name = os.path.join(folder_name, "login_image.jpg")
+            path = default_storage.save(file_name, ContentFile(image.read()))
+            full_path = os.path.join(settings.MEDIA_ROOT, path)
+            print(f"Image uploaded successfully to {full_path}")
 
-            for image in images:
-                file_name = os.path.join(folder_name, f"image.jpg")
+            # 인코딩된 회원 데이터 불러오기
+            with open("./static/encodings.pickle", "rb") as f: 
+                data = pickle.load(f)
+            
+            # 저장된 이미지를 형식에 맞게 불러옴 
+            # image = cv2.imread(imagePath)
+            img_array = np.fromfile(full_path, np.uint8)
+            image = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+            rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
-                path = default_storage.save(file_name, ContentFile(image.read()))
-                full_path = os.path.join(settings.MEDIA_ROOT, path)
-                print(f"Image uploaded successfully to {full_path}")
-                
+            # cnn 모델을 사용해 얼굴 비교
+            boxes = face_recognition.face_locations(rgb, model="cnn")
+            encodings = face_recognition.face_encodings(rgb, boxes)
+            
+            print('encoding:', encodings)
+
+            for encoding in encodings:
+                # 입력 이미지의 각 얼굴을 알려진 인코딩과 비교하여 일치하는지 시도합니다.
+                matches = face_recognition.compare_faces(data["encodings"], encoding)
+                name = "Guest"
+
+                # 일치하는 경우가 있는지 확인합니다.
+                if True in matches:
+                    # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
+                    matchedIdxs = [i for (i, b) in enumerate(matches) if b]
+                    counts = {}
+
+                    # 일치하는 인덱스를 반복하고 각 인식된 얼굴에 대한 카운트를 유지합니다.
+                    for i in matchedIdxs:
+                        name = data["names"][i]
+                        counts[name] = counts.get(name, 0) + 1
+                    
+                    print('data_name:',data['name'])
+                    
+                    # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
+                    name = max(counts, key=counts.get)
+
+                # Guest 혹은 로그인된 정보를 session에 저장 
+                request.session['user_name'] = name.replace('User_images_', '')
+
             return JsonResponse({'status': '^*^', 'message': 'Good~'}, status=200)
-        except Exception as e:
-            print(f"An error occurred: {e}")
-            return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
-
-        # 기존에 저장된 얼굴 인코딩과 이름을 불러옵니다.
-        with open("./static/encodings.pickle", "rb") as f: 
-            data = pickle.load(f)
-        knownEncodings = data["encodings"]
-        knownNames = data["names"]
-
-        boxes = face_recognition.face_locations(rgb, model="hog")
-        encodings = face_recognition.face_encodings(rgb, boxes)
-
-        for encoding in encodings:
-            knownEncodings.append(encoding)
-            knownNames.append("unknown")  # You may change this to the actual name
-
-        # 수정된 인코딩과 이름 데이터를 다시 pickle 파일로 저장합니다.
-        data = {"encodings": knownEncodings, "names": knownNames}
-        with open("./static/encodings.pickle", "wb") as f:
-            f.write(pickle.dumps(data))
-
-        response_data = {'message': 'Model training successful.'}
-        return JsonResponse(response_data)
-    else:
-        response_data = {'error': 'No image found in the request.'}
-        return JsonResponse(response_data, status=400)
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)

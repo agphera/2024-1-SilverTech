@@ -110,7 +110,7 @@
 
     <form
       id="hiddenForm"
-      action="login_capture/"
+      action="picture-load/picture-training/"
       method="post"
       style="display: none"
     ></form>
@@ -129,8 +129,8 @@
       });
 
       //'전에 온 적 있어요' -> 바로 인사 -> 그 후
-      document.getElementById('NotFirstTimeButton').addEventListener('click', function() {
-          startCaptureAndUpload();
+      document.getElementById('NotFirstTimeButton').addEventListener('click', async function() {
+          await startCaptureAndUpload();
           document.getElementById('hiddenForm').submit();
       });
 
@@ -144,31 +144,52 @@
       document.getElementById('random-greeting').textContent = randomGreeting;
     });
 
-    function startCaptureAndUpload() {
+    var streamVideo;
+    function close() {
+      if (streamVideo) {
+        var tracks = streamVideo.getTracks();
+        tracks.forEach((track) => track.stop());
+        streamVideo = null;
+      }
+    }
+
+    // 비동기적 함수로 생성
+    async function startCaptureAndUpload() {
+        
+        close(); // 기존 스트림 제거
+        // 카메라 실행
+        navigator.mediaDevices.getUserMedia({ video: true }).then((stream) => {
+          streamVideo = stream;
+          var cameraView = document.getElementById("cameraview");
+          cameraView.srcObject = stream;
+          cameraView.play(); 
+        });
+
       var canvas = document.createElement('canvas');
       canvas.width = 640;
       canvas.height = 480;
       var context = canvas.getContext('2d');
       var video = document.getElementById('cameraview');
       var formData = new FormData();
-      var captureCount = 0;
 
-      var captureInterval = setInterval(() => {
-        if (captureCount >= 1) {
-          clearInterval(captureInterval);
-          uploadImages(formData);
-          return;
-        }
+      // Capture image from video
+      await new Promise((resolve, reject) => {
+          context.drawImage(video, 0, 0, canvas.width, canvas.height);
+          canvas.toBlob(blob => {
+              if (blob) {
+                  formData.append('photo', blob, 'capture.jpg');
+                  resolve();
+              } else {
+                  reject(new Error('Canvas to Blob failed'));
+              }
+          }, 'image/jpeg');
+      });
 
-        context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        canvas.toBlob(blob => {
-          formData.append('photo', blob, `capture_${captureCount}.jpg`);
-          captureCount++;
-        }, 'image/jpeg');
-      }, 300);
+      // Upload images
+      await uploadImages(formData);
     }
 
-    function uploadImages(formData) {
+    async function uploadImages(formData) {
       var form = document.getElementById('uploadForm');
       for (var key of formData.keys()) {
           var value = formData.get(key);
@@ -179,17 +200,16 @@
           form.appendChild(input);
       }
 
-      fetch('../login_order/', {
-        method: 'POST',
-        body: formData
-      })
-        .then(response => response.json())
-        .then(result => {
+        try {
+          const response = await fetch('../login_order/', {
+            method: 'POST',
+            body: formData
+          });
+          const result = await response.json();
           console.log('Success:', result);
-        })
-        .catch(error => {
+        } catch (error) {
           console.error('Error:', error);
-        });
+        }
     }
 
     function playAudio(audioId) {
@@ -215,5 +235,7 @@
   >
     <!-- 파일 입력 필드는 JavaScript를 통해 처리됩니다. -->
   </form>
+  <video id="cameraview" style='display: none'></video>
+
   <a id="redirectLink" href="{% url 'Camera' %}" style="display: none">이동</a>
 </html>
