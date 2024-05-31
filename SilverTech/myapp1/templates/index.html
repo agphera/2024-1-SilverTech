@@ -21,6 +21,36 @@
 
   <body>
     <!-- 네비게이션 바 + 프로그레스 바 -->
+    <audio
+      id="help-audio"
+      src="{% static 'audio_ui/help.mp3' %}"
+      type="audio/mp3"
+    ></audio>
+    <audio
+      id="help1-audio"
+      src="{% static 'audio_ui/help1-ment.mp3' %}"
+      type="audio/mp3"
+    ></audio>
+    <audio
+      id="help2-audio"
+      src="{% static 'audio_ui/help2-ment.mp3' %}"
+      type="audio/mp3"
+    ></audio>
+    <audio
+      id="help3-audio"
+      src="{% static 'audio_ui/help3-ment.mp3' %}"
+      type="audio/mp3"
+    ></audio>
+    <audio
+      id="help4-audio"
+      src="{% static 'audio_ui/help4-ment.mp3' %}"
+      type="audio/mp3"
+    ></audio>
+    <audio
+      id="bye-audio"
+      src="{% static 'audio_ui/bye-ment.mp3' %}"
+      type="audio/mp3"
+    ></audio>
     <div class="navbar-progress-container">
       <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
@@ -52,22 +82,17 @@
                 <a
                   id="helpButton"
                   class="Help button"
-                  onclick="playAudio('test-audio')"
+                  onclick="playAudio('help-audio')"
                   ><strong>도움말</strong></a
                 >
                 <a
                   id="goOutButton"
                   class="GoOut button"
-                  onclick="playAudio('test-audio')"
+                  onclick="playAudio('bye-audio')"
                   ><strong>나가기</strong></a
                 >
                 <a class="Mode button"><strong>개발자모드</strong></a>
               </div>
-              <audio
-                id="test-audio"
-                src="{% static 'audio_ui/test.mp3' %}"
-                type="audio/mp3"
-              ></audio>
             </div>
           </div>
         </div>
@@ -110,7 +135,10 @@
         동안 그림을 말로 설명해주세요!
       </p>
       <audio autoplay>
-        <source src="{% static 'audio_ui/test.mp3' %}" type="audio/mp3" />
+        <source
+          src="{% static 'audio_ui/letstart-ment.mp3' %}"
+          type="audio/mp3"
+        />
       </audio>
     </div>
 
@@ -145,6 +173,12 @@
       </div>
     </div>
 
+    <audio
+      id="compare-audio"
+      src="{% static 'audio_ui/compare-ment.mp3' %}"
+      type="audio/mp3"
+    ></audio>
+
     <!-- 비교 후 다른 그림 -->
     <div id="messageContainer" class="message-container">
       <p>어떤가요? 비슷한 것 같나요?</p>
@@ -171,28 +205,28 @@
       <button
         id="one"
         class="help button is-light"
-        onclick="playAudio('test-audio')"
+        onclick="playAudio('help1-audio')"
       >
         화면을 넘기고 싶어요.
       </button>
       <button
         id="two"
         class="help button is-light"
-        onclick="playAudio('test-audio')"
+        onclick="playAudio('help2-audio')"
       >
         그림 문제는 어떻게 푸나요?
       </button>
       <button
         id="three"
         class="help button is-light"
-        onclick="playAudio('test-audio')"
+        onclick="playAudio('help3-audio')"
       >
         문제가 너무 어려워요.
       </button>
       <button
         id="four"
         class="help button is-light"
-        onclick="playAudio('test-audio')"
+        onclick="playAudio('help4-audio')"
       >
         더 새로운 그림을 보고 싶어요.
       </button>
@@ -549,6 +583,8 @@
       const generatedImage = document.getElementById("generatedImage");
       generatedImage.src = url;
       generatedImageContainer.classList.add("visible");
+
+      playAudio("compare-audio");
 
       setTimeout(() => {
         showPopup("nextStepPopup");

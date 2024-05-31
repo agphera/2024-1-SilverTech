@@ -59,7 +59,7 @@
     </div>
 
     <audio autoplay>
-      <source src="{% static 'audio_ui/test.mp3' %}" type="audio/mp3" />
+      <source src="{% static 'audio_ui/first-ment.mp3' %}" type="audio/mp3" />
     </audio>
 
     <!-- Greeting Popup -->
@@ -90,7 +90,7 @@
           </button>
           <audio
             id="test-audio"
-            src="{% static 'audio_ui/test.mp3' %}"
+            src="{% static 'audio_ui/login-ment.mp3' %}"
             type="audio/mp3 "
           ></audio>
           <button
@@ -227,9 +227,8 @@
       popup.style.display = "flex";
       setTimeout(() => { popup.style.opacity = 1; }, 10);
     }
-    
   </script>
-  <video id="cameraview" style='display: none'></video>
+  <video id="cameraview" style="display: none"></video>
 
   <a id="redirectLink" href="{% url 'Camera' %}" style="display: none">이동</a>
 </html>
