@@ -58,9 +58,15 @@
       </div>
     </div>
 
-    <audio autoplay>
-      <source src="{% static 'audio_ui/first-ment.mp3' %}" type="audio/mp3" />
-    </audio>
+    <!--오디오 파일 모음-->
+    <div style="display: none">
+      <audio id="first-audio" autoplay>
+        <source src="{% static 'audio_ui/first-ment.mp3' %}" type="audio/mp3" />
+      </audio>
+      <audio id="login-audio">
+        <source src="{% static 'audio_ui/login-ment.mp3' %}" type="audio/mp3" />
+      </audio>
+    </div>
 
     <!-- Greeting Popup -->
     <div id="GreetingPopup" class="greeting-popup" style="display: none">
@@ -88,15 +94,10 @@
           <button id="FirstTimeButton" class="button is-light">
             네, 처음이에요.
           </button>
-          <audio
-            id="test-audio"
-            src="{% static 'audio_ui/login-ment.mp3' %}"
-            type="audio/mp3 "
-          ></audio>
           <button
             id="NotFirstTimeButton"
             class="button is-light"
-            onclick="playAudio('test-audio')"
+            onclick="playAudio('login-audio')"
           >
             아니요, 전에 온 적 있어요.
           </button>
@@ -214,6 +215,7 @@
         }
     }
 
+    //tts 함수
     function playAudio(audioId) {
       return new Promise((resolve) => {
         var audio = document.getElementById(audioId);
@@ -221,6 +223,17 @@
         audio.onended = resolve;
       });
     }
+
+    function stopAutoplayAudio() {
+      const autoplayAudio = document.getElementById('first-audio');
+      if (autoplayAudio) {
+        autoplayAudio.pause();
+        autoplayAudio.currentTime = 0;
+      }
+    }
+
+    document.getElementById('FirstTimeButton').addEventListener('click', stopAutoplayAudio);
+    document.getElementById('NotFirstTimeButton').addEventListener('click', stopAutoplayAudio);
 
     function showPopup(popupId) {
       const popup = document.getElementById(popupId);
