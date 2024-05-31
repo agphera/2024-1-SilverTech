@@ -69,7 +69,7 @@
     <div class="navbar-progress-container">
       <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-          <a class="navbar-item" href="index.html">
+          <a class="navbar-item">
             <img
               src="{% static 'Main_source/Starting_icon.PNG' %}"
               width="30"
@@ -141,7 +141,7 @@
     </div>
 
     <div id="letStartPopup" class="let-start-popup">
-      <!--갑자기 화면 시작하면 이상할 것 같아서 추가함. 아직 display none 상태-->
+      <!--index로 넘어오면 가장 먼저 뜨는 팝업창-->
       <p id="startMent" class="start-ment">
         반갑습니다! 이제 그림 문제를 풀러 가봅시다!
         <br />화면이 바뀌면, 바로 문제 풀이 시간이 시작됩니다. <br />제한시간
@@ -321,6 +321,7 @@
 
   <script>
     let progressBar = document.querySelector("progress");
+    let progressInterval; //progress interval 전역변수 선언
     let duration = 14000; // 초기 프로그레스바 및 녹음 시간 설정
     var globalAccuracy = 0; // 정확도 전역 변수
 
@@ -477,6 +478,66 @@
         exitPopup.style.display = "flex";
         showPopup("exitPopup");
       });
+
+        //일시정지 함수
+    function pauseAllActivities() {
+      if (mediaRecorder && mediaRecorder.state === "recording") {
+          mediaRecorder.stop(); // 녹음 정지
+      }
+      progressBar.value=0; //프로그레스바 0으로 만들기
+      clearInterval(progressInterval); 
+      
+      //동작 관련 팝업 모두 지우기
+      hidePopup("analysisPopup");
+      hidePopup("nextStepPopup");
+      hidePopup("complimentPopup");
+      hidePopup("scorePopup");
+    }
+
+    //도움말 버튼 전체 동작 관리
+    document.getElementById("helpButton").addEventListener("click", function () {
+      //pauseAllActivities();
+      showPopup("helpPopup");
+    });
+
+    document.getElementById("one").addEventListener("click", function () {
+      showPopup("onePopup");
+    });
+
+    document.getElementById("two").addEventListener("click", function () {
+      showPopup("twoPopup");
+    });
+
+    document.getElementById("three").addEventListener("click", function () {
+      showPopup("threePopup");
+    });
+
+    document.getElementById("four").addEventListener("click", function () {
+      showPopup("fourPopup");
+    });
+
+    document.getElementById("back").addEventListener("click", function () {
+      hidePopup("helpPopup");
+      //fetchImage(false);
+    });
+
+    document.getElementById("bbackOne").addEventListener("click", function () {
+      hidePopup("onePopup");
+    });
+
+    document.getElementById("bbackTwo").addEventListener("click", function () {
+      hidePopup("twoPopup");
+    });
+
+    document.getElementById("bbackThree").addEventListener("click", function () {
+      hidePopup("threePopup");
+    });
+
+    document.getElementById("bbackFour").addEventListener("click", function () {
+      hidePopup("fourPopup");
+    });
+    //도움말 버튼 완료  
+
 
     function sendAudioToNaverSTT(blob) {
       //핵심 동작
