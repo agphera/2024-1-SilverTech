@@ -617,6 +617,34 @@
     }
 
     function showPopup(popupId) {
+      if (popupId == 'exitPopup') { // 종료 팝업인 경우 서버에서 최근 기록을 불러옴
+        fetch('/fetch_user_history/')
+          .then(response => response.json())
+          .then(data => {
+              console.log('urls:', data.urls);
+              const urls = data.urls;
+        
+              // div id 리스트
+              const divIds = ['imageHistory1', 'imageHistory2', 'imageHistory3', 'imageHistory4', 'imageHistory5'];
+              divIds.forEach((divId, index) => {
+                  const div = document.getElementById(divId);
+                  if (div) {
+                      div.innerHTML = ''; // 기존 내용을 지웁니다.
+                      if (index < urls.length) {
+                          const img = document.createElement('img');
+                          img.src = urls[index];
+                          img.alt = `Image ${index + 1}`;
+                          div.appendChild(img);
+                      }
+                  }
+              });
+
+          })
+          .catch(error => {
+              console.error('Error fetching user history:', error);
+          });
+      }
+
       const popup = document.getElementById(popupId);
       popup.style.display = "flex";
       setTimeout(() => {

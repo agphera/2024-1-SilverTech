@@ -52,7 +52,7 @@ NAVER_API_KEY_ID = f"{keys['naver_api_keys_id']}"
 NAVER_API_KEY = f"{keys['naver_api_keys']}"
 
 @csrf_exempt
-def proxy_to_naver_stt1(request):
+def proxy_to_naver_stt(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
@@ -70,7 +70,9 @@ def proxy_to_naver_stt1(request):
         print('theme:',theme)
         
         if "text" in data:            
-            accuracy, true_word, whole_prompt = scoring_points(data['text'], theme) 
+            accuracy, true_word, whole_prompt = scoring_points(data['text'], theme)
+            request.session['accuracy'] = accuracy
+
             data['accuracy'] = accuracy
             data['len_true_word'] = len(true_word)
             data['p'] = list(whole_prompt)
@@ -95,7 +97,7 @@ import requests
 error_counter = {'count': 0}
 
 @csrf_exempt
-def proxy_to_naver_stt(request):
+def proxy_to_naver_stt9(request):
     if request.method == 'POST' and request.FILES.get('audioFile'):
         naver_api_url = 'https://naveropenapi.apigw.ntruss.com/recog/v1/stt?lang=Kor'
         headers = {
@@ -131,7 +133,7 @@ def proxy_to_naver_stt(request):
 
             error_counter['count'] += 1
             if error_counter['count'] == 3:  # 오류가 3번 발생하면 종료
-                return HttpResponseServerError("Error count exceeded. Please try again.")
+                return JsonResponse({'error': 'Error count exceeded. Please try again.'}, status=500)
 
             try_count += 1
 
@@ -159,7 +161,7 @@ def make_pic_karlo(request):
         
         # max heap에 이미지 url 저장
         accuracy = request.session.get('accuracy')
-        heapq.heappush(user_history, (-accuracy, image_url))
+        heapq.heappush(user_history, [-accuracy, image_url])
         
         print(user_history)
         
