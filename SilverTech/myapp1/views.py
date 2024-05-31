@@ -5,6 +5,7 @@ import requests
 from django.views.decorators.csrf import csrf_exempt
 import os
 import json
+import heapq
 from function.server_use import scoring_points, make_picture
 from .models import User, UserProceeding, BasePictures, BasePictureThemes
 
@@ -116,6 +117,8 @@ def proxy_to_naver_stt(request):
                 print('theme:',theme)
 
                 accuracy, true_word, whole_prompt = scoring_points(data['text'], theme)
+                request.session['accuracy'] = accuracy
+
                 data['accuracy'] = accuracy
                 data['len_true_word'] = len(true_word)
                 data['p'] = list(whole_prompt)
@@ -148,8 +151,21 @@ def make_pic_karlo(request):
 
         whole_prompt = body_data.get('text', '')
         image_response = make_picture(whole_prompt, theme)
-        data = {'image_url': image_response['images'][0]['image']}
+        image_url = image_response['images'][0]['image']
+        data = {'image_url': image_url}
+
+        # 세션에서 'user_history'를 가져오고 없으면 빈 리스트로 초기화
+        user_history = request.session.get('user_history', [])
         
+        # max heap에 이미지 url 저장
+        accuracy = request.session.get('accuracy')
+        heapq.heappush(user_history, (-accuracy, image_url))
+        
+        print(user_history)
+        
+        # 세션에 업데이트된 리스트 저장
+        request.session['user_history'] = user_history
+
         print(data)
 
         response_to_client = JsonResponse(data, safe=False)
@@ -159,45 +175,18 @@ def make_pic_karlo(request):
 
         return response_to_client
 
-def fetch_user_info(request):
-    #request에서 로그인 정보를 추출하는 코드 추후 추가
-    #사용자 정보 임의 설정
-    user_name = 'suchae'
-    if user_name:
-        try:
-            # DB 접근해서 해당 사용자 난이도 정보를 가져옴
-            user = User.objects.get(name=user_name)
-            user_proceeding = UserProceeding.objects.get(user_id=user.user_id)
-
-            # 세션에 사용자 정보 저장
-            request.session['user_name'] = user_name
-            request.session['user_id'] = user.user_id
-            request.session['level'] = user_proceeding.level
-
-            return user_proceeding, None  # 사용자 진행 객체와 None을 반환
-        except User.DoesNotExist:
-            return None, JsonResponse({'error': 'User not found'}, status=404)
-        except UserProceeding.DoesNotExist:
-            return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
-    else:
-        return None, JsonResponse({'error': 'No name provided'}, status=400)
-
-def load_base_picture(request):
-    user_proceeding, error_response = fetch_user_info(request)
-    if error_response:
-        return error_response  # If error, return early
-
-    try:
-        # 사용자의 현재 레벨을 바탕으로 picture_level 계산
-        current_level = user_proceeding.level
-        # 예를 들어, picture_level은 현재 레벨보다 2 레벨 낮게 설정하되 최소 레벨은 1로 설정
-        picture_level = max(1, current_level - 2)
-
-        # DB에서 해당 레벨과 순서에 맞는 그림 정보를 가져옴
-        base_picture = BasePictures.objects.get(level=picture_level, order=user_proceeding.last_order)
-        return JsonResponse({'url': base_picture.url})  # 이미지 URL을 JSON 형식으로 전송
-    except BasePictures.DoesNotExist:
-        return JsonResponse({'error': 'Base picture not found'}, status=404)
+def fetch_user_history(request):
+    # 세션에서 'user_history'를 가져오고 없으면 빈 리스트로 초기화
+    user_history = request.session.get('user_history', [])
+    
+    # 상위 5개의 점수를 가져오기 위해 max heap에서 값을 꺼내기
+    top_scores = heapq.nlargest(5, user_history)
+    
+    # url 리스트만 반환
+    top_scores_url = [item[1] for item in top_scores]
+    
+    # JSON 형식으로 반환
+    return JsonResponse({'urls': top_scores_url})
 
 
 # urls.py

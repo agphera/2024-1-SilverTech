@@ -12,7 +12,7 @@ import cv2
 # 'currentname'을 초기화하여 새로운 사람이 식별될 때만 트리거되도록 합니다.
 currentname = "unknown"
 # train_model.py에서 생성된 encodings.pickle 파일 모델로부터 얼굴을 식별합니다.
-encodingsP = "../static/encodings.pickle"
+encodingsP = "SilverTech/static/encodings.pickle"
 
 # 인코딩과 얼굴 검출을 위한 OpenCV의 Haar cascade를 로드합니다.
 print("[INFO] loading encodings + face detector...")
@@ -43,6 +43,9 @@ while True:
         matches = face_recognition.compare_faces(data["encodings"], encoding)
         name = "Unknown"
 
+        print(data['names'])
+        print(matches)        
+
         # 일치하는 경우가 있는지 확인합니다.
         if True in matches:
             # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
@@ -53,7 +56,7 @@ while True:
             for i in matchedIdxs:
                 name = data["names"][i]
                 counts[name] = counts.get(name, 0) + 1
-
+    
             # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
             name = max(counts, key=counts.get)
 
