@@ -20,37 +20,52 @@
   </head>
 
   <body>
+    <!-- 오디오 파일 모음 -->
+    <div id="audio-container" style="display: none">
+      <audio
+        id="help-audio"
+        src="{% static 'audio_ui/help.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
+        id="help1-audio"
+        src="{% static 'audio_ui/help1-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
+        id="help2-audio"
+        src="{% static 'audio_ui/help2-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
+        id="help3-audio"
+        src="{% static 'audio_ui/help3-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
+        id="help4-audio"
+        src="{% static 'audio_ui/help4-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
+        id="bye-audio"
+        src="{% static 'audio_ui/bye-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
+        id="compare-audio"
+        src="{% static 'audio_ui/compare-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio autoplay>
+        <source
+          src="{% static 'audio_ui/letstart-ment.mp3' %}"
+          type="audio/mp3"
+        />
+      </audio>
+    </div>
+
     <!-- 네비게이션 바 + 프로그레스 바 -->
-    <audio
-      id="help-audio"
-      src="{% static 'audio_ui/help.mp3' %}"
-      type="audio/mp3"
-    ></audio>
-    <audio
-      id="help1-audio"
-      src="{% static 'audio_ui/help1-ment.mp3' %}"
-      type="audio/mp3"
-    ></audio>
-    <audio
-      id="help2-audio"
-      src="{% static 'audio_ui/help2-ment.mp3' %}"
-      type="audio/mp3"
-    ></audio>
-    <audio
-      id="help3-audio"
-      src="{% static 'audio_ui/help3-ment.mp3' %}"
-      type="audio/mp3"
-    ></audio>
-    <audio
-      id="help4-audio"
-      src="{% static 'audio_ui/help4-ment.mp3' %}"
-      type="audio/mp3"
-    ></audio>
-    <audio
-      id="bye-audio"
-      src="{% static 'audio_ui/bye-ment.mp3' %}"
-      type="audio/mp3"
-    ></audio>
     <div class="navbar-progress-container">
       <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
@@ -91,7 +106,6 @@
                   onclick="playAudio('bye-audio')"
                   ><strong>나가기</strong></a
                 >
-
               </div>
             </div>
           </div>
@@ -134,12 +148,6 @@
         <br />화면이 바뀌면, 바로 문제 풀이 시간이 시작됩니다. <br />제한시간
         동안 그림을 말로 설명해주세요!
       </p>
-      <audio autoplay>
-        <source
-          src="{% static 'audio_ui/letstart-ment.mp3' %}"
-          type="audio/mp3"
-        />
-      </audio>
     </div>
 
     <!-- 로딩중 팝업 -->
@@ -172,12 +180,6 @@
         </p>
       </div>
     </div>
-
-    <audio
-      id="compare-audio"
-      src="{% static 'audio_ui/compare-ment.mp3' %}"
-      type="audio/mp3"
-    ></audio>
 
     <!-- 비교 후 다른 그림 -->
     <div id="messageContainer" class="message-container">
@@ -252,7 +254,9 @@
         화면을 넘길 수 있답니다! <br />아래의 버튼을 누르시면 이전 화면으로
         돌아갈 수 있어요!
       </p>
-      <button id="bbackOne" class="button is-light">돌아가기</button>
+      <button id="bbackOne" class="button is-light" onclick="stopAllAudio()">
+        돌아가기
+      </button>
     </div>
     <!--도움말 two-->
     <div id="twoPopup" class="two-popup">
@@ -262,7 +266,9 @@
         '말소리'를 인식해, 표현해주신 그림을 그려드릴게요! <br />아래의 버튼을
         누르시면 이전 화면으로 돌아갈 수 있어요!
       </p>
-      <button id="bbackTwo" class="button is-light">돌아가기</button>
+      <button id="bbackTwo" class="button is-light" onclick="stopAllAudio()">
+        돌아가기
+      </button>
     </div>
 
     <!--도움말 three-->
@@ -275,7 +281,9 @@
         있다면 근처 병원에 상담을 요청해보세요. <br />아래의 버튼을 누르시면
         이전 화면으로 돌아갈 수 있어요!
       </p>
-      <button id="bbackThree" class="button is-light">돌아가기</button>
+      <button id="bbackThree" class="button is-light" onclick="stopAllAudio()">
+        돌아가기
+      </button>
     </div>
 
     <!--도움말 four-->
@@ -285,7 +293,9 @@
         자세히 살펴보고, 잘 맞춘다면<br />자연스럽게 또다른 그림을 볼 수
         있답니다. <br />아래의 버튼을 누르시면 이전 화면으로 돌아갈 수 있어요!
       </p>
-      <button id="bbackFour" class="button is-light">돌아가기</button>
+      <button id="bbackFour" class="button is-light" onclick="stopAllAudio()">
+        돌아가기
+      </button>
     </div>
 
     <!-- 종료 3초전 팝업 -->
@@ -414,7 +424,7 @@
           if (data.error) {
             alert("Error: " + data.error);
           } else {
-            if(fetchNew){
+            if (fetchNew) {
               if (data.url) {
                 console.log(data.level);
                 loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
@@ -609,9 +619,20 @@
       }, 500);
     }
 
+    //tts 함수
     function playAudio(audioId) {
+      stopAllAudio(); // 다른 오디오 중지 후 새 오디오 재생
       var audio = document.getElementById(audioId);
       audio.play();
+    }
+
+    // 모든 오디오 중지 함수
+    function stopAllAudio() {
+      var audios = document.querySelectorAll("audio");
+      audios.forEach(function (audio) {
+        audio.pause();
+        audio.currentTime = 0;
+      });
     }
   </script>
 </html>
