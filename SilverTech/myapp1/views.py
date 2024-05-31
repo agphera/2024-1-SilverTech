@@ -489,7 +489,7 @@ def login_order(request):
                 name = "Guest"
                 # 일치하는 경우가 있는지 확인합니다.
                 if True in matches:
-                    print('일치하는 경우 잇음')
+                    print('일치하는 경우 있음')
                     # 모든 일치하는 얼굴의 인덱스를 찾은 다음 각 인식된 얼굴에 대한 투표 횟수를 계산하기 위한 사전을 초기화합니다.
                     matchedIdxs = [i for (i, b) in enumerate(matches) if b]
                     counts = {}
@@ -513,7 +513,7 @@ def login_order(request):
                 else:
                     print(f"{directory_path} 폴더를 찾을 수 없습니다.")
 
-            return JsonResponse({'status': '^*^', 'message': 'Good~'}, status=200)
+            return JsonResponse({'status': '사람 구분 성공적', 'message': 'Good~'}, status=200)
     except Exception as e:
         print(f"An error occurred: {e}")
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
