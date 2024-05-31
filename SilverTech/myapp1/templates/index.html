@@ -91,7 +91,7 @@
                   onclick="playAudio('bye-audio')"
                   ><strong>나가기</strong></a
                 >
-                <a class="Mode button"><strong>개발자모드</strong></a>
+
               </div>
             </div>
           </div>
@@ -414,9 +414,11 @@
           if (data.error) {
             alert("Error: " + data.error);
           } else {
-            if (data.url) {
-              console.log(data.level);
-              loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
+            if(fetchNew){
+              if (data.url) {
+                console.log(data.level);
+                loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
+              }
             }
             duration = data.level >= 4 ? 8000 : 14000;
             //4단계 이상부터는 duration을 8초로 줄인다.
