@@ -450,7 +450,7 @@ progress::-webkit-progress-value {
 
 
 /*종료 팝업창 style*/
-#exitPopup {
+.exit-popup {
     position: fixed;
     top: 0;
     left: 0;
@@ -471,15 +471,33 @@ progress::-webkit-progress-value {
 
 }
 
-.modal-content {
-    font-size: 40px;
+.exit-content {
+    font-size: 35px;
     text-align: center;
 }
 
-.modal-text p {
-    font-size: 40px;
+.exit-text p {
+    font-size: 35px;
     text-align: center;
 }
+
+/*종료 팝업창 안의 5개의 이미지 컨테이너*/
+.image-history-container {
+    display: flex; 
+    justify-content: center; 
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+  }
+  
+  .image-history-container > div { /*이미지 컨테이너 안의 5개 그림에 대한 공통 스타일 모두 적용*/
+    flex: 0 0 auto; 
+    width: 300px;
+    height: 300px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
 
 
 body,

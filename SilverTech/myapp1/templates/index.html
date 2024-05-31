@@ -117,7 +117,6 @@
     <!-- 메인 화면 -->
     <div class="columns">
       <div id="base-image" class="column is-half image-container">
-        <!--여기 수정-->
       </div>
       <div class="column is-half right-container">
         <div class="textboard">
@@ -299,11 +298,25 @@
     </div>
 
     <!-- 종료 3초전 팝업 -->
-    <div id="exitPopup" class="modal">
-      <div class="modal-content">
-        <p class="modal-text">프로그램을 종료합니다.<br />다음에 또 봐요!</p>
+    <!--이미지 팝업-->
+    <div id="exitPopup" class="exit-popup">
+      <div class="exit-content">
+        <p class="exit-text">오늘의 훈련 결과입니다.<br />다음에 또 봐요!</p>
+        <div id="imageHistoryContainer" class="image-history-container"> <!--생성 이미지 5개-->
+          <div id="imageHistory1" class="image-history-1"> 
+          </div>
+          <div id="imageHistory2" class="image-history-2">
+          </div>
+          <div id="imageHistory3" class="image-history-3">
+          </div>
+          <div id="imageHistory4" class="image-history-4">
+          </div>
+          <div id="imageHistory5" class="image-history-5">
+          </div>
+        </div>
       </div>
     </div>
+
   </body>
 
   <script>
