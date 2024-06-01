@@ -53,6 +53,11 @@
         type="audio/mp3"
       ></audio>
       <audio
+        id="generate-audio"
+        src="{% static 'audio_ui/generate-ment.mp3' %}"
+        type="audio/mp3"
+      ></audio>
+      <audio
         id="compare-audio"
         src="{% static 'audio_ui/compare-ment.mp3' %}"
         type="audio/mp3"
@@ -116,8 +121,7 @@
 
     <!-- 메인 화면 -->
     <div class="columns">
-      <div id="base-image" class="column is-half image-container">
-      </div>
+      <div id="base-image" class="column is-half image-container"></div>
       <div class="column is-half right-container">
         <div class="textboard">
           <p>그림을<br />설명해주세요!</p>
@@ -302,21 +306,16 @@
     <div id="exitPopup" class="exit-popup">
       <div class="exit-content">
         <p class="exit-text">오늘의 훈련 결과입니다.<br />다음에 또 봐요!</p>
-        <div id="imageHistoryContainer" class="image-history-container"> <!--생성 이미지 5개-->
-          <div id="imageHistory1" class="image-history-1"> 
-          </div>
-          <div id="imageHistory2" class="image-history-2">
-          </div>
-          <div id="imageHistory3" class="image-history-3">
-          </div>
-          <div id="imageHistory4" class="image-history-4">
-          </div>
-          <div id="imageHistory5" class="image-history-5">
-          </div>
+        <div id="imageHistoryContainer" class="image-history-container">
+          <!--생성 이미지 5개-->
+          <div id="imageHistory1" class="image-history-1"></div>
+          <div id="imageHistory2" class="image-history-2"></div>
+          <div id="imageHistory3" class="image-history-3"></div>
+          <div id="imageHistory4" class="image-history-4"></div>
+          <div id="imageHistory5" class="image-history-5"></div>
         </div>
       </div>
     </div>
-
   </body>
 
   <script>
@@ -577,12 +576,14 @@
           setTimeout(() => {
             hidePopup("complimentPopup"); //5초뒤 사라짐
             showPopup("scorePopup"); //5초 뒤 점수 팝업 생성됨
+            playAudio("generate-audio");
           }, 7000);
 
           //점수 팝업 내용
           document.querySelector(
             ".show-accuracy"
           ).innerHTML = `맞힌 단어 개수는 ${data["len_true_word"]} 개 입니다!`;
+
           //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
           //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
 
@@ -678,6 +679,40 @@
     }
 
     function showPopup(popupId) {
+      if (popupId == "exitPopup") {
+        // 종료 팝업인 경우 서버에서 최근 기록을 불러옴
+        fetch("/fetch_user_history/")
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("urls:", data.urls);
+            const urls = data.urls;
+
+            // div id 리스트
+            const divIds = [
+              "imageHistory1",
+              "imageHistory2",
+              "imageHistory3",
+              "imageHistory4",
+              "imageHistory5",
+            ];
+            divIds.forEach((divId, index) => {
+              const div = document.getElementById(divId);
+              if (div) {
+                div.innerHTML = ""; // 기존 내용을 지웁니다.
+                if (index < urls.length) {
+                  const img = document.createElement("img");
+                  img.src = urls[index];
+                  img.alt = `Image ${index + 1}`;
+                  div.appendChild(img);
+                }
+              }
+            });
+          })
+          .catch((error) => {
+            console.error("Error fetching user history:", error);
+          });
+      }
+
       const popup = document.getElementById(popupId);
       popup.style.display = "flex";
       setTimeout(() => {

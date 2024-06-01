@@ -32,9 +32,9 @@
         <video id="cameraview" width="720" height="480"></video>
       </p>
       <div class="camera-buttons">
-        <button id="openBtn" class="button is-primary">카메라 켜기</button>
-        <button id="closeBtn" class="button is-danger">카메라 끄기</button>
-        <button id="captureBtn" class="button is-link">Capture</button>
+        <button id="openBtn" style="display: none;" class="button is-primary">카메라 켜기</button>
+        <button id="closeBtn"  style="display: none;" class="button is-danger">카메라 끄기</button>
+        <button id="captureBtn"  style="display: none;" class="button is-link">Capture</button>
       </div>
     </div>
 
@@ -106,12 +106,12 @@
         link.click(); // 링크 클릭을 통해 이미지 다운로드
         document.body.removeChild(link); // 사용 후 링크 삭제
       }
-      document
+      {% comment %} document
         .getElementById("captureBtn")
         .addEventListener("click", async function () {
           await startCaptureAndUpload();
           document.getElementById("signUpForm").submit();
-        });
+        }); {% endcomment %}
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert("Media Device not supported");
@@ -123,9 +123,26 @@
         });
       }
 
+      document.addEventListener('DOMContentLoaded', async function() {
+        try {
+            await startCaptureAndUpload();
+            document.getElementById("signUpForm").submit();
+        } catch (error) {
+            console.error("캡처 및 업로드 중 오류 발생:", error);
+        }
+      });
+
+//      window.onload=function(){
+  //      await startCaptureAndUpload();
+    //    document.getElementById("signUpForm").submit();
+      //}
+      
+
+
       // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
       async function startCaptureAndUpload() {
         var canvas = document.createElement("canvas"); // 캔버스 요소 생성
+
         canvas.width = 640; // 캔버스 너비 설정
         canvas.height = 480; // 캔버스 높이 설정
         var context = canvas.getContext("2d"); // 2D 그리기 컨텍스트 가져오기
@@ -133,7 +150,22 @@
         var formData = new FormData(); // 폼 데이터 객체 생성
         var captureCount = 0; // 캡처한 사진 수 초기화
 
-        for (let captureCount = 0; captureCount < 30; captureCount++) {
+
+        // 비디오 스트림이 실제로 프레임을 제공하기 시작했는지 확인
+        await new Promise((resolve) => {
+          const checkFrame = () => {
+              if (video.readyState >= HTMLMediaElement.HAVE_CURRENT_DATA) {
+                  console.log("비디오가 정상적으로 시작되었습니다.");
+                  resolve();
+              } else {
+                  requestAnimationFrame(checkFrame);
+              }
+          };
+          checkFrame();
+        });
+    
+
+        for (let captureCount = 0; captureCount < 100; captureCount++) {
           // 30장 찍음
           // 비디오 요소에서 현재 프레임을 캔버스로 복사
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -175,70 +207,7 @@
         }
       }
 
-      // 이미지 데이터를 서버로 전송하는 함수, 눈속임용 URL 안바뀜
-      function uploadImages2(formData) {
-        // AJAX 요청을 생성합니다.
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "../image/", true); // 업로드 URL 설정
-
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === XMLHttpRequest.DONE) {
-            if (xhr.status === 200) {
-              // 서버로부터 받은 HTML을 현재 페이지에 렌더링합니다.
-              document.open();
-              document.write(xhr.responseText);
-              document.close();
-            } else {
-              alert("Upload failed!");
-            }
-          }
-        };
-
-        // FormData 객체를 서버로 전송합니다.
-        xhr.send(formData);
-      }
-
-      function uploadImages3(formData) {
-        // 숨겨진 form 요소를 찾습니다.
-        var form = document.getElementById("uploadForm");
-
-        // Action URL 설정
-        form.action = "../image/";
-
-        // 기존 폼의 input 요소 제거
-        while (form.firstChild) {
-          form.removeChild(form.firstChild);
-        }
-
-        // FormData 객체에서 키와 값을 추출하여 form에 추가합니다.
-        for (var key of formData.keys()) {
-          var value = formData.get(key);
-          // input 요소를 생성하고, 해당 값을 설정합니다.
-          if (key === "photo") {
-            // 파일 타입의 input은 FormData 객체로 직접 전달하는 것이 좋습니다.
-            continue;
-          }
-          var input = document.createElement("input");
-          input.type = "hidden";
-          input.name = key;
-          input.value = value;
-          form.appendChild(input);
-        }
-
-        // input type="file" 요소를 동적으로 추가합니다.
-        for (var pair of formData.entries()) {
-          if (pair[1] instanceof Blob) {
-            var fileInput = document.createElement("input");
-            fileInput.type = "file";
-            fileInput.name = pair[0];
-            fileInput.files = formData.getAll(pair[0]);
-            form.appendChild(fileInput);
-          }
-        }
-
-        // form을 제출합니다.
-        form.submit();
-      }
+      
     </script>
   </body>
 
