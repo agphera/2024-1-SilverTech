@@ -57,21 +57,9 @@ nav {
 }
 
 
-.navbar-progress-container {
+.navbar-container {
     z-index: 5;
-    transition: transform 0.5s ease-in-out, opacity 0.5s ease-in-out;
-    transform: translateY(0);
-    opacity: 1;
 }
-
-.navbar-progress-container.hide {
-    transform: translateY(-100%);
-    /*뷰 위로 움직임 */
-    opacity: 0;
-    /* 스르륵*/
-}
-
-
 
 .Help,
 .GoOut,
