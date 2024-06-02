@@ -360,22 +360,45 @@
           mediaRecorder = new MediaRecorder(stream);
           mediaRecorder.start();
           let audioChunks = [];
+          let recordingStartTime = Date.now();  // 녹음 시작 시간 기록
+          let recordingStoppedEarly = false;  // 녹음 도중 정지 여부 변수
 
           mediaRecorder.ondataavailable = (event) => {
             audioChunks.push(event.data);
           };
 
+          // 도움말, 나가기 버튼 누르면 녹음 정지 및 기능 정지 함수 호출
+          document.getElementById("helpButton").addEventListener("click", stopRecordingEarly);
+          document.getElementById("goOutButton").addEventListener("click", stopRecordingEarly);
+
+          // 녹음 정지 및 기능 정지
+          function stopRecordingEarly() {
+            if (mediaRecorder && mediaRecorder.state === "recording") {
+                recordingStoppedEarly = true; // Set flag to true
+                mediaRecorder.stop(); // Stop the media recorder
+                stream.getTracks().forEach(track => track.stop()); // Stop all tracks
+            }
+          }  
+
+
+          mediaRecorder.onstop = () => {
+            if (!recordingStoppedEarly) { //중간에 중지되지 않은 경우에 대해서만 stt로 전송
+                const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+                sendAudioToNaverSTT(audioBlob);
+            } else {
+                console.log("녹음이 도중에 중지되었습니다.");
+            }
+          };
+
           setTimeout(() => {
+            if(!recordingStoppedEarly){
             mediaRecorder.stop();
             stream.getTracks().forEach((track) => track.stop());
             showPopup("analysisPopup");
+          }
           }, duration);
           //녹음 중지는 프로그레스 바 총 시간과 동일해야 함.
 
-          mediaRecorder.onstop = () => {
-            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-            sendAudioToNaverSTT(audioBlob); // 녹음이 끝난 후 STT 서비스로 전송
-          };
         })
         .catch((error) => console.error("Microphone access error.", error));
     }
@@ -465,7 +488,7 @@
     }
 
     //일시정지 함수
-    {% comment %} function pauseAllActivities() {
+    function pauseAllActivities() {
       //shouldProceed=False;
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop(); // Stop recording only if it is active
@@ -474,7 +497,7 @@
       clearInterval(progressInterval); 
       //동작 관련 팝업 모두 지우기
       hideAllPopups(); 
-    } {% endcomment %}
+    } 
 
     function muteAudio(audioId) { //오디오 음소거 함수
           const audio = document.getElementById(audioId);
@@ -499,6 +522,7 @@
     document.getElementById("goOutButton").addEventListener("click", function () {
       muteAudio("compare-audio");
       muteAudio("generate-audio");
+      pauseAllActivities();
       showPopup("exitPopup");
     });
 
@@ -506,7 +530,8 @@
 
     //도움말 버튼 전체 동작 관리
     document.getElementById("helpButton").addEventListener("click", function () {
-      //pauseAllActivities();
+      pauseAllActivities();
+
       muteAudio("compare-audio");
       muteAudio("generate-audio");
       showPopup("helpPopup");
