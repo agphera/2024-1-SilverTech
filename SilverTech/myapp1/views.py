@@ -183,7 +183,7 @@ def fetch_user_history(request):
     user_history = request.session.get('user_history', [])
     
     # 상위 5개의 점수를 가져오기 위해 max heap에서 값을 꺼내기
-    top_scores = heapq.nlargest(5, user_history)
+    top_scores = heapq.nsmallest(5, user_history)
     
     # url 리스트만 반환
     top_scores_url = [item[1] for item in top_scores]
