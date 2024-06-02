@@ -178,7 +178,7 @@
       <div class="show-correct" style="font-size: 35px">
         <p><!--맞힌 단어 출력--></p>
         <p>
-          맞힌 단어를 바탕으로 그림을 만들고 있어요!<br />어떤 그림이 나올지
+          말씀해주신 내용을 바탕으로 그림을 만들고 있어요!<br />어떤 그림이 나올지
           상상해볼까요?
         </p>
       </div>
@@ -360,42 +360,20 @@
           mediaRecorder = new MediaRecorder(stream);
           mediaRecorder.start();
           let audioChunks = [];
-          let recordingStartTime = Date.now();  // 녹음 시작 시간 기록
-          let recordingStoppedEarly = false;  // 녹음 도중 정지 여부 변수
 
           mediaRecorder.ondataavailable = (event) => {
             audioChunks.push(event.data);
           };
 
-          // 도움말, 나가기 버튼 누르면 녹음 정지 및 기능 정지 함수 호출
-          document.getElementById("helpButton").addEventListener("click", stopRecordingEarly);
-          document.getElementById("goOutButton").addEventListener("click", stopRecordingEarly);
-
-          // 녹음 정지 및 기능 정지
-          function stopRecordingEarly() {
-            if (mediaRecorder && mediaRecorder.state === "recording") {
-                recordingStoppedEarly = true; // Set flag to true
-                mediaRecorder.stop(); // Stop the media recorder
-                stream.getTracks().forEach(track => track.stop()); // Stop all tracks
-            }
-          }  
-
-
           mediaRecorder.onstop = () => {
-            if (!recordingStoppedEarly) { //중간에 중지되지 않은 경우에 대해서만 stt로 전송
                 const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
                 sendAudioToNaverSTT(audioBlob);
-            } else {
-                console.log("녹음이 도중에 중지되었습니다.");
-            }
           };
 
           setTimeout(() => {
-            if(!recordingStoppedEarly){
             mediaRecorder.stop();
             stream.getTracks().forEach((track) => track.stop());
             showPopup("analysisPopup");
-          }
           }, duration);
           //녹음 중지는 프로그레스 바 총 시간과 동일해야 함.
 
@@ -418,21 +396,31 @@
       // 같은 이미지로 녹음 및 프로그레스 바 다시 시작
     });
 
-    // 이미지를 로드하고 화면에 표시하는 함수
+    // 이미지 를 로드하고 화면에 표시, level 가져오는 함수
     window.onload = function () {
       const url = "{{ url }}";
+      const level="{{ level }}"
       console.log(url);
+      console.log(level);
       if (url) {
-        loadImage(url);
+        if(level){
+        loadImage(url,level);
+        }
       }
     };
 
-    function loadImage(imageUrl) {
+    function loadImage(imageUrl,level) {
       const imageDisplayDiv = document.getElementById("base-image");
       imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
       const image = new Image();
       image.src = imageUrl;
       imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
+
+      if (parseInt(level) >= 3) { //초기 레벨 파악 후 duration 설정
+        duration = 8000; //3레벨 이후 8초
+      } else {
+        duration = 14000; //아니면 14초
+      }
     }
 
     //다른 그림으로 넘어가시겠어요?
@@ -460,11 +448,11 @@
             if (fetchNew) {
               if (data.url) {
                 console.log(data.level);
-                loadImage(data.url); // 새로운 레벨에 맞는 이미지 로드
+                loadImage(data.url,data.level); // 새로운 레벨에 맞는 이미지 로드
               }
             }
             duration = data.level >= 3 ? 8000 : 14000;
-            //4단계 이상부터는 duration을 8초로 줄인다.
+            //4단계(3) 이상부터는 duration을 8초로 줄인다.
             progress_and_record(); //duration 값 반영된 함수
           }
         })
