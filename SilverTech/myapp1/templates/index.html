@@ -116,7 +116,7 @@
           </div>
         </div>
       </nav>
-    </div>  
+    </div>
     <progress max="100" value="100"></progress>
 
     <!-- 메인 화면 -->
@@ -178,8 +178,8 @@
       <div class="show-correct" style="font-size: 35px">
         <p><!--맞힌 단어 출력--></p>
         <p>
-          말씀해주신 내용을 바탕으로 그림을 만들고 있어요!<br />어떤 그림이 나올지
-          상상해볼까요?
+          말씀해주신 내용을 바탕으로 그림을 만들고 있어요!<br />어떤 그림이
+          나올지 상상해볼까요?
         </p>
       </div>
     </div>
@@ -203,9 +203,7 @@
 
     <!--도움말 버튼-->
     <div id="helpPopup" class="help-popup">
-      <p>
-        어떤 궁금증이 있으신가요?
-      </p>
+      <p>어떤 궁금증이 있으신가요?</p>
       <button
         id="one"
         class="help button is-light"
@@ -280,7 +278,11 @@
         훈련이나 치료가 필요할 수 있어요. <br />치료와 관련해 궁금하신 점이
         있다면 근처 병원에 상담을 요청해보세요.
       </p>
-      <button id="bbackThree" class="button is-warning" onclick="stopAllAudio()">
+      <button
+        id="bbackThree"
+        class="button is-warning"
+        onclick="stopAllAudio()"
+      >
         돌아가기
       </button>
     </div>
@@ -319,8 +321,7 @@
     let progressInterval; //progress interval 전역변수 선언
     let duration = 14000; // 초기 프로그레스바 및 녹음 시간 설정
     var globalAccuracy = 0; // 정확도 전역 변수
-    let mediaRecorder;  // 전역변수, 컨트롤
-
+    let mediaRecorder; // 전역변수, 컨트롤
 
     document.addEventListener("DOMContentLoaded", function () {
       showPopup("letStartPopup"); //시작하자마자 띄워주기
@@ -366,8 +367,8 @@
           };
 
           mediaRecorder.onstop = () => {
-                const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
-                sendAudioToNaverSTT(audioBlob);
+            const audioBlob = new Blob(audioChunks, { type: "audio/wav" });
+            sendAudioToNaverSTT(audioBlob);
           };
 
           setTimeout(() => {
@@ -376,7 +377,6 @@
             showPopup("analysisPopup");
           }, duration);
           //녹음 중지는 프로그레스 바 총 시간과 동일해야 함.
-
         })
         .catch((error) => console.error("Microphone access error.", error));
     }
@@ -399,24 +399,25 @@
     // 이미지 를 로드하고 화면에 표시, level 가져오는 함수
     window.onload = function () {
       const url = "{{ url }}";
-      const level="{{ level }}"
+      const level = "{{ level }}";
       console.log(url);
       console.log(level);
       if (url) {
-        if(level){
-        loadImage(url,level);
+        if (level) {
+          loadImage(url, level);
         }
       }
     };
 
-    function loadImage(imageUrl,level) {
+    function loadImage(imageUrl, level) {
       const imageDisplayDiv = document.getElementById("base-image");
       imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
       const image = new Image();
       image.src = imageUrl;
       imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
 
-      if (parseInt(level) >= 3) { //초기 레벨 파악 후 duration 설정
+      if (parseInt(level) >= 3) {
+        //초기 레벨 파악 후 duration 설정
         duration = 8000; //3레벨 이후 8초
       } else {
         duration = 14000; //아니면 14초
@@ -427,9 +428,10 @@
     function fetchImage(fetchNew) {
       hidePopup("nextStepPopup");
       generatedImageContainer.classList.remove("visible");
-      
+
       //정확도 전역변수 가져오고, fetchnew 변수-> 새 그림 가져올지에 대한 여부 변수 가져옴.
       const data = { accuracy: globalAccuracy, fetchNew: fetchNew };
+      console.log("Sending data to server:", data);
 
       // 레벨이 변경되었을 경우, 변경된 레벨에 해당하는 그림을 직접 가져옴
       fetch("../fetch-picture/", {
@@ -448,7 +450,7 @@
             if (fetchNew) {
               if (data.url) {
                 console.log(data.level);
-                loadImage(data.url,data.level); // 새로운 레벨에 맞는 이미지 로드
+                loadImage(data.url, data.level); // 새로운 레벨에 맞는 이미지 로드
               }
             }
             duration = data.level >= 3 ? 8000 : 14000;
@@ -481,49 +483,59 @@
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop(); // Stop recording only if it is active
       }
-      progressBar.value=0; //프로그레스바 0으로 만들기
-      clearInterval(progressInterval); 
+      progressBar.value = 0; //프로그레스바 0으로 만들기
+      clearInterval(progressInterval);
       //동작 관련 팝업 모두 지우기
-      hideAllPopups(); 
-    } 
-
-    function muteAudio(audioId) { //오디오 음소거 함수
-          const audio = document.getElementById(audioId);
-          audio.muted = true; 
+      hideAllPopups();
     }
 
-    function unmuteAudio(audioId) { //오디오 음소거 해제 함수
-          const audio = document.getElementById(audioId);
-          audio.muted = false;
+    function muteAudio(audioId) {
+      //오디오 음소거 함수
+      const audio = document.getElementById(audioId);
+      audio.muted = true;
     }
 
-    function hideAllPopups() { //(도움말, 나가기 제외) 모든 팝업을 지우는 함수
-      ["analysisPopup", "nextStepPopup", "complimentPopup", "scorePopup"].forEach(popupId => {
-          const popup = document.getElementById(popupId);
-          if (popup.style.display === "flex") {
-              hidePopup(popupId);
-          }
+    function unmuteAudio(audioId) {
+      //오디오 음소거 해제 함수
+      const audio = document.getElementById(audioId);
+      audio.muted = false;
+    }
+
+    function hideAllPopups() {
+      //(도움말, 나가기 제외) 모든 팝업을 지우는 함수
+      [
+        "analysisPopup",
+        "nextStepPopup",
+        "complimentPopup",
+        "scorePopup",
+      ].forEach((popupId) => {
+        const popup = document.getElementById(popupId);
+        if (popup.style.display === "flex") {
+          hidePopup(popupId);
+        }
       });
     }
 
     //나가기 버튼 동작
-    document.getElementById("goOutButton").addEventListener("click", function () {
-      muteAudio("compare-audio");
-      muteAudio("generate-audio");
-      pauseAllActivities();
-      showPopup("exitPopup");
-    });
-
-
+    document
+      .getElementById("goOutButton")
+      .addEventListener("click", function () {
+        muteAudio("compare-audio");
+        muteAudio("generate-audio");
+        pauseAllActivities();
+        showPopup("exitPopup");
+      });
 
     //도움말 버튼 전체 동작 관리
-    document.getElementById("helpButton").addEventListener("click", function () {
-      pauseAllActivities();
+    document
+      .getElementById("helpButton")
+      .addEventListener("click", function () {
+        pauseAllActivities();
 
-      muteAudio("compare-audio");
-      muteAudio("generate-audio");
-      showPopup("helpPopup");
-    });
+        muteAudio("compare-audio");
+        muteAudio("generate-audio");
+        showPopup("helpPopup");
+      });
 
     document.getElementById("one").addEventListener("click", function () {
       showPopup("onePopup");
@@ -556,15 +568,16 @@
       hidePopup("twoPopup");
     });
 
-    document.getElementById("bbackThree").addEventListener("click", function () {
-      hidePopup("threePopup");
-    });
+    document
+      .getElementById("bbackThree")
+      .addEventListener("click", function () {
+        hidePopup("threePopup");
+      });
 
     document.getElementById("bbackFour").addEventListener("click", function () {
       hidePopup("fourPopup");
     });
-    //도움말 버튼 완료  
-
+    //도움말 버튼 완료
 
     function sendAudioToNaverSTT(blob) {
       //핵심 동작
