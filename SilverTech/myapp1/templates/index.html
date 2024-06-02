@@ -147,7 +147,7 @@
     <div id="letStartPopup" class="let-start-popup">
       <!--index로 넘어오면 가장 먼저 뜨는 팝업창-->
       <p id="startMent" class="start-ment">
-        반갑습니다! 이제 그림 문제를 풀러 가봅시다!
+        반갑습니다! 이제 그림 인지 훈련을 시작합니다.
         <br />화면이 바뀌면, 바로 문제 풀이 시간이 시작됩니다. <br />제한시간
         동안 그림을 말로 설명해주세요!
       </p>
@@ -328,7 +328,7 @@
       setTimeout(() => {
         hidePopup("letStartPopup");
         progress_and_record();
-      }, 6000);
+      }, 7000);
     });
 
     // 프로그레스 바가 진행되면서 자동으로 녹음을 시작하는 함수
@@ -464,15 +464,8 @@
       return cookieValue;
     }
 
-    document
-      .getElementById("goOutButton")
-      .addEventListener("click", function () {
-        exitPopup.style.display = "flex";
-        showPopup("exitPopup");
-      });
-
-        //일시정지 함수
-    function pauseAllActivities() {
+    //일시정지 함수
+    {% comment %} function pauseAllActivities() {
       //shouldProceed=False;
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop(); // Stop recording only if it is active
@@ -481,9 +474,19 @@
       clearInterval(progressInterval); 
       //동작 관련 팝업 모두 지우기
       hideAllPopups(); 
+    } {% endcomment %}
+
+    function muteAudio(audioId) { //오디오 음소거 함수
+          const audio = document.getElementById(audioId);
+          audio.muted = true; 
     }
 
-    function hideAllPopups() { //모든 팝업을 지우는 함수
+    function unmuteAudio(audioId) { //오디오 음소거 해제 함수
+          const audio = document.getElementById(audioId);
+          audio.muted = false;
+    }
+
+    function hideAllPopups() { //(도움말, 나가기 제외) 모든 팝업을 지우는 함수
       ["analysisPopup", "nextStepPopup", "complimentPopup", "scorePopup"].forEach(popupId => {
           const popup = document.getElementById(popupId);
           if (popup.style.display === "flex") {
@@ -492,9 +495,20 @@
       });
     }
 
+    //나가기 버튼 동작
+    document.getElementById("goOutButton").addEventListener("click", function () {
+      muteAudio("compare-audio");
+      muteAudio("generate-audio");
+      showPopup("exitPopup");
+    });
+
+
+
     //도움말 버튼 전체 동작 관리
     document.getElementById("helpButton").addEventListener("click", function () {
       //pauseAllActivities();
+      muteAudio("compare-audio");
+      muteAudio("generate-audio");
       showPopup("helpPopup");
     });
 
@@ -516,7 +530,9 @@
 
     document.getElementById("back").addEventListener("click", function () {
       hidePopup("helpPopup");
-      //fetchImage(false);
+      unmuteAudio("compare-audio");
+      unmuteAudio("generate-audio");
+      window.location.reload();
     });
 
     document.getElementById("bbackOne").addEventListener("click", function () {
