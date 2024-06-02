@@ -476,7 +476,7 @@
     }
 
     //일시정지 함수
-    function pauseAllActivities() {
+    {% comment %} function pauseAllActivities() {
       //shouldProceed=False;
       if (mediaRecorder && mediaRecorder.state === "recording") {
         mediaRecorder.stop(); // Stop recording only if it is active
@@ -485,7 +485,7 @@
       clearInterval(progressInterval); 
       //동작 관련 팝업 모두 지우기
       hideAllPopups(); 
-    } 
+    }  {% endcomment %}
 
     function muteAudio(audioId) { //오디오 음소거 함수
           const audio = document.getElementById(audioId);
@@ -497,20 +497,19 @@
           audio.muted = false;
     }
 
-    function hideAllPopups() { //(도움말, 나가기 제외) 모든 팝업을 지우는 함수
+    {% comment %} function hideAllPopups() { //(도움말, 나가기 제외) 모든 팝업을 지우는 함수
       ["analysisPopup", "nextStepPopup", "complimentPopup", "scorePopup"].forEach(popupId => {
           const popup = document.getElementById(popupId);
           if (popup.style.display === "flex") {
               hidePopup(popupId);
           }
       });
-    }
+    } {% endcomment %}
 
     //나가기 버튼 동작
     document.getElementById("goOutButton").addEventListener("click", function () {
       muteAudio("compare-audio");
       muteAudio("generate-audio");
-      pauseAllActivities();
       showPopup("exitPopup");
     });
 
@@ -518,8 +517,6 @@
 
     //도움말 버튼 전체 동작 관리
     document.getElementById("helpButton").addEventListener("click", function () {
-      pauseAllActivities();
-
       muteAudio("compare-audio");
       muteAudio("generate-audio");
       showPopup("helpPopup");

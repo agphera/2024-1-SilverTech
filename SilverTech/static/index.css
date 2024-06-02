@@ -425,6 +425,10 @@ progress::-webkit-progress-value {
     color: black !important;
 }
 
+.help-popup p{
+    margin: 20px;
+}
+
 .one-popup button,
 .two-popup button,
 .three-popup button,
