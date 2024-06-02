@@ -330,12 +330,12 @@
       showPopup("letStartPopup"); //시작하자마자 띄워주기
       setTimeout(() => {
         hidePopup("letStartPopup");
+        progress_and_record();
         if(levelHigh){
           setTimeout(() => {
             //document.getElementById("baseImage").style.visibility = "hidden";
             baseImage.classList.add("hidden");
-          }, notShow);
-        progress_and_record();
+          }, notShow);  
         }
       }, 7000);
     });
@@ -422,11 +422,13 @@
       const level="{{ level }}"
       console.log(url);
       console.log(level);
-      if (url) {
-        if(level){
+      if (url&&level) {
         loadImage(url,level);
-        }
       }
+      //if (parseInt(level) >= 3) { //초기 레벨 파악 후 duration 설정
+      //  notShow=8000;
+      //  levelHigh=true;
+      //}
     };
 
     function loadImage(imageUrl,level) {
@@ -436,7 +438,7 @@
       image.src = imageUrl;
       imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
 
-      if (parseInt(level) >= 0) { //초기 레벨 파악 후 duration 설정
+      if (parseInt(level) >= 3) { //초기 레벨 파악 후 duration 설정
         notShow=8000;
         levelHigh=true;
       }
