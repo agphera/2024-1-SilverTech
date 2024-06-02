@@ -1,15 +1,7 @@
 [
   {
     "picture": "mountain1",
-    "keywords": [
-      "개",
-      "포도",
-      "나무",
-      "잎",
-      "산",
-      "꽃",
-      "울타리"
-    ],
+    "keywords": ["개", "포도", "나무", "잎", "산", "꽃", "울타리"],
     "prompt": {
       "개": "a dog playing alone",
       "포도": "grapes hanging on the tree",
@@ -19,23 +11,20 @@
   {
     "picture": "mountain2",
     "keywords": [
-      "가을",
       "산",
-      "잎",
+      "단풍",
       "토끼",
       "나무",
       "오두막",
-      "연기",
-      "굴뚝",
       "버섯",
       "숲",
       "울타리",
       "길"
     ],
     "prompt": {
-      "가을": "Golden autumn foliage adorns the lush mountainside.",
+      "산": "Golden autumn foliage adorns the lush mountainside.",
       "숲": "Golden autumn foliage adorns the lush mountainside.",
-      "잎": "Red, orange, and yellow leaves carpet the slopes.",
+      "단풍": "Red, orange, and yellow leaves carpet the slopes.",
       "길": "A narrow trail",
       "토끼": "A rabbit hops among the yellow leaves.",
       "굴뚝": "A cozy cabin nestled among the trees, smoke curling from the chimney.",
@@ -45,15 +34,7 @@
   },
   {
     "picture": "park1",
-    "keywords": [
-      "새",
-      "꽃",
-      "호수",
-      "나무",
-      "산",
-      "구름",
-      "길"
-    ],
+    "keywords": ["새", "꽃", "호수", "나무", "산", "구름", "길"],
     "prompt": {
       "새": "flying a few birds",
       "꽃": "flowers blossoming on a hill",
@@ -83,12 +64,7 @@
   },
   {
     "picture": "sky1",
-    "keywords": [
-      "해",
-      "무지개",
-      "구름",
-      "하늘"
-    ],
+    "keywords": ["해", "무지개", "구름", "하늘"],
     "prompt": {
       "해": "the sun is rising",
       "무지개": "a rainbow below the sun",
@@ -97,12 +73,7 @@
   },
   {
     "picture": "sky2",
-    "keywords": [
-      "하늘",
-      "비행기",
-      "구름",
-      "비눗방울"
-    ],
+    "keywords": ["하늘", "비행기", "구름", "비눗방울"],
     "prompt": {
       "하늘": "a sky with nothing in it",
       "비행기": "big airplane flying in the sky",
@@ -111,16 +82,7 @@
   },
   {
     "picture": "farming1",
-    "keywords": [
-      "길",
-      "농부",
-      "소",
-      "들판",
-      "나무",
-      "구름",
-      "산",
-      "꽃"
-    ],
+    "keywords": ["길", "농부", "소", "들판", "나무", "구름", "산", "꽃"],
     "prompt": {
       "농부": "a farmer",
       "소": "a bull",
@@ -153,15 +115,7 @@
   },
   {
     "picture": "stream1",
-    "keywords": [
-      "아이들",
-      "물",
-      "물고기",
-      "나무",
-      "계곡",
-      "산",
-      "돌"
-    ],
+    "keywords": ["아이들", "물", "물고기", "나무", "계곡", "산", "돌"],
     "prompt": {
       "아이들": "children playing tag in fun",
       "물": "few children are seen splashing water on each other's backs",
