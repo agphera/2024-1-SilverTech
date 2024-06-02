@@ -167,3 +167,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
 
 # MEDIA_URL 설정
 MEDIA_URL = '/Media/'
+
+# 세션이 브라우저를 닫으면 만료되도록 설정
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True

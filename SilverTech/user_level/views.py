@@ -257,6 +257,7 @@ def check_change_level(request, user_accuracy, user_proceeding):
     data = json.loads(request.body)
     accuracy = data.get('accuracy', 0)
     level_changed = False
+    print(f"Received accuracy: {accuracy}")
     if accuracy >= 0.6:
         user_accuracy.successive_correct += 1
         user_accuracy.successive_wrong = 0
@@ -265,6 +266,8 @@ def check_change_level(request, user_accuracy, user_proceeding):
         user_accuracy.successive_correct = 0
     else:
         user_accuracy.successive_correct = user_accuracy.successive_wrong = 0
+        
+    print(f"Successive correct: {user_accuracy.successive_correct}, Successive wrong: {user_accuracy.successive_wrong}")  # 연속 정오 로그
 
     if user_accuracy.successive_correct >= 3:
         if user_proceeding.level not in user_proceeding.clear_level:
@@ -278,5 +281,7 @@ def check_change_level(request, user_accuracy, user_proceeding):
             user_proceeding.level -= 1
             level_changed = -1
         user_accuracy.successive_wrong = 0
+        
+    print(f"Level changed: {level_changed}, New level: {user_proceeding.level}")  # 레벨 변경 로그
 
     return level_changed
