@@ -74,7 +74,7 @@
     <div class="navbar-progress-container">
       <nav class="navbar" role="navigation" aria-label="main navigation">
         <div class="navbar-brand">
-          <a class="navbar-item" href="index.html">
+          <a class="navbar-item" href="../../">
             <img
               src="{% static 'Main_source/Starting_icon.PNG' %}"
               width="30"
@@ -314,6 +314,7 @@
           <div id="imageHistory4" class="image-history-4"></div>
           <div id="imageHistory5" class="image-history-5"></div>
         </div>
+        <p class="exit-text">10초 뒤에 처음 화면으로 돌아갑니다!</p>
       </div>
     </div>
   </body>
@@ -645,6 +646,16 @@
                   div.appendChild(img);
                 }
               }
+            });
+
+            return fetch("/logout", {
+                method: "GET"
+            }).then(response => {
+                if (response.redirected) {
+                  setTimeout(() => {
+                          window.location.href = response.url;
+                        }, 10000); // 10초 후에 리디렉션    
+                }
             });
           })
           .catch((error) => {
