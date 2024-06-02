@@ -18,6 +18,16 @@ hr {
 
 }
 
+
+.hidden {
+    visibility: hidden;
+}
+
+.visible {
+    visibility: visible;
+}
+
+
 .let-start-popup {
     z-index: 100;
     position: fixed;

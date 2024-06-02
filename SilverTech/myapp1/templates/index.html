@@ -121,10 +121,10 @@
 
     <!-- 메인 화면 -->
     <div class="columns">
-      <div id="base-image" class="column is-half image-container"></div>
+      <div id="baseImage" class="column is-half image-container"></div>
       <div class="column is-half right-container">
         <div class="textboard">
-          <p>그림을<br />설명해주세요!</p>
+         <p>그림을<br />설명해주세요!</p>
         </div>
         <div class="speak-icon-container">
           <img
@@ -320,21 +320,28 @@
     let duration = 14000; // 초기 프로그레스바 및 녹음 시간 설정
     var globalAccuracy = 0; // 정확도 전역 변수
     let mediaRecorder;  // 전역변수, 컨트롤
+    let notShow=8000; //난이도 3 상승 시 사용할 사라지는 시간 변수
+    let levelHigh=false; //난이도 3 여부 변수
+    let levelNext=false;//다음 그림으로 넘어감 변수
 
 
     document.addEventListener("DOMContentLoaded", function () {
       showPopup("letStartPopup"); //시작하자마자 띄워주기
-
       setTimeout(() => {
         hidePopup("letStartPopup");
+        if(levelHigh){
+          setTimeout(() => {
+            //document.getElementById("baseImage").style.visibility = "hidden";
+            baseImage.classList.add("hidden");
+          }, notShow);
         progress_and_record();
+        }
       }, 7000);
     });
 
     // 프로그레스 바가 진행되면서 자동으로 녹음을 시작하는 함수
     function progress_and_record() {
       //hidepopup 실행 직후 아래의 모든 동작 시작
-
       progressBar.value = 100; // 프로그레스 바를 최대치로 설정
       let decrementAmount = progressBar.max / (duration / 100);
 
@@ -350,6 +357,14 @@
 
       startRecording(); // 녹음 시작 함수 호출
       //즉, 이 함수에서는 프로그레스바가 줄어들기 시작하는 것과 동시에 녹음 시작 함수를 호출함.
+      //또한, 레벨에 맞추어 난이도 설정.  
+      if(levelHigh&&levelNext){
+        setTimeout(() => {
+          //document.getElementById("baseImage").style.visibility = "hidden";
+          baseImage.classList.add("hidden");
+        }, notShow);
+      }
+      
     }
 
     // 녹음을 시작하는 함수
@@ -374,6 +389,8 @@
             mediaRecorder.stop();
             stream.getTracks().forEach((track) => track.stop());
             showPopup("analysisPopup");
+            baseImage.classList.remove("hidden");
+            //document.getElementById("baseImage").style.visibility = "visible";
           }, duration);
           //녹음 중지는 프로그레스 바 총 시간과 동일해야 함.
 
@@ -383,6 +400,7 @@
 
     // "다른 그림을 보시겠어요?" 팝업의 '예', '아니오' 버튼 이벤트 처리
     document.getElementById("yesButton").addEventListener("click", function () {
+      levelNext=true;
       hidePopup("nextStepPopup");
       generatedImageContainer.classList.remove("visible");
       fetchImage(true);
@@ -390,6 +408,7 @@
     });
 
     document.getElementById("noButton").addEventListener("click", function () {
+      levelNext=true;
       hidePopup("nextStepPopup");
       generatedImageContainer.classList.remove("visible");
       fetchImage(false);
@@ -410,16 +429,15 @@
     };
 
     function loadImage(imageUrl,level) {
-      const imageDisplayDiv = document.getElementById("base-image");
+      const imageDisplayDiv = document.getElementById("baseImage");
       imageDisplayDiv.innerHTML = ""; // 기존 이미지 제거
       const image = new Image();
       image.src = imageUrl;
       imageDisplayDiv.appendChild(image); // 새로운 이미지 추가
 
-      if (parseInt(level) >= 3) { //초기 레벨 파악 후 duration 설정
-        duration = 8000; //3레벨 이후 8초
-      } else {
-        duration = 14000; //아니면 14초
+      if (parseInt(level) >= 0) { //초기 레벨 파악 후 duration 설정
+        notShow=8000;
+        levelHigh=true;
       }
     }
 
@@ -451,7 +469,7 @@
                 loadImage(data.url,data.level); // 새로운 레벨에 맞는 이미지 로드
               }
             }
-            duration = data.level >= 3 ? 8000 : 14000;
+            //duration = data.level >= 3 ? 8000 : 14000;
             //4단계(3) 이상부터는 duration을 8초로 줄인다.
             progress_and_record(); //duration 값 반영된 함수
           }
