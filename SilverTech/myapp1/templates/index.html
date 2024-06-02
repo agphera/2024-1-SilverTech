@@ -291,6 +291,7 @@
         그림 문제를 잘 풀 수록 더 새로운 그림을 볼 수 있어요! <br />그림을
         자세히 살펴보고, 잘 맞춘다면<br />자연스럽게 또다른 그림을 볼 수
         있답니다.
+      </p>
       <button id="bbackFour" class="button is-warning" onclick="stopAllAudio()">
         돌아가기
       </button>
@@ -319,7 +320,6 @@
     let duration = 14000; // 초기 프로그레스바 및 녹음 시간 설정
     var globalAccuracy = 0; // 정확도 전역 변수
     let mediaRecorder;  // 전역변수, 컨트롤
-    let shouldProceed = true;  //녹음 동작 중지 후 stt전달 여부 변수
 
 
     document.addEventListener("DOMContentLoaded", function () {

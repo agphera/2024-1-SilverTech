@@ -293,11 +293,8 @@ progress::-webkit-progress-value {
 .compliment-popup,
 .score-popup {
     flex-direction: column;
-    /* Add this line to ensure vertical layout */
     align-items: center;
-    /* Center the items horizontally */
     justify-content: center;
-    /* Center the items vertically */
 }
 
 .compli-ment,
@@ -305,7 +302,8 @@ progress::-webkit-progress-value {
 .show-accuracy,
 .show-correct {
     margin: 10px 0;
-    /* Add some margin to separate the elements */
+    justify-content: center;
+    align-items: center;
 }
 
 
