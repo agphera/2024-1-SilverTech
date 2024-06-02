@@ -1,5 +1,5 @@
 
-from django.shortcuts import render, HttpResponse
+from django.shortcuts import render, HttpResponse, redirect
 from django.http import JsonResponse
 import requests
 from django.views.decorators.csrf import csrf_exempt
@@ -15,6 +15,7 @@ from imutils.video import FPS
 import imutils
 import time
 from django.http import JsonResponse
+from django.urls import reverse  # reverse 함수를 사용합니다.
 
 #모델 추가 학습
 from imutils import paths
@@ -201,6 +202,8 @@ urlpatterns = [
 
 @csrf_exempt 
 def StartingPage(request): #
+    if 'user_name' in request.session:
+        return redirect('picture-load/picture-training')
     return render(request,'StartingPage.html')
 
 @csrf_exempt
@@ -301,6 +304,13 @@ def upload_image(request):
         return JsonResponse({'status': 'error', 'message': 'Invalid request method'}, status=400)
 
 
+@csrf_exempt
+def logout_view(request):
+    try:
+        del request.session['user_name']
+    except KeyError:
+        pass
+    return redirect(reverse('StartingPage'))
 
 
 # 얼굴 인식 인공지능 모델 학습 및 입력으로 받아온 이미지 폴더 경로에 해당하는 폴더 삭제

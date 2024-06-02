@@ -9,6 +9,7 @@ from django.http import JsonResponse
 from .models import BasePictures, User, UserAccuracy, UserProceeding
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
+from django.urls import reverse
 from django.http import HttpRequest, HttpResponse
 
 
@@ -99,13 +100,18 @@ def login_to_training(request: HttpRequest):
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
+        if 'user_name' not in request.session:
+        # 로그인 하지 않고 URL로 직접 접근하는 경우 초기 화면으로 보냄
+            return redirect(reverse('StartingPage'))
         # GET 요청을 처리하고, 세션에서 정보를 가져와 템플릿을 렌더링
         context = {
-            'name': request.session.get('user_name', 'Guest'),
+            'name': request.session.get('user_name', 'guest'),
             'level': request.session.get('level', 1),
             'url': request.session.get('picture_url', None),
             'order': request.session.get('picture_order', 0),
         }
+        # 유저 히스토리 초기화
+        request.session['user_history'] = []
         print(context)
         return render(request, 'index.html', context)
 
