@@ -69,15 +69,21 @@ body, html {
 }
 
 
-.buttons-box, .guest-box{
+.buttons-box{
     display: flex;
     justify-content: center; /* 수평 중앙 정렬 */
     align-items: center;     /* 수직 중앙 정렬 */
-    padding: 10px;           /* 버튼 주변에 여백 추가 */
+    padding: 5px;           /* 버튼 주변에 여백 추가 */
+}
+
+.guest-box{
+    display: flex;
+    justify-content: center; /* 수평 중앙 정렬 */
+    align-items: center;     /* 수직 중앙 정렬 */
 }
 
 .button{
-    margin: 10px;
+    margin: 5px;
     font-size: 35px !important;
     font-family: "Gowun Dodum", sans-serif;
     font-weight: 500;

@@ -21,10 +21,14 @@ hr {
 
 .hidden {
     visibility: hidden;
+    opacity: 0;
+    transition: visibility 0s linear 0.5s, opacity 0.5s linear;
 }
 
 .visible {
     visibility: visible;
+    opacity: 1;
+    transition: opacity 0.5s linear;
 }
 
 
@@ -487,14 +491,14 @@ progress::-webkit-progress-value {
     display: flex; 
     justify-content: center; 
     align-items: center;
-    gap: 20px;
+    gap: 15px;
     padding: 20px;
   }
   
   .image-history-container > div { /*이미지 컨테이너 안의 5개 그림에 대한 공통 스타일 모두 적용*/
     flex: 0 0 auto; 
-    width: 300px;
-    height: 300px;
+    width: 270px;
+    height: 270px;
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
