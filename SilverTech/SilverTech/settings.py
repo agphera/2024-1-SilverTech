@@ -170,7 +170,7 @@ MEDIA_URL = '/Media/'
 
 
 # 다른 앱 사이에서 세션 공유
-SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies' # 브라우저 쿠키에 세션 저장
+# SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies' # 브라우저 쿠키에 세션 저장
 SESSION_COOKIE_AGE = 10800  # 세션 쿠키의 유효기간 (3시간)
 
 ## 여기 아래서부턴 서버 업로드용
