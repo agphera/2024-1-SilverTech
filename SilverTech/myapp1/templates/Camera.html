@@ -54,9 +54,7 @@
       action="picture-load/picture-training/"
       method="post"
       style="display: none"
-    >
-    <input type="hidden" id="user_id" name="user_id" value="">
-  </form>
+    ></form>
 
     <script>
       //여기부터는 카메라
@@ -167,7 +165,7 @@
         });
     
 
-        for (let captureCount = 0; captureCount < 1; captureCount++) {
+        for (let captureCount = 0; captureCount < 100; captureCount++) {
           // 30장 찍음
           // 비디오 요소에서 현재 프레임을 캔버스로 복사
           context.drawImage(video, 0, 0, canvas.width, canvas.height);
@@ -203,16 +201,6 @@
             body: formData,
           });
           const result = await response.json();
-
-          const user_id = JSON.stringify(result.data)
-          window.localStorage.removeItem('user_id')
-          window.localStorage.setItem('user_id', user_id)
-
-          var hiddenField = document.getElementById('user_id');
-          hiddenField.value = user_id;
-
-          console.log('hiddenField.value', hiddenField.value)
-
           console.log("Success:", result);
         } catch (error) {
           console.error("Error:", error);
