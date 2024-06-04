@@ -503,16 +503,16 @@ def login_order(request):
                     # 가장 많은 표를 받은 얼굴을 결정합니다(동점인 경우 Python은 사전의 첫 번째 항목을 선택합니다).
                     name = max(counts, key=counts.get)
 
-                # Guest 혹은 로그인된 정보를 session에 저장 
-                request.session['user_name'] = name.replace('User_images_', '')
+            # Guest 혹은 로그인된 정보를 session에 저장 
+            request.session['user_name'] = name.replace('User_images_', '')
 
-                # 폴더가 존재하는지 확인
-                if os.path.exists(directory_path):
-                    # 폴더 삭제
-                    shutil.rmtree(directory_path)
-                    print(f"{directory_path} 폴더가 성공적으로 삭제되었습니다.")
-                else:
-                    print(f"{directory_path} 폴더를 찾을 수 없습니다.")
+            # 폴더가 존재하는지 확인
+            if os.path.exists(directory_path):
+                # 폴더 삭제
+                shutil.rmtree(directory_path)
+                print(f"{directory_path} 폴더가 성공적으로 삭제되었습니다.")
+            else:
+                print(f"{directory_path} 폴더를 찾을 수 없습니다.")
 
             return JsonResponse({'status': '사람 구분 성공적', 'message': 'Good~'}, status=200)
     except Exception as e:

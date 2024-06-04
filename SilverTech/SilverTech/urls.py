@@ -60,5 +60,5 @@ urlpatterns = [
     path('login_capture/', login_capture, name='login_capture'),
     path('login_order/', login_order, name='login_order'),
     path('fetch_user_history/', fetch_user_history, name='fetch_user_history'),
-    path('logout', logout_view),
+    path('logout/', logout_view),
     ]
