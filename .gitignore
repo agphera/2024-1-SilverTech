@@ -7,3 +7,4 @@ venv
 *.pyc
 /SilverTech/Media
 /SilverTech/function/encodings.pickle
+/SilverTech/static/encodings.pickle
