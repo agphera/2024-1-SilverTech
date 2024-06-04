@@ -73,7 +73,7 @@ def fetch_user_info(request, user_name):
 @api_view(["GET", "POST"]) 
 def login_to_training(request: HttpRequest):
     if request.method == "POST":
-        name = request.session.get('user_name')
+        name = request.session.get('user_name', 'Guest')
         print('login_to_training name:',name)
         
         user_proceeding, error_response = fetch_user_info(request, name)

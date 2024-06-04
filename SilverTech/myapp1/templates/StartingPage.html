@@ -139,6 +139,11 @@
           await startCaptureAndUpload();
           document.getElementById('loginForm').submit();
       });
+      
+      //'전에 온 적 있어요' -> 바로 인사 -> 그 후
+      document.getElementById('GuestLogin').addEventListener('click', function() {
+          document.getElementById('loginForm').submit();
+      });
 
       setTimeout(function() {
           console.log("Showing GreetingPopup and SoundPermissionPopup");
