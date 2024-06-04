@@ -39,7 +39,7 @@ SECRET_KEY = keys['django-key']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org']
+ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org', 'localhost']
 
 # Application definition
 
@@ -167,3 +167,11 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
 
 # MEDIA_URL 설정
 MEDIA_URL = '/Media/'
+
+
+# 다른 앱 사이에서 세션 공유
+SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies' # 브라우저 쿠키에 세션 저장
+SESSION_COOKIE_AGE = 10800  # 세션 쿠키의 유효기간 (3시간)
+# SESSION_COOKIE_DOMAIN = '.cogpicture.duckdns.org'  # '.yourdomain.com'으로 변경
+# SESSION_COOKIE_SECURE = True  # HTTPS 사용 시 True로 설정
+# SESSION_COOKIE_NAME = 'sessionid'  # 세션 쿠키의 이름
