@@ -167,3 +167,9 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'Media')
 
 # MEDIA_URL 설정
 MEDIA_URL = '/Media/'
+
+# 다른 앱 사이에서 세션 공유
+SESSION_COOKIE_AGE = 10800  # 세션 쿠키의 유효기간 (3시간)
+SESSION_COOKIE_DOMAIN = '.cogpicture.duckdns.org'  # '.yourdomain.com'으로 변경
+SESSION_COOKIE_SECURE = True  # HTTPS 사용 시 True로 설정
+SESSION_COOKIE_NAME = 'sessionid'  # 세션 쿠키의 이름
