@@ -23,8 +23,9 @@ def login_picture_load(request):
 
 # 회원정보 확인해서 로그인하거나 및 회원가입하는 함수
 def fetch_user_info(request, user_name):
+
     if not user_name:
-        return None, JsonResponse({'error': 'No name provided'}, status=400)
+        return None, JsonResponse({'error': f'No name provided'}, status=400)
     
     user, created = User.objects.get_or_create(name=user_name)
     if created:
@@ -34,7 +35,7 @@ def fetch_user_info(request, user_name):
     user_proceeding = UserProceeding.objects.filter(user=user).first()
     if not user_proceeding:
         return None, JsonResponse({'error': 'User proceeding not found'}, status=404)
-
+    
     request.session['user_name'] = user_name
     request.session['user_id'] = user.user_id
     print('fetch_user_info:', user_name)
@@ -73,8 +74,10 @@ def fetch_user_info(request, user_name):
 @api_view(["GET", "POST"]) 
 def login_to_training(request: HttpRequest):
     if request.method == "POST":
-        name = request.session.get('user_name')
-        print('login_to_training name:',name)
+        name = request.POST.get('user_id')
+        request.session['user_name'] = name
+        
+        print('login_to_training name:', name)
         
         user_proceeding, error_response = fetch_user_info(request, name)
         if error_response:
@@ -91,28 +94,41 @@ def login_to_training(request: HttpRequest):
             request.session['picture_url'] = base_picture.url
             request.session['picture_order'] = base_picture.order
             request.session['theme'] = base_picture.title
-
+            redirect_url = '../picture-training/'
+            redirect_url += '?level={}&picture_url={}&picture_order={}&theme={}&user_name={}'.format(
+                request.session.get('level'),
+                request.session.get('picture_url'),
+                request.session.get('picture_order'),
+                request.session.get('theme'),
+                name
+            )
             print(request)
             # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
-            return redirect('../picture-training/')  
+            return redirect(redirect_url)  
         except BasePictures.DoesNotExist:
             return JsonResponse({'error': 'Base picture not found'}, status=404)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
-        if 'user_name' not in request.session:
+        user_name = request.GET.get('user_name', None)
+        picture_url = request.GET.get('picture_url', None)
+        picture_order = request.GET.get('picture_order', None)
+        level = request.GET.get('level', None)
+        theme = request.GET.get('theme', None)
+        print(f"request.session['user_name'], {request.session.get('user_name')}")
+        if user_name is None:
         # 로그인 하지 않고 URL로 직접 접근하는 경우 초기 화면으로 보냄
             return redirect(reverse('StartingPage'))
         # GET 요청을 처리하고, 세션에서 정보를 가져와 템플릿을 렌더링
         context = {
-            'name': request.session.get('user_name', 'guest'),
-            'level': request.session.get('level', 1),
-            'url': request.session.get('picture_url', None),
-            'order': request.session.get('picture_order', 0),
+            'name': user_name,
+            'level': level,
+            'url': picture_url,
+            'order': picture_order,
         }
         # 유저 히스토리 초기화
         request.session['user_history'] = []
-        print(context)
+        print(f'context : {context}')
         return render(request, 'index.html', context)
 
 @swagger_auto_schema(

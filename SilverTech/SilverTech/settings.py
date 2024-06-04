@@ -39,7 +39,7 @@ SECRET_KEY = keys['django-key']
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org']
+ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org', 'localhost']
 
 # Application definition
 

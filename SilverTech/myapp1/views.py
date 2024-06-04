@@ -293,6 +293,7 @@ def upload_image(request):
                 full_paths.append(full_path)
             
             request.session['user_name'] = str(folder_counter)
+            print(f"request.session.get('user_name'): {request.session.get('user_name')}")
             folder_counter = folder_counter + 1
             #del request.session['folder_counter']
             return train_model_again(request, directory_path)
@@ -318,6 +319,8 @@ def logout_view(request):
 # 반환: 없음
 # 출력물: 새롭게 학습된 모델 파일(./static/encodings.pickle)
 def train_model_again(request, directory_path):
+
+    print(f'train model : {request.session.get("user_name")}')
     encoding_file = "./static/encodings.pickle"
     
     # 인코딩 파일 존재 여부 확인 및 초기화
@@ -373,7 +376,7 @@ def train_model_again(request, directory_path):
     else:
         print(f"{directory_path} 폴더를 찾을 수 없습니다.")
 
-    return JsonResponse({'status': '^*^', 'message': 'Good~'}, status=200)
+    return JsonResponse({'status': '^*^', 'message': 'Good~', 'data': request.session.get("user_name")}, status=200)
 
 
 
