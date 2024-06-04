@@ -94,42 +94,23 @@ def login_to_training(request: HttpRequest):
             request.session['picture_url'] = base_picture.url
             request.session['picture_order'] = base_picture.order
             request.session['theme'] = base_picture.title
-            redirect_url = '../picture-training/'
-            redirect_url += '?level={}&picture_url={}&picture_order={}&theme={}&user_name={}'.format(
-                request.session.get('level'),
-                request.session.get('picture_url'),
-                request.session.get('picture_order'),
-                request.session.get('theme'),
-                name
-            )
-            print(request)
-            # 같은 URL에서 GET 요청을 처리하도록 리다이렉트
-            return redirect(redirect_url)  
+
+            context = {
+                'name': name,
+                'level': level,
+                'url': base_picture.url,
+                'order': base_picture.order,
+                'theme': base_picture.title
+            }
+            request.session['user_history'] = []
+            return render(request, 'index.html', context)
         except BasePictures.DoesNotExist:
             return JsonResponse({'error': 'Base picture not found'}, status=404)
         except Exception as e:
             return JsonResponse({'status': 'error', 'message': str(e)}, status=400)
     else:
-        user_name = request.GET.get('user_name', None)
-        picture_url = request.GET.get('picture_url', None)
-        picture_order = request.GET.get('picture_order', None)
-        level = request.GET.get('level', None)
-        theme = request.GET.get('theme', None)
-        print(f"request.session['user_name'], {request.session.get('user_name')}")
-        if user_name is None:
         # 로그인 하지 않고 URL로 직접 접근하는 경우 초기 화면으로 보냄
-            return redirect(reverse('StartingPage'))
-        # GET 요청을 처리하고, 세션에서 정보를 가져와 템플릿을 렌더링
-        context = {
-            'name': user_name,
-            'level': level,
-            'url': picture_url,
-            'order': picture_order,
-        }
-        # 유저 히스토리 초기화
-        request.session['user_history'] = []
-        print(f'context : {context}')
-        return render(request, 'index.html', context)
+        return redirect(reverse('StartingPage'))
 
 @swagger_auto_schema(
     method='post',  # 요청 메소드
