@@ -76,7 +76,6 @@
           cameraView.srcObject = stream;
           cameraView.play();
           cameraView.onloadedmetadata = function (e) {
-            //capture(); // 카메라가 준비되면 사진을 찍습니다.
           };
         });
       }
@@ -88,30 +87,6 @@
           streamVideo = null;
         }
       }
-
-      function capture() {
-        var canvas = document.createElement("canvas"); // 캔버스 요소 생성
-        canvas.width = 640; // 캔버스 너비 설정
-        canvas.height = 480; // 캔버스 높이 설정
-        var context = canvas.getContext("2d");
-        var cameraView = document.getElementById("cameraview");
-
-        context.drawImage(cameraView, 0, 0, canvas.width, canvas.height); // 현재 카메라의 이미지를 캔버스에 그립니다.
-        var imageUrl = canvas.toDataURL("image/png"); // 캔버스의 내용을 이미지 URL로 변환
-
-        var link = document.createElement("a"); // 다운로드 링크 생성
-        link.href = imageUrl;
-        link.download = "capture.png"; // 다운로드될 파일 이름 설정
-        document.body.appendChild(link); // 링크를 문서에 추가
-        link.click(); // 링크 클릭을 통해 이미지 다운로드
-        document.body.removeChild(link); // 사용 후 링크 삭제
-      }
-      {% comment %} document
-        .getElementById("captureBtn")
-        .addEventListener("click", async function () {
-          await startCaptureAndUpload();
-          document.getElementById("signUpForm").submit();
-        }); {% endcomment %}
 
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         alert("Media Device not supported");
@@ -131,12 +106,6 @@
             console.error("캡처 및 업로드 중 오류 발생:", error);
         }
       });
-
-//      window.onload=function(){
-  //      await startCaptureAndUpload();
-    //    document.getElementById("signUpForm").submit();
-      //}
-      
 
 
       // 카메라로 사진을 10장 캡처하고 서버로 전송하는 함수
