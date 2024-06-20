@@ -333,7 +333,6 @@
         progress_and_record();
         if(levelHigh){
           setTimeout(() => {
-            //document.getElementById("baseImage").style.visibility = "hidden";
             baseImage.classList.add("hidden");
           }, notShow);  
         }
@@ -391,7 +390,6 @@
             stream.getTracks().forEach((track) => track.stop());
             showPopup("analysisPopup");
             baseImage.classList.remove("hidden");
-            //document.getElementById("baseImage").style.visibility = "visible";
           }, duration);
           //녹음 중지는 프로그레스 바 총 시간과 동일해야 함.
 
@@ -468,9 +466,7 @@
                 loadImage(data.url,data.level); // 새로운 레벨에 맞는 이미지 로드
               }
             }
-            //duration = data.level >= 3 ? 8000 : 14000;
-            //4단계(3) 이상부터는 duration을 8초로 줄인다.
-            progress_and_record(); //duration 값 반영된 함수
+            progress_and_record();
           }
         })
         .catch((error) => console.error("Error:", error));
@@ -492,18 +488,6 @@
       return cookieValue;
     }
 
-    //일시정지 함수
-    {% comment %} function pauseAllActivities() {
-      //shouldProceed=False;
-      if (mediaRecorder && mediaRecorder.state === "recording") {
-        mediaRecorder.stop(); // Stop recording only if it is active
-      }
-      progressBar.value=0; //프로그레스바 0으로 만들기
-      clearInterval(progressInterval); 
-      //동작 관련 팝업 모두 지우기
-      hideAllPopups(); 
-    }  {% endcomment %}
-
     function muteAudio(audioId) { //오디오 음소거 함수
           const audio = document.getElementById(audioId);
           audio.muted = true; 
@@ -514,14 +498,6 @@
           audio.muted = false;
     }
 
-    {% comment %} function hideAllPopups() { //(도움말, 나가기 제외) 모든 팝업을 지우는 함수
-      ["analysisPopup", "nextStepPopup", "complimentPopup", "scorePopup"].forEach(popupId => {
-          const popup = document.getElementById(popupId);
-          if (popup.style.display === "flex") {
-              hidePopup(popupId);
-          }
-      });
-    } {% endcomment %}
 
     //나가기 버튼 동작
     document.getElementById("goOutButton").addEventListener("click", function () {
@@ -626,8 +602,6 @@
             ".show-accuracy"
           ).innerHTML = `맞힌 단어 개수는 ${data["len_true_word"]} 개 입니다!`;
 
-          //document.querySelector('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
-          //document.getElementById('.show-correct').innerHTML = `맞힌 단어는 ${data['true_word']}입니다!`;
 
           return fetch("../../func/make-pic/", {
             method: "POST",

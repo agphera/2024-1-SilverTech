@@ -13,19 +13,6 @@
   </head>
 
   <body>
-    {% comment %}
-    <!-- 백엔드url로 회원가입 정보 전달 -->
-    <form
-      id="userDataForm"
-      action="../picture-load/picture-training/"
-      method="post"
-      style="display: none"
-    >
-      {% csrf_token %}
-      <input type="hidden" id="username" name="name" value="" />
-      <input type="submit" value="Submit" />
-    </form>
-    {% endcomment %}
 
     <div class="camera-box">
       <p>
@@ -181,14 +168,7 @@
   </body>
 
   <script>
-    {% comment %} // DOM이 완전히 로드된 후 실행
-    document.addEventListener("DOMContentLoaded", function () {
-    // 30초 후에 실행될 함수 설정
-    setTimeout(function () {
-      // Django URL 태그를 사용해 렌더링된 URL로 페이지 이동
-      submitUserData();
-    }, 4000); //
-    }); {% endcomment %}
+  
 
     //30초 동안 멘트 보여줌
     const mentArray = [

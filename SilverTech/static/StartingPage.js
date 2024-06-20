@@ -5,8 +5,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // 3초후 팝업
   setTimeout(function () {
-    //popup.style.display = "block";
-    //popup.style.opacity = 1;
     showPopup("GreetingPopup");
   }, 3000);
 

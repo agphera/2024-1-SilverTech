@@ -25,19 +25,7 @@
   </head>
 
   <body class="hero is-fullheight-with-navbar has-background-green">
-    <!-- 백엔드url로 회원가입 정보 전달-->
-    {% comment %}
-    <form
-      id="userDataForm"
-      action="../picture-load/picture-training/"
-      method="post"
-      style="display: none"
-    >
-      {% csrf_token %}
-      <input type="hidden" id="username" name="name" value="" />
-      <input type="submit" value="Submit" />
-    </form>
-    {% endcomment %}
+   
     <div class="hero-body">
       <div class="container">
         <div class="columns is-vcentered">
@@ -83,14 +71,7 @@
           그림 인지 훈련 프로그램에 어서오세요!<br />혹시 처음오셨나요?
         </p>
         <div class="buttons-box">
-          <!-- <button
-            id="HiddenPlayButton"
-            class="button is-light"
-            style="display: none"
-            onclick="playAudio('test-audio')"
-          >
-            숨겨진 버튼
-          </button> -->
+         
           <button id="FirstTimeButton" class="button is-light">
             네, 처음이에요.
           </button>
