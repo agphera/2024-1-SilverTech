@@ -1,7 +1,5 @@
 import json
 import random
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.http import require_POST
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
@@ -10,16 +8,15 @@ from .models import BasePictures, User, UserAccuracy, UserProceeding
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from django.urls import reverse
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 
 
 picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에서 list over되어 5, 3 추가함
 
-# http://127.0.0.1:8000/picture-load/
 
 # Create your views here.
 def login_picture_load(request):
-    return render(request, "test-login.html") # templates 폴더 안에 test-image-load.html가 존재함
+    return render(request, "test-login.html")
 
 # 회원정보 확인해서 로그인하거나 및 회원가입하는 함수
 def fetch_user_info(request, user_name):
@@ -217,8 +214,6 @@ def fetch_same_level_base_picture(request, user_proceeding):
     # 그림의 URL과 순서를 JSON 형태로 반환
     return picture
 
-
-
 def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
     # 사용자가 이전에 클리어한 레벨이면 is_order=false // 아니면 true
     user_proceeding.is_order = False if user_proceeding.level in user_proceeding.clear_level else True
@@ -248,8 +243,6 @@ def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
     user_proceeding.save()
 
     return picture
-
-
 
 # 난이도 자동 조정 구현 테스트 필요    
 @csrf_exempt

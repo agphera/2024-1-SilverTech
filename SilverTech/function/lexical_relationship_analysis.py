@@ -120,8 +120,3 @@ def user_base_similarity(THEMA, results):
     accuracy = len(true_word)/len_label_keyword
 
     return true_word, translate_word, accuracy, whole_prompt_word
-
-if __name__ == "__main__":
-    print(lex_rel_anal('예', '길_0101'))
-    print()
-    print(lex_rel_anal('예_0100', '길_0101'))

@@ -21,10 +21,10 @@ from django.urls import path
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
-from myapp1.views import index, Camera, StartingPage, send_audio_to_naver_stt, login_order # 'index' 뷰도 임포트합니다.
+from login_and_training.views import index, Camera, StartingPage, send_audio_to_naver_stt, login_order # 'index' 뷰도 임포트합니다.
 from django.contrib import admin
 from django.urls import include, path
-from myapp1.views import proxy_to_naver_stt, make_pic_karlo, upload_image, fetch_user_history, logout_view
+from login_and_training.views import proxy_to_naver_stt, make_pic_karlo, upload_image, fetch_user_history, logout_view
 
 schema_view = get_schema_view( # Swagger
     openapi.Info(
