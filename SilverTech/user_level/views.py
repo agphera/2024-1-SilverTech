@@ -1,7 +1,5 @@
 import json
 import random
-from django.views.decorators.http import require_http_methods
-from django.views.decorators.http import require_POST
 from rest_framework.decorators import api_view
 from django.views.decorators.csrf import csrf_exempt
 from django.shortcuts import render, redirect
@@ -10,18 +8,17 @@ from .models import BasePictures, User, UserAccuracy, UserProceeding
 from drf_yasg import openapi
 from drf_yasg.utils import swagger_auto_schema
 from django.urls import reverse
-from django.http import HttpRequest, HttpResponse
+from django.http import HttpRequest
 
 
-picture_number_by_level = [2, 5, 3, 5, 3] #[2,5,3]만 해두니 level 3과 4에서 list over되어 5, 3 추가함
+picture_number_by_level = [2, 5, 3, 5, 3] #순서대로 각 레벨별 그림 수
 
-# http://127.0.0.1:8000/picture-load/
 
-# Create your views here.
+# 로그인 페이지 렌더링
 def login_picture_load(request):
-    return render(request, "test-login.html") # templates 폴더 안에 test-image-load.html가 존재함
+    return render(request, "test-login.html")
 
-# 회원정보 확인해서 로그인하거나 및 회원가입하는 함수
+# 회원정보 확인 후 로그인 및 회원가입 함수
 def fetch_user_info(request, user_name):
     if not user_name:
         return None, JsonResponse({'error': 'No name provided'}, status=400)
@@ -70,6 +67,8 @@ def fetch_user_info(request, user_name):
         404: openapi.Response(description='요청한 훈련 사이트를 찾을 수 없습니다.'),
     },
 )
+
+# 로그인 및 훈련 페이지로의 리다이렉션 처리 함수
 @api_view(["GET", "POST"]) 
 def login_to_training(request: HttpRequest):
     if request.method == "POST":
@@ -136,6 +135,8 @@ def login_to_training(request: HttpRequest):
     operation_description="사용자의 레벨과 진행 상태에 따라 적절한 그림을 반환하는 API",
     tags=['Base picture'], 
 )
+
+# 사용자 레벨과 진행 상태에 따라 다음 그림을 가져오는 함수
 @api_view(["POST"])
 def load_next_base_picture(request):
     try:
@@ -174,7 +175,7 @@ def load_next_base_picture(request):
     except Exception as e:
         return JsonResponse({'error': str(e)}, status=500)
 
-# 다음 order의 그림을 가져오는 함수
+# 동일한 레벨의 다음 순서 그림을 가져오는 함수
 def fetch_same_level_base_picture(request, user_proceeding):
     # 세션에서 레벨, 그림 레벨을 가져옴
     level = user_proceeding.level 
@@ -217,8 +218,7 @@ def fetch_same_level_base_picture(request, user_proceeding):
     # 그림의 URL과 순서를 JSON 형태로 반환
     return picture
 
-
-
+# 변경된 레벨의 그림을 가져오는 함수
 def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
     # 사용자가 이전에 클리어한 레벨이면 is_order=false // 아니면 true
     user_proceeding.is_order = False if user_proceeding.level in user_proceeding.clear_level else True
@@ -249,9 +249,7 @@ def fetch_altered_level_base_picture(request, user_accuracy, user_proceeding):
 
     return picture
 
-
-
-# 난이도 자동 조정 구현 테스트 필요    
+# 사용자의 정확도에 따라 레벨 변경 체크 함수    
 @csrf_exempt
 def check_change_level(request, user_accuracy, user_proceeding):
     data = json.loads(request.body)

@@ -1,7 +1,3 @@
-# 1. pip install google-cloud-translate==2.0.1
-# 2. 수채 프로젝트에 추가 (call me)
-# 3. [Cloud CLI 설치] https://cloud.google.com/sdk/docs/install?hl=ko <= 인증키 사용하기 위해 사용
-# 4. 설치 후 터미널에서 gcloud auth application-default login 실행 https://cloud.google.com/docs/authentication/api-keys?hl=ko#using-with-client-libs
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from google.cloud import translate_v2 as translate
 
@@ -26,8 +22,6 @@ def translate_text_list(text: list) -> dict:
     
     return results
 
-
-
 def translate_text_single(te, translate_client):
     return translate_client.translate(te, target_language="en")["translatedText"] # API 호출
 
@@ -41,8 +35,3 @@ def translate_text_list(text: list) -> dict:
             results.append(future.result())
     
     return results # 번역된 결과 반환
-
-
-if __name__ == "__main__":
-    print(translate_text_list(['배', '바다', '돛', '선장']))
-    print(translate_text_list(['배', '사과', '나무', '산']))

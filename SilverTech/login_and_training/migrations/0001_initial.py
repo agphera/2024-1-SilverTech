@@ -189,7 +189,7 @@ class Migration(migrations.Migration):
         migrations.CreateModel(
             name='UserProceeding',
             fields=[
-                ('user', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='myapp1.user')),
+                ('user', models.OneToOneField(on_delete=django.db.models.deletion.DO_NOTHING, primary_key=True, serialize=False, to='login_and_training.user')),
                 ('level', models.IntegerField()),
                 ('last_order', models.IntegerField()),
                 ('is_order', models.IntegerField()),

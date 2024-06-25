@@ -45,7 +45,7 @@ ALLOWED_HOSTS = ['127.0.0.1', 'cogpicture.duckdns.org', 'localhost']
 
 INSTALLED_APPS = [
     'corsheaders',
-    'myapp1',  # 이 줄을 추가하세요.
+    'login_and_training',  # 이 줄을 추가하세요.
     'user_level',
     'django.contrib.admin',
     'django.contrib.auth',
